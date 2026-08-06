@@ -1,0 +1,1 @@
+"""EduPilot AI — Core package."""
