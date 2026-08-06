@@ -15,7 +15,17 @@
 
 ## 🔑 1. How to Obtain Environment Secrets (Step-by-Step)
 
-### 🤖 Step 1: Groq API Keys (Primary LLM)
+### 🔐 Step 1: Generate Cryptographic Secret Keys (`SECRET_KEY` & `JWT_SECRET_KEY`)
+
+You can generate 64-character hex secret keys using Python directly in your terminal:
+
+```bash
+python -c "import secrets; print('SECRET_KEY=' + secrets.token_hex(32)); print('JWT_SECRET_KEY=' + secrets.token_hex(32))"
+```
+
+Copy the generated 64-character strings and set them as `SECRET_KEY` and `JWT_SECRET_KEY` in your `.env` file.
+
+### 🤖 Step 2: Groq API Keys (Primary LLM)
 
 1. Go to [Groq Console](https://console.groq.com/).
 2. Sign in or create a free developer account.
@@ -23,21 +33,14 @@
 4. Click **Create API Key** and copy the string (starts with `gsk_`). Put this as `GROQ_API_KEY_1`.
 5. Repeat the step to generate a second key for `GROQ_API_KEY_2` to serve as a high-volume key backup.
 
-### 🧠 Step 2: Google Gemini API Key (Fallback LLM)
+### 🧠 Step 3: Google Gemini API Key (Fallback LLM)
 
 1. Visit [Google AI Studio](https://aistudio.google.com/).
 2. Log in with your Google account.
 3. Click **Get API Key** -> **Create API key in new project**.
 4. Copy the generated key string and set it as `GEMINI_API_KEY`.
 
-### 📧 Step 3: Gmail App Password (SMTP Email Sending)
-
-1. Open your Google Account settings ([myaccount.google.com](https://myaccount.google.com/)).
-2. Ensure **2-Step Verification** is turned ON under Security.
-3. In the search bar at the top, type **App passwords**.
-4. Enter an app name (e.g. `EduPilot AI`) and click **Create**.
-5. Copy the 16-digit password string (e.g., `abcd efgh ijkl mnop`).
-6. Set `SMTP_PASSWORD` to this 16-digit string without spaces, `SMTP_USERNAME` to your Gmail address, and `SMTP_FROM_EMAIL` to your Gmail address.
+> 💡 **Note on Email & Communications**: In demo mode, all email dispatching (student lecture notes, attendance alerts, announcements) is handled natively inside the teacher communications portal without requiring external SMTP configuration.
 
 ---
 
