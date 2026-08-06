@@ -39,11 +39,15 @@ Follow these quick commands to launch EduPilot AI locally in your browser:
 cd backend
 python -m venv .venv
 
-# Activate Virtual Environment
-# On Windows:
-.venv\Scripts\activate
-# On Linux/macOS:
-source .venv/bin/activate
+# Activate Virtual Environment:
+# On Git Bash / Linux / macOS:
+source .venv/Scripts/activate
+
+# On Windows PowerShell:
+# .venv\Scripts\Activate.ps1
+
+# On Windows Command Prompt (cmd):
+# .venv\Scripts\activate.bat
 
 pip install -e .
 uvicorn app.main:app --reload --port 8000
@@ -74,7 +78,7 @@ On the login screen, click any of the **Quick Demo Faculty Cards** to pre-fill c
 - 📐 **[Architecture Specifications](ARCHITECTURE.md)** — Complete Mermaid Diagrams & System Design
 - 📘 **[Developer Instructions](INSTRUCTIONS.md)** — Step-by-Step API Secrets Guide, Code Principles & Deployment Guide
 - ⚙️ **[Backend API Engine](backend/README.md)** — FastAPI Framework & Database Architecture
-- 🎨 **[Frontend Portal](frontend/README.md)** — React 18 + Vite Portal Documentation
+- 🎨 **[Frontend README](frontend/README.md)** — React 18 + Vite Portal Documentation
 - 📄 **[MIT License](LICENSE)** — Software Licensing Information
 
 ---
