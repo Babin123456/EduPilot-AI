@@ -1,10 +1,11 @@
+<!-- markdownlint-disable -->
 <div align="center">
 
 # 🎓 EduPilot AI
-### AI Academic Operating System for Higher Education
+## AI Academic Operating System for Higher Education
 
 <p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:0060B5,100:8CC63F&height=220&section=header&text=EduPilot%20AI&fontSize=65&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=AI%20Academic%20Operating%20System%20%E2%80%A2%20Adamas%20University&descFontSize=20&descAlignY=62" width="100%" />
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:0060B5,100:8CC63F&height=220&section=header&text=EduPilot%20AI&fontSize=65&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=AI%20Academic%20Operating%20System%20%E2%80%A2%20Adamas%20University&descFontSize=20&descAlignY=62" alt="Header Banner" width="100%" />
 </p>
 
 <p align="center">
@@ -44,7 +45,7 @@ This project was crafted for **VibeForge 1.0 Hackathon** by **Team Triangle** fr
 
 ## 🌟 Product Identity & Vision
 
-**EduPilot AI** is an intelligent academic operational layer designed for higher education institutions, tailored for **Adamas University, Kolkata, West Bengal, India**.
+**EduPilot AI** is an intelligent academic operational layer designed for higher education institutions, tailored for **Adamas University, Kolkata, West Bengal, India**. 
 
 It unifies daily teaching workflows, institutional data, AI copilot intelligence, attendance automation, coursework generation, and communication into a single unified platform.
 
@@ -83,5 +84,5 @@ It unifies daily teaching workflows, institutional data, AI copilot intelligence
 ---
 
 <p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:8CC63F,100:0060B5&height=120&section=footer" width="100%" />
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:8CC63F,100:0060B5&height=120&section=footer" alt="Footer Banner" width="100%" />
 </p>
