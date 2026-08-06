@@ -47,7 +47,11 @@ export const LoginPage: React.FC = () => {
       login(res.data.access_token, res.data.teacher);
       navigate('/dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Invalid email or password');
+      if (!err.response) {
+        setError('Unable to connect to server. Please ensure backend is running at http://localhost:8000.');
+      } else {
+        setError(err.response.data?.detail || 'Invalid email or password');
+      }
     } finally {
       setLoading(false);
     }

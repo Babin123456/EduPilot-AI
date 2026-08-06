@@ -49,6 +49,10 @@ class EmailError(EduPilotException):
 
 # ---- HTTP Exception shortcuts ----
 
+def http_400(detail: str = "Bad request") -> HTTPException:
+    return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=detail)
+
+
 def http_401(detail: str = "Invalid credentials") -> HTTPException:
     return HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
