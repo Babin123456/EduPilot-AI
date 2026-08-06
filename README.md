@@ -1,11 +1,8 @@
 <!-- markdownlint-disable -->
 <div align="center">
 
-# 🎓 EduPilot AI
-## AI Academic Operating System for Higher Education
-
 <p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:0060B5,100:8CC63F&height=220&section=header&text=EduPilot%20AI&fontSize=65&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=AI%20Academic%20Operating%20System%20%E2%80%A2%20Adamas%20University&descFontSize=20&descAlignY=62" alt="Header Banner" width="100%" />
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:0060B5,100:8CC63F&height=220&section=header&text=EduPilot%20AI&fontSize=60&fontColor=ffffff&fontAlign=50&fontAlignY=38&desc=AI%20Academic%20Operating%20System%20%E2%80%A2%20Adamas%20University&descFontSize=20&descAlign=50&descAlignY=62" alt="Header Banner" width="100%" />
 </p>
 
 <p align="center">

@@ -1,9 +1,17 @@
 <!-- markdownlint-disable -->
-# 📘 EduPilot AI — Complete Setup & Developer Guide
+<div align="center">
 
-![Header Banner](https://capsule-render.vercel.app/api?type=waving&color=0:0060B5,100:8CC63F&height=180&section=header&text=Developer%20Instructions&fontSize=50&fontColor=ffffff&fontAlignY=40)
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:0060B5,100:8CC63F&height=200&section=header&text=Developer%20Instructions&fontSize=50&fontColor=ffffff&fontAlign=50&fontAlignY=38" alt="Header Banner" width="100%" />
+</p>
+
+<p align="center">
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=20&duration=3000&pause=1000&color=8CC63F&center=true&vCenter=true&width=650&lines=Environment+Secrets+Setup+Guide;Step-by-step+working+principles+of+all+files;Vercel+Frontend+%2B+Render+Backend+Deployment" alt="Typing SVG" />
+</p>
 
 ---
+
+</div>
 
 ## 🔑 1. How to Obtain Environment Secrets (Step-by-Step)
 
@@ -119,4 +127,6 @@
 
 ---
 
-![Footer Banner](https://capsule-render.vercel.app/api?type=waving&color=0:8CC63F,100:0060B5&height=100&section=footer)
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:8CC63F,100:0060B5&height=100&section=footer" alt="Footer Banner" width="100%" />
+</p>
