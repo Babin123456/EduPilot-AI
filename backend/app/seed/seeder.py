@@ -174,6 +174,26 @@ DEMO_TEACHERS = [
         "specialization": "Mathematics & Discrete Structures",
         "phone": "+91-9876543217",
     },
+    {
+        "faculty_id": "FAC-AU-009",
+        "first_name": "Subhashis",
+        "last_name": "Roy",
+        "email": "subhashis.roy@adamasuniversity.ac.in",
+        "password": "demo@1234",
+        "designation": "Associate Professor",
+        "specialization": "Blockchain & Cyber Security",
+        "phone": "+91-9876543218",
+    },
+    {
+        "faculty_id": "FAC-AU-010",
+        "first_name": "Ananya",
+        "last_name": "Sengupta",
+        "email": "ananya.sengupta@adamasuniversity.ac.in",
+        "password": "demo@1234",
+        "designation": "Assistant Professor",
+        "specialization": "Internet of Things & Embedded Systems",
+        "phone": "+91-9876543219",
+    },
 ]
 
 TEACHER_ASSIGNMENTS = {
@@ -185,6 +205,8 @@ TEACHER_ASSIGNMENTS = {
     5: [(4, "CS402", ["A", "B", "C"]), (5, "CS503", ["A"]), (6, "CS603", ["B"])],
     6: [(6, "CS601", ["A", "B", "C"]), (7, "CS704", ["A"]), (7, "CS702", ["B"])],
     7: [(1, "MA101", ["A", "B", "C"]), (2, "MA201", ["A", "B", "C"]), (3, "CS303", ["A"])],
+    8: [(8, "CS801", ["A", "B", "C"]), (8, "CS802", ["B", "C"])],
+    9: [(7, "CS703", ["A", "B", "C"]), (2, "CS202", ["A", "B"])],
 }
 
 
