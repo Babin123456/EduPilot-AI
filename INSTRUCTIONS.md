@@ -13,109 +13,109 @@
 
 </div>
 
-## 🔑 1. How to Obtain Environment Secrets (Step-by-Step)
+## 🔑 1. How to Obtain Environment Secrets (Step-by-Step) ⚡
 
-### Step 1: Groq API Keys (Primary LLM)
+### Step 1: Groq API Keys (Primary LLM 🤖)
 
-1. Go to [Groq Console](https://console.groq.com/).
-2. Sign in or create a free developer account.
-3. Navigate to **API Keys** section.
+1. Go to [Groq Console](https://console.groq.com/) 🌐.
+2. Sign in or create a free developer account 👤.
+3. Navigate to **API Keys** section 🗝️.
 4. Click **Create API Key** and copy the string (starts with `gsk_`). Put this as `GROQ_API_KEY_1`.
-5. Repeat the step to generate a second key for `GROQ_API_KEY_2` to serve as a high-volume key backup.
+5. Repeat the step to generate a second key for `GROQ_API_KEY_2` to serve as a high-volume key backup 🔄.
 
-### Step 2: Google Gemini API Key (Fallback LLM)
+### Step 2: Google Gemini API Key (Fallback LLM 🧠)
 
-1. Visit [Google AI Studio](https://aistudio.google.com/).
-2. Log in with your Google account.
-3. Click **Get API Key** -> **Create API key in new project**.
+1. Visit [Google AI Studio](https://aistudio.google.com/) 🌐.
+2. Log in with your Google account 🔑.
+3. Click **Get API Key** -> **Create API key in new project** ✨.
 4. Copy the generated key string and set it as `GEMINI_API_KEY`.
 
-### Step 3: Gmail App Password (SMTP Email Sending)
+### Step 3: Gmail App Password (SMTP Email Sending 📧)
 
-1. Open your Google Account settings ([myaccount.google.com](https://myaccount.google.com/)).
-2. Ensure **2-Step Verification** is turned ON under Security.
-3. In the search bar at the top, type **App passwords**.
-4. Enter an app name (e.g. `EduPilot AI`) and click **Create**.
+1. Open your Google Account settings ([myaccount.google.com](https://myaccount.google.com/)) ⚙️.
+2. Ensure **2-Step Verification** is turned ON under Security 🔐.
+3. In the search bar at the top, type **App passwords** 🔑.
+4. Enter an app name (e.g. `EduPilot AI`) and click **Create** ✨.
 5. Copy the 16-digit password string (e.g., `abcd efgh ijkl mnop`).
-6. Set `SMTP_PASSWORD` to this 16-digit string without spaces, `SMTP_USERNAME` to your Gmail address, and `SMTP_FROM_EMAIL` to your Gmail address.
+6. Set `SMTP_PASSWORD` to this 16-digit string without spaces, `SMTP_USERNAME` to your Gmail address, and `SMTP_FROM_EMAIL` to your Gmail address 📬.
 
 ---
 
-## 📂 2. Principles & Purpose of Each File in the Codebase
+## 📂 2. Principles & Purpose of Each File in the Codebase 🛠️
 
-### Backend Files (`backend/app/`)
+### 🐍 Backend Files (`backend/app/`)
 
-- `main.py`: Entry point for FastAPI application. Sets up CORS, mounts `/api/v1` routes, handles database creation and automatic seeding on startup.
-- `core/config.py`: Environment variable configuration loader built with `pydantic-settings`.
-- `core/database.py`: SQLAlchemy engine setup with SQLite WAL mode and session dependencies.
-- `core/security.py`: Password hashing (bcrypt) and JWT access/refresh token generator and decoder.
-- `core/exceptions.py`: Standardized HTTP exception helpers (401, 403, 404, 500).
-- `models/__init__.py`: Registry importing all SQLAlchemy database models for table reflection.
-- `models/university.py`: University, School, Department, and Program entities.
-- `models/academic.py`: AcademicSession, Year (1-4), Semester (1-8), Section (A/B/C), and Course entities.
-- `models/teacher.py`: Faculty teacher user model with credentials and department metadata.
-- `models/student.py`: Student canonical identity model containing roll numbers, placements, and risk metrics.
-- `models/enrollment.py`: Student course enrollments and Teacher-Course-Section class mappings.
-- `models/timetable.py`: Class schedule timetable entry slots per weekday.
-- `models/attendance.py`: Daily attendance sessions and per-student attendance status records.
-- `models/assignment.py`: Course assignments, rubrics, and student submission tracking.
-- `models/assessment.py`: Quizzes/exams, question items, and student grade results.
-- `models/ai_models.py`: Persistent AI conversation logs and message histories.
-- `models/knowledge.py`: RAG Knowledge base documents and text chunks.
-- `models/notification.py`: Teacher in-app alert notifications.
-- `seed/names.py`: Curated collection of **720 unique Indian student names**.
-- `seed/seeder.py`: Deterministic database seeder creating 720 student records, 8 faculty accounts, courses, and attendance history.
-- `api/deps.py`: Auth dependency extracting current logged-in teacher from Bearer JWT headers.
-- `api/v1/routes/auth.py`: REST routes for teacher login, logout, profile fetching, and demo accounts listing.
-- `api/v1/routes/dashboard.py`: Summary metrics for the teacher command center dashboard.
-- `api/v1/routes/classes.py`: API listing teacher assigned classes and details.
-- `api/v1/routes/timetable.py`: API providing daily and weekly timetable routine schedules.
-- `api/v1/routes/students.py`: Searchable, filterable student directory API.
-- `api/v1/routes/attendance.py`: Interactive attendance session recording API.
-- `api/v1/routes/analytics.py`: Class grade distribution and attendance analytics API.
-- `api/v1/routes/ai.py`: Groq & Gemini powered context-aware AI chat API endpoint.
+- ⚡ `main.py`: Entry point for FastAPI application. Sets up CORS, mounts `/api/v1` routes, handles database creation and automatic seeding on startup.
+- ⚙️ `core/config.py`: Environment variable configuration loader built with `pydantic-settings`.
+- 🗄️ `core/database.py`: SQLAlchemy engine setup with SQLite WAL mode and session dependencies.
+- 🔐 `core/security.py`: Password hashing (bcrypt) and JWT access/refresh token generator and decoder.
+- 🚨 `core/exceptions.py`: Standardized HTTP exception helpers (401, 403, 404, 500).
+- 📜 `models/__init__.py`: Registry importing all SQLAlchemy database models for table reflection.
+- 🏫 `models/university.py`: University, School, Department, and Program entities.
+- 📚 `models/academic.py`: AcademicSession, Year (1-4), Semester (1-8), Section (A/B/C), and Course entities.
+- 👨‍🏫 `models/teacher.py`: Faculty teacher user model with credentials and department metadata.
+- 🎓 `models/student.py`: Student canonical identity model containing roll numbers, placements, and risk metrics.
+- 📝 `models/enrollment.py`: Student course enrollments and Teacher-Course-Section class mappings.
+- 📅 `models/timetable.py`: Class schedule timetable entry slots per weekday.
+- ✅ `models/attendance.py`: Daily attendance sessions and per-student attendance status records.
+- 📄 `models/assignment.py`: Course assignments, rubrics, and student submission tracking.
+- 🎯 `models/assessment.py`: Quizzes/exams, question items, and student grade results.
+- 💬 `models/ai_models.py`: Persistent AI conversation logs and message histories.
+- 📚 `models/knowledge.py`: RAG Knowledge base documents and text chunks.
+- 🔔 `models/notification.py`: Teacher in-app alert notifications.
+- 👥 `seed/names.py`: Curated collection of **720 unique Indian student names**.
+- 🌱 `seed/seeder.py`: Deterministic database seeder creating 720 student records, 8 faculty accounts, courses, and attendance history.
+- 🔑 `api/deps.py`: Auth dependency extracting current logged-in teacher from Bearer JWT headers.
+- 🔓 `api/v1/routes/auth.py`: REST routes for teacher login, logout, profile fetching, and demo accounts listing.
+- 📊 `api/v1/routes/dashboard.py`: Summary metrics for the teacher command center dashboard.
+- 🏫 `api/v1/routes/classes.py`: API listing teacher assigned classes and details.
+- 🗓️ `api/v1/routes/timetable.py`: API providing daily and weekly timetable routine schedules.
+- 👥 `api/v1/routes/students.py`: Searchable, filterable student directory API.
+- ✅ `api/v1/routes/attendance.py`: Interactive attendance session recording API.
+- 📈 `api/v1/routes/analytics.py`: Class grade distribution and attendance analytics API.
+- 🤖 `api/v1/routes/ai.py`: Groq & Gemini powered context-aware AI chat API endpoint.
 
-### Frontend Files (`frontend/src/`)
+### ⚛️ Frontend Files (`frontend/src/`)
 
-- `main.tsx`: Entry point mounting the React root DOM.
-- `App.tsx`: Top-level router routing authenticated routes through `MainLayout`.
-- `index.css`: Tailwind CSS directives and custom UI scrollbars.
-- `api/client.ts`: Axios client instance equipped with automatic Bearer token injection and 401 redirect handling.
-- `context/AuthContext.tsx`: React Context managing token storage, current teacher profile, and active class selection.
-- `context/ThemeContext.tsx`: React Context managing dark/light theme toggling and localStorage persistence.
-- `components/MainLayout.tsx`: Responsive application shell with sidebar navigation, header class context switcher, and theme toggle.
-- `pages/LoginPage.tsx`: Adamas-branded sign-in page with prefillable demo faculty cards.
-- `pages/DashboardPage.tsx`: Teacher Command Center dashboard showing statistics, routine, and quick actions.
-- `pages/AttendancePage.tsx`: Attendance-taking interface supporting bulk selection and status updates.
-- `pages/AIPage.tsx`: EduPilot AI Assistant conversational interface.
-- `pages/StudentsPage.tsx`: 720-student directory with risk indicators and search filters.
-- `pages/TimetablePage.tsx`: Weekly teaching schedule routine grid.
-- `pages/AnalyticsPage.tsx`: Interactive Recharts data charts for grade and attendance analytics.
+- 🚀 `main.tsx`: Entry point mounting the React root DOM.
+- 🚦 `App.tsx`: Top-level router routing authenticated routes through `MainLayout`.
+- 🎨 `index.css`: Tailwind CSS directives and custom UI scrollbars.
+- 🌐 `api/client.ts`: Axios client instance equipped with automatic Bearer token injection and 401 redirect handling.
+- 🔐 `context/AuthContext.tsx`: React Context managing token storage, current teacher profile, and active class selection.
+- 🌓 `context/ThemeContext.tsx`: React Context managing dark/light theme toggling and localStorage persistence.
+- 🏛️ `components/MainLayout.tsx`: Responsive application shell with sidebar navigation, header class context switcher, and theme toggle.
+- 🔑 `pages/LoginPage.tsx`: Adamas-branded sign-in page with prefillable demo faculty cards.
+- 📊 `pages/DashboardPage.tsx`: Teacher Command Center dashboard showing statistics, routine, and quick actions.
+- ✅ `pages/AttendancePage.tsx`: Attendance-taking interface supporting bulk selection and status updates.
+- 🤖 `pages/AIPage.tsx`: EduPilot AI Assistant conversational interface.
+- 👥 `pages/StudentsPage.tsx`: 720-student directory with risk indicators and search filters.
+- 📅 `pages/TimetablePage.tsx`: Weekly teaching schedule routine grid.
+- 📈 `pages/AnalyticsPage.tsx`: Interactive Recharts data charts for grade and attendance analytics.
 
 ---
 
-## 🚀 3. Deployment Process (Vercel + Render)
+## 🚀 3. Deployment Process (Vercel + Render) 🌐
 
-### Frontend Deployment (Vercel)
+### ⚛️ Frontend Deployment (Vercel)
 
-1. Push project repository to GitHub.
-2. Go to [Vercel Dashboard](https://vercel.com/) and click **Add New Project**.
-3. Import the `EduPilot-AI` repository.
+1. Push project repository to GitHub 🐙.
+2. Go to [Vercel Dashboard](https://vercel.com/) and click **Add New Project** 🚀.
+3. Import the `EduPilot-AI` repository 📦.
 4. Set **Root Directory** to `frontend`.
 5. Set **Build Command** to `npm run build` and **Output Directory** to `dist`.
-6. Add Environment Variable:
+6. Add Environment Variable 🔑:
    - `VITE_API_URL` = `https://your-backend-render-url.onrender.com/api/v1`
-7. Click **Deploy**.
+7. Click **Deploy** ✨.
 
-### Backend Deployment (Render)
+### 🐍 Backend Deployment (Render)
 
-1. Go to [Render Dashboard](https://render.com/) and create a **Web Service**.
-2. Connect your GitHub repository `EduPilot-AI`.
+1. Go to [Render Dashboard](https://render.com/) and create a **Web Service** 🌐.
+2. Connect your GitHub repository `EduPilot-AI` 🐙.
 3. Set **Root Directory** to `backend`.
 4. Set **Runtime** to `Python 3`.
-5. Set **Build Command** to `pip install -r pyproject.toml` or `pip install .`
+5. Set **Build Command** to `pip install -r pyproject.toml` or `pip install .`.
 6. Set **Start Command** to `uvicorn app.main:app --host 0.0.0.0 --port $PORT`.
-7. Add Environment Variables in Render:
+7. Add Environment Variables in Render 🔐:
    - `DATABASE_URL` = `sqlite:///./edupilot.db` (or a managed PostgreSQL connection string)
    - `JWT_SECRET_KEY` = your secret
    - `GROQ_API_KEY_1` = your key
@@ -123,7 +123,7 @@
    - `GEMINI_API_KEY` = your key
    - `SMTP_USERNAME` = your email
    - `SMTP_PASSWORD` = your app password
-8. Click **Create Web Service**.
+8. Click **Create Web Service** ✨.
 
 ---
 

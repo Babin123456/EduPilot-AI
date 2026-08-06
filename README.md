@@ -2,7 +2,7 @@
 <div align="center">
 
 <p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:0060B5,100:8CC63F&height=220&section=header&text=EduPilot%20AI&fontSize=60&fontColor=ffffff&fontAlign=50&fontAlignY=38&desc=AI%20Academic%20Operating%20System%20%E2%80%A2%20Adamas%20University&descFontSize=20&descAlign=50&descAlignY=62" alt="Header Banner" width="100%" />
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:0060B5,100:8CC63F&height=220&section=header&text=EduPilot%20AI&fontSize=65&fontColor=ffffff&animation=fadeIn&fontAlign=50&fontAlignY=38&desc=AI%20Academic%20Operating%20System%20%E2%80%A2%20Adamas%20University&descFontSize=20&descAlign=50&descAlignY=62" alt="Header Banner" width="100%" />
 </p>
 
 <p align="center">
@@ -24,29 +24,29 @@ This project was crafted for **VibeForge 1.0 Hackathon** by **Team Triangle** fr
 
 | Role | Name | Institution |
 | :--- | :--- | :--- |
-| **Team Leader** | **Babin Bid** | Adamas University |
-| **Team Member** | **Baibhab Adhikari** | Adamas University |
-| **Team Member** | **Subhajyoti Halder** | Adamas University |
+| 👑 **Team Leader** | **Babin Bid** | Adamas University |
+| 🛠️ **Team Member** | **Baibhab Adhikari** | Adamas University |
+| 🚀 **Team Member** | **Subhajyoti Halder** | Adamas University |
 
 ---
 
 ## 🔗 Project Documentation Index
 
-- 📐 **[ARCHITECTURE.md](ARCHITECTURE.md)** — Comprehensive Mermaid System Diagrams & Workflow Diagrams
-- 📘 **[INSTRUCTIONS.md](INSTRUCTIONS.md)** — Step-by-Step API Secrets Guide, Codebase Principles & Deployment Guide
-- ⚙️ **[Backend README](backend/README.md)** — FastAPI Engine Setup & API Structure
-- 🎨 **[Frontend README](frontend/README.md)** — React 18 + Vite Portal Documentation
-- 📄 **[LICENSE](LICENSE)** — Official MIT License
+- 📐 **[ARCHITECTURE.md](ARCHITECTURE.md)** — Comprehensive Mermaid System Diagrams & Workflow Diagrams 📊
+- 📘 **[INSTRUCTIONS.md](INSTRUCTIONS.md)** — Step-by-Step API Secrets Guide, Codebase Principles & Deployment Guide 🔑
+- ⚙️ **[Backend README](backend/README.md)** — FastAPI Engine Setup & API Structure 🐍
+- 🎨 **[Frontend README](frontend/README.md)** — React 18 + Vite Portal Documentation ⚛️
+- 📄 **[LICENSE](LICENSE)** — Official MIT License 📜
 
 ---
 
 ## 🌟 Product Identity & Vision
 
-**EduPilot AI** is an intelligent academic operational layer designed for higher education institutions, tailored for **Adamas University, Kolkata, West Bengal, India**. 
+**EduPilot AI** is an intelligent academic operational layer designed for higher education institutions, tailored for **Adamas University, Kolkata, West Bengal, India** 🏫. 
 
-It unifies daily teaching workflows, institutional data, AI copilot intelligence, attendance automation, coursework generation, and communication into a single unified platform.
+It unifies daily teaching workflows, institutional data, AI copilot intelligence, attendance automation, coursework generation, and communication into a single unified platform ✨.
 
-> 💡 **Core Principle**: AI assists; the teacher remains the final authority.
+> 💡 **Core Principle**: AI assists; the teacher remains the final authority 🎓.
 
 ---
 
@@ -63,20 +63,20 @@ It unifies daily teaching workflows, institutional data, AI copilot intelligence
 
 ## ⚡ Tech Stack Architecture
 
-### Backend
+### 🐍 Backend
 
-- **Framework**: Python 3.11+ & FastAPI
-- **Database**: SQLite with `aiosqlite` and WAL Mode enabled
-- **Security**: JWT Access/Refresh tokens + bcrypt password hashing
-- **AI Core**: Groq API (Primary - Dual Keys) & Google Gemini (Fallback)
-- **Email**: Gmail SMTP Integration
+- 🚀 **Framework**: Python 3.11+ & FastAPI
+- 🗄️ **Database**: SQLite with `aiosqlite` and WAL Mode enabled
+- 🔐 **Security**: JWT Access/Refresh tokens + bcrypt password hashing
+- 🧠 **AI Core**: Groq API (Primary - Dual Keys 🔑) & Google Gemini (Fallback ⚡)
+- 📧 **Email**: Gmail SMTP Integration
 
-### Frontend
+### ⚛️ Frontend
 
-- **Framework**: React 18 + Vite + TypeScript
-- **Styling**: Tailwind CSS (Adamas University Brand Blue `#0060B5` & Green `#8CC63F`)
-- **Icons**: Lucide React (strictly non-emoji UI icons)
-- **Data Visualizations**: Recharts
+- 💻 **Framework**: React 18 + Vite + TypeScript
+- 🎨 **Styling**: Tailwind CSS (Adamas University Brand Blue `#0060B5` & Green `#8CC63F`)
+- 🧩 **Icons**: Lucide React (accessible UI icons)
+- 📊 **Data Visualizations**: Recharts
 
 ---
 
