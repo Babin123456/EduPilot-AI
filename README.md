@@ -30,13 +30,13 @@ This project was crafted for **VibeForge 1.0 Hackathon** by **Team Triangle** fr
 
 ---
 
-## 🔗 Project Documentation Index
+## 🔗 Documentation & Quick Links
 
-- 📐 **[ARCHITECTURE.md](ARCHITECTURE.md)** — Comprehensive Mermaid System Diagrams & Workflow Diagrams
-- 📘 **[INSTRUCTIONS.md](INSTRUCTIONS.md)** — Step-by-Step API Secrets Guide, Codebase Principles & Deployment Guide
-- ⚙️ **[Backend README](backend/README.md)** — FastAPI Engine Setup & API Structure
-- 🎨 **[Frontend README](frontend/README.md)** — React 18 + Vite Portal Documentation
-- 📄 **[LICENSE](LICENSE)** — Official MIT License
+- 📐 **[Architecture Specifications](ARCHITECTURE.md)** — Complete Mermaid Diagrams & System Design
+- 📘 **[Developer Instructions](INSTRUCTIONS.md)** — Step-by-Step API Secrets Guide, Code Principles & Deployment Guide
+- ⚙️ **[Backend API Engine](backend/README.md)** — FastAPI Framework & Database Architecture
+- 🎨 **[Frontend Portal](frontend/README.md)** — React 18 + Vite Portal Documentation
+- 📄 **[MIT License](LICENSE)** — Software Licensing Information
 
 ---
 
@@ -50,7 +50,7 @@ It unifies daily teaching workflows, institutional data, AI copilot intelligence
 
 ---
 
-## 🔥 Key Capabilities
+## 🔥 Key System Capabilities
 
 - 📊 **Teacher Command Center**: Instant visibility into daily routine, pending attendance, grading tasks, and at-risk students.
 - 🎯 **Global Academic Context**: Switching active class dynamically updates every context-sensitive module (attendance, analytics, student directory, AI context).
@@ -61,22 +61,22 @@ It unifies daily teaching workflows, institutional data, AI copilot intelligence
 
 ---
 
-## ⚡ Tech Stack Architecture
+## ⚡ Technical Stack Overview
 
-### 🐍 Backend
+### 🐍 Backend Architecture
 
-- **Framework**: Python 3.11+ & FastAPI
+- **Framework**: Python 3.11+ & FastAPI 0.115
 - **Database**: SQLite with `aiosqlite` and WAL Mode enabled
 - **Security**: JWT Access/Refresh tokens + bcrypt password hashing
-- **AI Core**: Groq API (Primary - Dual Keys) & Google Gemini (Fallback)
-- **Email**: Gmail SMTP Integration
+- **AI Engine**: Groq API (Dual Primary Keys) & Google Gemini (Fallback)
+- **Communications**: Gmail SMTP Integration
 
-### ⚛️ Frontend
+### ⚛️ Frontend Architecture
 
-- **Framework**: React 18 + Vite + TypeScript
+- **Framework**: React 18 + Vite 5 + TypeScript 5
 - **Styling**: Tailwind CSS (Adamas University Brand Blue `#0060B5` & Green `#8CC63F`)
-- **Icons**: Lucide React (accessible UI icons)
-- **Data Visualizations**: Recharts
+- **UI Components**: Accessible Lucide React icons & Recharts visualizations
+- **State & Data**: React Context API & Axios HTTP Client
 
 ---
 
