@@ -2,10 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { api } from '../api/client';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   Mail, Send, Users, Search, CheckCircle2, Loader2,
-  FileText, Clock, ChevronDown, ChevronUp, Inbox, AlertCircle
+  Clock, ChevronDown, ChevronUp, Inbox
 } from 'lucide-react';
 
 export const CommunicationsPage: React.FC = () => {
@@ -14,7 +13,6 @@ export const CommunicationsPage: React.FC = () => {
   const [students, setStudents] = useState<any[]>([]);
   const [templates, setTemplates] = useState<any[]>([]);
   const [history, setHistory] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStudents, setSelectedStudents] = useState<Set<string>>(new Set());
@@ -33,7 +31,6 @@ export const CommunicationsPage: React.FC = () => {
   }, [activeClass]);
 
   const fetchData = async () => {
-    setLoading(true);
     try {
       const [studRes, tmplRes, histRes] = await Promise.all([
         api.get('/communications/student-emails', { params: { class_id: activeClass?.id } }),
@@ -45,8 +42,6 @@ export const CommunicationsPage: React.FC = () => {
       setHistory(histRes.data || []);
     } catch (err) {
       console.error('Failed to load communications data:', err);
-    } finally {
-      setLoading(false);
     }
   };
 

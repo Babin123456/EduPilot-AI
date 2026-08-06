@@ -30,7 +30,6 @@ const cardVariants = {
 export const DashboardPage: React.FC = () => {
   const { user, activeClass } = useAuth();
   const [summary, setSummary] = useState<any>(null);
-  const [alerts, setAlerts] = useState<any[]>([]);
   const [todaySchedule, setTodaySchedule] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -39,11 +38,9 @@ export const DashboardPage: React.FC = () => {
     setSummary(null);
     Promise.all([
       api.get('/dashboard/summary'),
-      api.get('/dashboard/alerts'),
       api.get('/timetable/today')
-    ]).then(([sumRes, alertRes, ttRes]) => {
+    ]).then(([sumRes, ttRes]) => {
       setSummary(sumRes.data);
-      setAlerts(alertRes.data);
       setTodaySchedule(ttRes.data);
     }).finally(() => setLoading(false));
   }, [activeClass]);

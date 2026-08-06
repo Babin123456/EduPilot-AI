@@ -4,7 +4,7 @@ import { useToast } from '../context/ToastContext';
 import { api } from '../api/client';
 import { motion } from 'framer-motion';
 import {
-  Folder, Download, FileText, BookOpen, BarChart3,
+  Download, FileText, BookOpen,
   Users, HelpCircle, Loader2, Clock, File
 } from 'lucide-react';
 import { generateQuizPDF, generateClassReportPDF, generateDailyNotePDF } from '../utils/pdfGenerator';
@@ -23,14 +23,13 @@ export const DocumentStudioPage: React.FC = () => {
   const { activeClass, user } = useAuth();
   const toast = useToast();
   const [documents, setDocuments] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState<string | null>(null);
 
   useEffect(() => {
     if (!activeClass) return;
     api.get('/documents', { params: { class_id: activeClass.id } })
       .then(res => setDocuments(res.data))
-      .finally(() => setLoading(false));
+      .catch(() => {});
   }, [activeClass]);
 
   const generateQuiz = async () => {
