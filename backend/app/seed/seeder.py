@@ -33,12 +33,8 @@ from app.models import (
 )
 from app.seed.names import STUDENT_NAMES
 
-# Fixed random seed for deterministic output
 RANDOM_SEED = 42
 
-# ──────────────────────────────────────────────────────────────
-# Course definitions per semester
-# ──────────────────────────────────────────────────────────────
 COURSES_BY_SEMESTER = {
     1: [
         ("CS101", "Programming Fundamentals", "theory", 4),
@@ -97,9 +93,6 @@ COURSES_BY_SEMESTER = {
     ],
 }
 
-# ──────────────────────────────────────────────────────────────
-# Demo teachers
-# ──────────────────────────────────────────────────────────────
 DEMO_TEACHERS = [
     {
         "faculty_id": "FAC-AU-001",
@@ -183,7 +176,6 @@ DEMO_TEACHERS = [
     },
 ]
 
-# Teacher-to-course assignments: teacher_index -> list of (semester, course_code, sections)
 TEACHER_ASSIGNMENTS = {
     0: [(3, "CS301", ["A", "B"]), (4, "CS401", ["A"]), (1, "CS101", ["A", "B", "C"])],
     1: [(3, "CS302", ["A", "B", "C"]), (6, "CS604", ["A"])],
@@ -207,14 +199,13 @@ def run_seed():
     db = SessionLocal()
 
     try:
-        # Check if already seeded
         if db.query(University).first():
             print("[Seed] Database already seeded. Skipping.")
             return
 
         print("[Seed] Starting database seed...")
 
-        # ── 1. University ──
+        # 1. University
         university = University(
             id=_uid(), name="Adamas University", short_name="AU",
             city="Kolkata", state="West Bengal", country="India",
@@ -222,41 +213,46 @@ def run_seed():
             address="Barasat - Barrackpore Road, Barbaria, P.O. Jagannathpur, Kolkata - 700126",
         )
         db.add(university)
+        db.flush()
 
-        # ── 2. School ──
+        # 2. School
         school = School(
             id=_uid(), university_id=university.id,
             name="School of Engineering & Technology", short_name="SOET",
         )
         db.add(school)
+        db.flush()
 
-        # ── 3. Department ──
+        # 3. Department
         department = Department(
             id=_uid(), school_id=school.id,
             name="Computer Science & Engineering", short_name="CSE", code="CSE",
         )
         db.add(department)
+        db.flush()
 
-        # ── 4. Program ──
+        # 4. Program
         program = Program(
             id=_uid(), department_id=department.id,
             name="Bachelor of Technology in Computer Science & Engineering",
             short_name="B.Tech CSE", degree_type="B.Tech", duration_years=4,
         )
         db.add(program)
+        db.flush()
 
-        # ── 5. Academic Session ──
+        # 5. Academic Session
         session = AcademicSession(
             id=_uid(), name="2025-2026",
             start_date=date(2025, 7, 1), end_date=date(2026, 6, 30),
             is_current=True,
         )
         db.add(session)
+        db.flush()
 
-        # ── 6. Years, Semesters, Sections ──
+        # 6. Years, Semesters, Sections
         years: dict[int, Year] = {}
         semesters: dict[int, Semester] = {}
-        sections: dict[str, Section] = {}  # key: "Y{year}S{section_name}"
+        sections: dict[str, Section] = {}
 
         year_labels = {1: "1st Year", 2: "2nd Year", 3: "3rd Year", 4: "4th Year"}
         for yn in range(1, 5):
@@ -265,18 +261,19 @@ def run_seed():
                 year_number=yn, label=year_labels[yn],
             )
             db.add(year)
+            db.flush()
             years[yn] = year
 
-            for sn in range(1, 3):  # 2 semesters per year
+            for sn in range(1, 3):
                 sem_num = (yn - 1) * 2 + sn
-                is_odd = (sn == 1)
                 semester = Semester(
                     id=_uid(), year_id=year.id,
                     semester_number=sem_num,
                     label=f"Semester {sem_num}",
-                    is_current=(sem_num % 2 == 1),  # odd semesters current
+                    is_current=(sem_num % 2 == 1),
                 )
                 db.add(semester)
+                db.flush()
                 semesters[sem_num] = semester
 
             for sec_name in ["A", "B", "C"]:
@@ -285,11 +282,10 @@ def run_seed():
                     name=sec_name, max_students=60,
                 )
                 db.add(sec)
+                db.flush()
                 sections[f"Y{yn}S{sec_name}"] = sec
 
-        db.flush()
-
-        # ── 7. Courses ──
+        # 7. Courses
         courses: dict[str, Course] = {}
         for sem_num, course_list in COURSES_BY_SEMESTER.items():
             for code, name, ctype, credits in course_list:
@@ -299,11 +295,10 @@ def run_seed():
                     code=code, name=name, course_type=ctype, credits=credits,
                 )
                 db.add(course)
+                db.flush()
                 courses[code] = course
 
-        db.flush()
-
-        # ── 8. Teachers ──
+        # 8. Teachers
         teachers: list[Teacher] = []
         for t_data in DEMO_TEACHERS:
             teacher = Teacher(
@@ -319,12 +314,11 @@ def run_seed():
                 is_demo=True,
             )
             db.add(teacher)
+            db.flush()
             teachers.append(teacher)
 
-        db.flush()
-
-        # ── 9. Teacher Course Assignments ("classes") ──
-        tca_map: dict[str, TeacherCourseAssignment] = {}  # key: f"{course_code}_{section_name}"
+        # 9. Teacher Course Assignments
+        tca_map: dict[str, TeacherCourseAssignment] = {}
 
         for t_idx, assignments in TEACHER_ASSIGNMENTS.items():
             teacher = teachers[t_idx]
@@ -347,11 +341,10 @@ def run_seed():
                         is_active=True,
                     )
                     db.add(tca)
+                    db.flush()
                     tca_map[f"{course_code}_{sec_name}_{year_num}"] = tca
 
-        db.flush()
-
-        # ── 10. Students (720) ──
+        # 10. Students (720)
         students_by_section: dict[str, list[Student]] = {}
         student_index = 0
 
@@ -359,7 +352,7 @@ def run_seed():
             for sec_name in ["A", "B", "C"]:
                 sec_key = f"Y{yn}S{sec_name}"
                 sec = sections[sec_key]
-                current_sem = (yn - 1) * 2 + 1  # odd semester (current)
+                current_sem = (yn - 1) * 2 + 1
                 students_in_sec = []
 
                 for i in range(60):
@@ -412,14 +405,13 @@ def run_seed():
                         gender=rng.choice(["Male", "Female"]),
                     )
                     db.add(student)
+                    db.flush()
                     students_in_sec.append(student)
                     student_index += 1
 
                 students_by_section[sec_key] = students_in_sec
 
-        db.flush()
-
-        # ── 11. Enrollments ──
+        # 11. Enrollments
         for yn in range(1, 5):
             current_sem = (yn - 1) * 2 + 1
             sem_courses = [c for code, c in courses.items()
@@ -437,10 +429,9 @@ def run_seed():
                             status="active",
                         )
                         db.add(enrollment)
+                        db.flush()
 
-        db.flush()
-
-        # ── 12. Timetable ──
+        # 12. Timetable
         time_slots = [
             ("09:00", "10:00"), ("10:00", "11:00"), ("11:15", "12:15"),
             ("12:15", "13:15"), ("14:00", "15:00"), ("15:00", "16:00"),
@@ -448,9 +439,8 @@ def run_seed():
         ]
 
         for tca_key, tca in tca_map.items():
-            # Each class gets 2-3 slots per week
             num_slots = rng.randint(2, 3)
-            used_days = rng.sample(range(0, 5), num_slots)  # Mon-Fri
+            used_days = rng.sample(range(0, 5), num_slots)
             for day in used_days:
                 slot = rng.choice(time_slots)
                 entry = TimetableEntry(
@@ -463,18 +453,17 @@ def run_seed():
                     slot_type="lab" if "Lab" in tca.room else "lecture",
                 )
                 db.add(entry)
+                db.flush()
 
-        db.flush()
-
-        # ── 13. Historical Attendance (30 days) ──
+        # 13. Historical Attendance
         today = date.today()
         attendance_dates = []
         d = today - timedelta(days=45)
         while d <= today - timedelta(days=1):
-            if d.weekday() < 5:  # Mon-Fri
+            if d.weekday() < 5:
                 attendance_dates.append(d)
             d += timedelta(days=1)
-        attendance_dates = attendance_dates[-30:]  # last 30 working days
+        attendance_dates = attendance_dates[-30:]
 
         for tca_key, tca in tca_map.items():
             parts = tca_key.split("_")
@@ -487,7 +476,6 @@ def run_seed():
             if not section_students:
                 continue
 
-            # Pick ~10-15 dates for this class's attendance
             num_sessions = rng.randint(10, min(15, len(attendance_dates)))
             session_dates = sorted(rng.sample(attendance_dates, num_sessions))
 
@@ -531,10 +519,9 @@ def run_seed():
                 att_session.total_present = present_count
                 att_session.total_absent = absent_count
                 att_session.total_late = late_count
+                db.flush()
 
-        db.flush()
-
-        # ── 14. Sample Assignments ──
+        # 14. Sample Assignments
         assignment_topics = {
             "CS101": ["Variables and Data Types", "Control Structures", "Functions and Recursion"],
             "CS201": ["Linked Lists Implementation", "Binary Trees", "Graph Algorithms"],
@@ -556,7 +543,7 @@ def run_seed():
 
             topics = assignment_topics.get(course_code, ["General Assignment"])
 
-            for idx, topic in enumerate(topics[:2]):  # 2 assignments per class
+            for idx, topic in enumerate(topics[:2]):
                 deadline = today + timedelta(days=rng.randint(-10, 14))
                 assignment = Assignment(
                     id=_uid(),
@@ -574,9 +561,8 @@ def run_seed():
                 db.add(assignment)
                 db.flush()
 
-                # Create submissions for some students
                 for student in section_students:
-                    if rng.random() < 0.75:  # 75% submission rate
+                    if rng.random() < 0.75:
                         score = round(rng.gauss(70, 15), 1)
                         score = max(10, min(100, score))
                         is_graded = rng.random() < 0.6
@@ -592,10 +578,9 @@ def run_seed():
                             status="graded" if is_graded else "submitted",
                         )
                         db.add(sub)
+                        db.flush()
 
-        db.flush()
-
-        # ── 15. Sample Assessments ──
+        # 15. Sample Assessments
         for tca_key, tca in tca_map.items():
             parts = tca_key.split("_")
             course_code = parts[0]
@@ -623,7 +608,6 @@ def run_seed():
             db.add(assessment)
             db.flush()
 
-            # Results
             for student in section_students:
                 score = round(rng.gauss(17, 5), 1)
                 score = max(3, min(25, score))
@@ -637,10 +621,9 @@ def run_seed():
                     grade="A" if score >= 22 else "B" if score >= 18 else "C" if score >= 13 else "D" if score >= 8 else "F",
                 )
                 db.add(result)
+                db.flush()
 
-        db.flush()
-
-        # ── 16. Sample Notifications for first teacher ──
+        # 16. Sample Notifications
         teacher_0 = teachers[0]
         notifs = [
             ("Quiz results ready", "Quiz 1 for 3rd Year Section A has been graded.", "success"),
@@ -652,6 +635,7 @@ def run_seed():
                 id=_uid(), teacher_id=teacher_0.id,
                 title=title, message=msg, notification_type=ntype,
             ))
+            db.flush()
 
         db.commit()
         print(f"[Seed] Successfully seeded {student_index} students, {len(teachers)} teachers, "

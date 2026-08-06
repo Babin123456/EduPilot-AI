@@ -5,6 +5,7 @@
 ## 🔑 1. How to Obtain Environment Secrets (Step-by-Step)
 
 ### Step 1: Groq API Keys (Primary LLM)
+
 1. Go to [Groq Console](https://console.groq.com/).
 2. Sign in or create a free developer account.
 3. Navigate to **API Keys** section.
@@ -12,12 +13,14 @@
 5. Repeat the step to generate a second key for `GROQ_API_KEY_2` to serve as a high-volume key backup.
 
 ### Step 2: Google Gemini API Key (Fallback LLM)
+
 1. Visit [Google AI Studio](https://aistudio.google.com/).
 2. Log in with your Google account.
 3. Click **Get API Key** -> **Create API key in new project**.
 4. Copy the generated key string and set it as `GEMINI_API_KEY`.
 
 ### Step 3: Gmail App Password (SMTP Email Sending)
+
 1. Open your Google Account settings ([myaccount.google.com](https://myaccount.google.com/)).
 2. Ensure **2-Step Verification** is turned ON under Security.
 3. In the search bar at the top, type **App passwords**.
@@ -30,6 +33,7 @@
 ## 📂 2. Principles & Purpose of Each File in the Codebase
 
 ### Backend Files (`backend/app/`)
+
 - `main.py`: Entry point for FastAPI application. Sets up CORS, mounts `/api/v1` routes, handles database creation and automatic seeding on startup.
 - `core/config.py`: Environment variable configuration loader built with `pydantic-settings`.
 - `core/database.py`: SQLAlchemy engine setup with SQLite WAL mode and session dependencies.
@@ -61,6 +65,7 @@
 - `api/v1/routes/ai.py`: Groq & Gemini powered context-aware AI chat API endpoint.
 
 ### Frontend Files (`frontend/src/`)
+
 - `main.tsx`: Entry point mounting the React root DOM.
 - `App.tsx`: Top-level router routing authenticated routes through `MainLayout`.
 - `index.css`: Tailwind CSS directives and custom UI scrollbars.
@@ -81,6 +86,7 @@
 ## 🚀 3. Deployment Process (Vercel + Render)
 
 ### Frontend Deployment (Vercel)
+
 1. Push project repository to GitHub.
 2. Go to [Vercel Dashboard](https://vercel.com/) and click **Add New Project**.
 3. Import the `EduPilot-AI` repository.
@@ -91,6 +97,7 @@
 7. Click **Deploy**.
 
 ### Backend Deployment (Render)
+
 1. Go to [Render Dashboard](https://render.com/) and create a **Web Service**.
 2. Connect your GitHub repository `EduPilot-AI`.
 3. Set **Root Directory** to `backend`.

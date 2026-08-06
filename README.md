@@ -44,7 +44,7 @@ This project was crafted for **VibeForge 1.0 Hackathon** by **Team Triangle** fr
 
 ## 🌟 Product Identity & Vision
 
-**EduPilot AI** is an intelligent academic operational layer designed for higher education institutions, tailored for **Adamas University, Kolkata, West Bengal, India**. 
+**EduPilot AI** is an intelligent academic operational layer designed for higher education institutions, tailored for **Adamas University, Kolkata, West Bengal, India**.
 
 It unifies daily teaching workflows, institutional data, AI copilot intelligence, attendance automation, coursework generation, and communication into a single unified platform.
 
@@ -66,6 +66,7 @@ It unifies daily teaching workflows, institutional data, AI copilot intelligence
 ## ⚡ Tech Stack Architecture
 
 ### Backend
+
 - **Framework**: Python 3.11+ & FastAPI
 - **Database**: SQLite with `aiosqlite` and WAL Mode enabled
 - **Security**: JWT Access/Refresh tokens + bcrypt password hashing
@@ -73,6 +74,7 @@ It unifies daily teaching workflows, institutional data, AI copilot intelligence
 - **Email**: Gmail SMTP Integration
 
 ### Frontend
+
 - **Framework**: React 18 + Vite + TypeScript
 - **Styling**: Tailwind CSS (Adamas University Brand Blue `#0060B5` & Green `#8CC63F`)
 - **Icons**: Lucide React (strictly non-emoji UI icons)

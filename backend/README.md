@@ -5,11 +5,13 @@
 ---
 
 ## 📌 Overview
+
 The backend service powers EduPilot AI using FastAPI, SQLAlchemy, and SQLite WAL mode. It manages data access for 720 unique students, teacher authentication, class scheduling, attendance persistence, and context-aware LLM query routing using Groq (dual primary keys) and Gemini (fallback).
 
 ---
 
 ## 🛠️ Key Technologies
+
 - **Python 3.11+**
 - **FastAPI 0.115**
 - **SQLAlchemy 2.0 ORM**

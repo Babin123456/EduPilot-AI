@@ -5,11 +5,13 @@
 ---
 
 ## 📌 Overview
+
 The frontend portal is built for faculty members at Adamas University. It delivers a modern visual experience with dark/light mode persistence, dynamic class context switching, interactive attendance taking, Recharts visual analytics, and an integrated EduPilot AI chat workspace.
 
 ---
 
 ## 🛠️ Key Technologies
+
 - **React 18**
 - **Vite 5**
 - **TypeScript 5**
