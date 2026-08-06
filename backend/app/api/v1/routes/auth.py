@@ -60,7 +60,9 @@ class DemoTeacherCard(BaseModel):
 @router.post("/login", response_model=TokenResponse)
 def login(body: LoginRequest, db: Session = Depends(get_db)):
     """Authenticate a teacher and return JWT tokens."""
-    teacher = db.query(Teacher).filter(Teacher.email == body.email).first()
+    from sqlalchemy import func
+    clean_email = str(body.email).strip().lower()
+    teacher = db.query(Teacher).filter(func.lower(Teacher.email) == clean_email).first()
     if not teacher or not verify_password(body.password, teacher.hashed_password):
         raise http_401("Invalid email or password")
     if not teacher.is_active:
