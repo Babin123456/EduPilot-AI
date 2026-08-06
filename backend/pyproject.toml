@@ -3,6 +3,10 @@ name = "edupilot-backend"
 version = "1.0.0"
 description = "EduPilot AI — Backend API for AI Academic Operating System"
 requires-python = ">=3.11"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
 dependencies = [
     # ---- Web Framework ----
     "fastapi>=0.115.0",
