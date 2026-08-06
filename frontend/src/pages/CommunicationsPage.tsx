@@ -112,11 +112,13 @@ export const CommunicationsPage: React.FC = () => {
     }
   };
 
-  const filteredStudents = students.filter(s =>
-    s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    s.roll_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    s.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredStudents = students.filter(s => {
+    const sName = (s.name || s.full_name || '').toLowerCase();
+    const sRoll = (s.roll_number || '').toLowerCase();
+    const sEmail = (s.email || '').toLowerCase();
+    const query = (searchTerm || '').toLowerCase();
+    return sName.includes(query) || sRoll.includes(query) || sEmail.includes(query);
+  });
 
   return (
     <div className="space-y-6">
@@ -208,7 +210,7 @@ export const CommunicationsPage: React.FC = () => {
                   } ${isSelected ? 'bg-blue-50/50 dark:bg-blue-950/30' : ''}`}
                 >
                   <div className="space-y-0.5">
-                    <p className="text-xs font-bold text-slate-900 dark:text-white">{student.name}</p>
+                    <p className="text-xs font-bold text-slate-900 dark:text-white">{student.name || student.full_name}</p>
                     <p className="text-[10px] text-slate-500">{student.roll_number}</p>
                     <p className="text-[10px] text-adamas-blue font-mono">{student.email}</p>
                   </div>

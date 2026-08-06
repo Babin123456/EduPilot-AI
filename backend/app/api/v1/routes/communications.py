@@ -127,6 +127,7 @@ def get_student_emails(
             {
                 "id": s.id,
                 "roll_number": s.roll_number,
+                "name": s.full_name,
                 "full_name": s.full_name,
                 "email": s.email,
             }
