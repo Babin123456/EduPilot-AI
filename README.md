@@ -32,21 +32,21 @@ This project was crafted for **VibeForge 1.0 Hackathon** by **Team Triangle** fr
 
 ## 🔗 Project Documentation Index
 
-- 📐 **[ARCHITECTURE.md](ARCHITECTURE.md)** — Comprehensive Mermaid System Diagrams & Workflow Diagrams 📊
-- 📘 **[INSTRUCTIONS.md](INSTRUCTIONS.md)** — Step-by-Step API Secrets Guide, Codebase Principles & Deployment Guide 🔑
-- ⚙️ **[Backend README](backend/README.md)** — FastAPI Engine Setup & API Structure 🐍
-- 🎨 **[Frontend README](frontend/README.md)** — React 18 + Vite Portal Documentation ⚛️
-- 📄 **[LICENSE](LICENSE)** — Official MIT License 📜
+- 📐 **[ARCHITECTURE.md](ARCHITECTURE.md)** — Comprehensive Mermaid System Diagrams & Workflow Diagrams
+- 📘 **[INSTRUCTIONS.md](INSTRUCTIONS.md)** — Step-by-Step API Secrets Guide, Codebase Principles & Deployment Guide
+- ⚙️ **[Backend README](backend/README.md)** — FastAPI Engine Setup & API Structure
+- 🎨 **[Frontend README](frontend/README.md)** — React 18 + Vite Portal Documentation
+- 📄 **[LICENSE](LICENSE)** — Official MIT License
 
 ---
 
 ## 🌟 Product Identity & Vision
 
-**EduPilot AI** is an intelligent academic operational layer designed for higher education institutions, tailored for **Adamas University, Kolkata, West Bengal, India** 🏫. 
+**EduPilot AI** is an intelligent academic operational layer designed for higher education institutions, tailored for **Adamas University, Kolkata, West Bengal, India**. 
 
-It unifies daily teaching workflows, institutional data, AI copilot intelligence, attendance automation, coursework generation, and communication into a single unified platform ✨.
+It unifies daily teaching workflows, institutional data, AI copilot intelligence, attendance automation, coursework generation, and communication into a single unified platform.
 
-> 💡 **Core Principle**: AI assists; the teacher remains the final authority 🎓.
+> 💡 **Core Principle**: AI assists; the teacher remains the final authority.
 
 ---
 
@@ -65,18 +65,18 @@ It unifies daily teaching workflows, institutional data, AI copilot intelligence
 
 ### 🐍 Backend
 
-- 🚀 **Framework**: Python 3.11+ & FastAPI
-- 🗄️ **Database**: SQLite with `aiosqlite` and WAL Mode enabled
-- 🔐 **Security**: JWT Access/Refresh tokens + bcrypt password hashing
-- 🧠 **AI Core**: Groq API (Primary - Dual Keys 🔑) & Google Gemini (Fallback ⚡)
-- 📧 **Email**: Gmail SMTP Integration
+- **Framework**: Python 3.11+ & FastAPI
+- **Database**: SQLite with `aiosqlite` and WAL Mode enabled
+- **Security**: JWT Access/Refresh tokens + bcrypt password hashing
+- **AI Core**: Groq API (Primary - Dual Keys) & Google Gemini (Fallback)
+- **Email**: Gmail SMTP Integration
 
 ### ⚛️ Frontend
 
-- 💻 **Framework**: React 18 + Vite + TypeScript
-- 🎨 **Styling**: Tailwind CSS (Adamas University Brand Blue `#0060B5` & Green `#8CC63F`)
-- 🧩 **Icons**: Lucide React (accessible UI icons)
-- 📊 **Data Visualizations**: Recharts
+- **Framework**: React 18 + Vite + TypeScript
+- **Styling**: Tailwind CSS (Adamas University Brand Blue `#0060B5` & Green `#8CC63F`)
+- **Icons**: Lucide React (accessible UI icons)
+- **Data Visualizations**: Recharts
 
 ---
 

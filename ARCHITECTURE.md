@@ -17,7 +17,7 @@
 
 ---
 
-## 🚀 High-Level System Architecture 🏗️
+## 🚀 High-Level System Architecture
 
 ```mermaid
 flowchart LR
@@ -51,7 +51,7 @@ flowchart LR
 
 ---
 
-## 🏛️ Academic Hierarchy & Student Placement 👥
+## 👥 Academic Hierarchy & Student Placement
 
 ```mermaid
 flowchart TD
@@ -84,7 +84,7 @@ flowchart TD
 
 ---
 
-## 🔄 Teacher Daily Journey & Workflow ⏱️
+## ⏱️ Teacher Daily Journey & Workflow
 
 ```mermaid
 flowchart TD
