@@ -1,5 +1,9 @@
 # 🎓 EduPilot AI — System Architecture & Workflow Specifications
 
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:0060B5,100:8CC63F&height=180&section=header&text=System%20Architecture&fontSize=50&fontColor=ffffff&fontAlignY=40" width="100%" />
+</p>
+
 > AI Academic Operating System tailored for Adamas University
 
 ---
@@ -86,3 +90,7 @@ flowchart TD
     GENERATE --> STUDIO[Document Studio & PDF/PPTX Export]
     STUDIO --> COMM[Email / WhatsApp Distribution]
 ```
+
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:8CC63F,100:0060B5&height=100&section=footer" width="100%" />
+</p>
