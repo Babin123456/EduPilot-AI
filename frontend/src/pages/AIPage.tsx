@@ -1,40 +1,88 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../api/client';
-import { Bot, Send, Sparkles, User, UserCheck } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Bot, Send, Sparkles, Paperclip, FileText, Image as ImageIcon,
+  FileSpreadsheet, Presentation, File, X, Loader2, CheckCircle2, Cpu
+} from 'lucide-react';
+
+interface AttachedFile {
+  filename: string;
+  file_type: string;
+  extracted_text: string;
+  summary: string;
+}
 
 export const AIPage: React.FC = () => {
   const { activeClass } = useAuth();
   const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [attachedFile, setAttachedFile] = useState<AttachedFile | null>(null);
+
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await api.post('/ai/upload-file', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setAttachedFile(res.data);
+    } catch (err) {
+      console.error('File upload error:', err);
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   const handleSend = async (textToSend?: string) => {
     const query = textToSend || input;
-    if (!query.trim() || loading) return;
+    if ((!query.trim() && !attachedFile) || loading) return;
 
-    const userMsg = { role: 'user', content: query };
+    const userMsgContent = query.trim() + (attachedFile ? `\n\n📎 [Attached File: ${attachedFile.filename}]` : '');
+    const userMsg = { role: 'user', content: userMsgContent };
     setMessages((prev) => [...prev, userMsg]);
     if (!textToSend) setInput('');
     setLoading(true);
 
+    const fileContext = attachedFile ? attachedFile.extracted_text : null;
+    setAttachedFile(null); // Reset file attachment after sending
+
     try {
       const res = await api.post('/ai/chat', {
-        message: query,
+        message: query || `Please analyze the attached ${attachedFile?.file_type} file: ${attachedFile?.filename}`,
         conversation_id: conversationId,
         class_id: activeClass?.id,
+        file_context: fileContext,
       });
 
       setConversationId(res.data.conversation_id);
       setMessages((prev) => [
         ...prev,
-        { role: 'assistant', content: res.data.message.content },
+        {
+          role: 'assistant',
+          content: res.data.message.content,
+          model_used: res.data.message.model_used || 'Groq & Gemini Copilot',
+        },
       ]);
     } catch (err) {
       setMessages((prev) => [
         ...prev,
-        { role: 'assistant', content: 'Sorry, I encountered an issue processing your request.' },
+        {
+          role: 'assistant',
+          content: 'I encountered an issue connecting to the AI engine. Please verify backend services and try again.',
+        },
       ]);
     } finally {
       setLoading(false);
@@ -44,22 +92,35 @@ export const AIPage: React.FC = () => {
   const samplePrompts = [
     'Which students in my active class have attendance below 75%?',
     'What classes do I have scheduled for today?',
-    'Summarize my section analytics and risk status',
+    'Explain the TCP/IP protocol suite vs OSI model',
     'Generate a quiz topic outline for Operating Systems',
   ];
+
+  const getFileIcon = (type?: string) => {
+    if (type === 'pdf') return <FileText className="w-4 h-4 text-red-500" />;
+    if (type === 'spreadsheet') return <FileSpreadsheet className="w-4 h-4 text-emerald-500" />;
+    if (type === 'presentation') return <Presentation className="w-4 h-4 text-amber-500" />;
+    if (type === 'image') return <ImageIcon className="w-4 h-4 text-blue-500" />;
+    return <File className="w-4 h-4 text-slate-500" />;
+  };
 
   return (
     <div className="flex flex-col h-[calc(100vh-7rem)] bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
       {/* Header */}
       <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-adamas-green text-slate-950 flex items-center justify-center font-bold">
+          <div className="w-9 h-9 rounded-xl bg-adamas-green text-slate-950 flex items-center justify-center font-bold shadow-sm">
             <Bot className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="font-extrabold text-slate-900 dark:text-white text-base">EduPilot AI Assistant</h2>
+            <h2 className="font-extrabold text-slate-900 dark:text-white text-base flex items-center gap-2">
+              EduPilot AI Copilot
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-adamas-blue/10 text-adamas-blue dark:text-adamas-green border border-adamas-blue/20">
+                Groq & Gemini Engine
+              </span>
+            </h2>
             <p className="text-xs text-slate-500">
-              Context-Aware Copilot • Groq & Gemini Powered
+              Academic Operations • File Analysis (PDF, PPT, Excel, Images) • Subject Q&A
             </p>
           </div>
         </div>
@@ -68,20 +129,22 @@ export const AIPage: React.FC = () => {
       {/* Messages Window */}
       <div className="flex-1 p-6 overflow-y-auto space-y-4">
         {messages.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-center max-w-md mx-auto space-y-4">
-            <div className="w-12 h-12 rounded-2xl bg-adamas-blue/10 text-adamas-blue dark:text-adamas-green flex items-center justify-center">
-              <Sparkles className="w-6 h-6" />
+          <div className="h-full flex flex-col items-center justify-center text-center max-w-lg mx-auto space-y-4">
+            <div className="w-14 h-14 rounded-2xl bg-adamas-blue/10 text-adamas-blue dark:text-adamas-green flex items-center justify-center shadow-inner">
+              <Sparkles className="w-7 h-7" />
             </div>
-            <h3 className="font-bold text-slate-900 dark:text-white text-lg">How can I assist your teaching today?</h3>
-            <p className="text-xs text-slate-500">
-              Ask questions about attendance thresholds, timetable schedules, student analytics, or generate academic lesson plans.
-            </p>
+            <div>
+              <h3 className="font-extrabold text-slate-900 dark:text-white text-lg">How can EduPilot assist your teaching today?</h3>
+              <p className="text-xs text-slate-500 mt-1">
+                Ask about attendance metrics, timetable routines, student performance, or upload any PDF, PPT, Excel, or Image file for instant AI explanation!
+              </p>
+            </div>
             <div className="grid grid-cols-1 gap-2 w-full pt-2">
               {samplePrompts.map((prompt, i) => (
                 <button
                   key={i}
                   onClick={() => handleSend(prompt)}
-                  className="p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:border-adamas-blue hover:text-adamas-blue text-left transition-colors"
+                  className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:border-adamas-blue hover:bg-adamas-blue/5 text-left transition-all duration-200"
                 >
                   "{prompt}"
                 </button>
@@ -90,25 +153,36 @@ export const AIPage: React.FC = () => {
           </div>
         ) : (
           messages.map((msg, i) => (
-            <div
+            <motion.div
               key={i}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25 }}
               className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               {msg.role === 'assistant' && (
-                <div className="w-8 h-8 rounded-lg bg-adamas-green text-slate-950 flex items-center justify-center flex-shrink-0 text-xs font-bold">
+                <div className="w-8 h-8 rounded-lg bg-adamas-green text-slate-950 flex items-center justify-center flex-shrink-0 text-xs font-bold shadow-sm">
                   AI
                 </div>
               )}
-              <div
-                className={`max-w-xl p-4 rounded-2xl text-xs font-medium whitespace-pre-wrap leading-relaxed ${
-                  msg.role === 'user'
-                    ? 'bg-adamas-blue text-white rounded-tr-none'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-tl-none border border-slate-200 dark:border-slate-700'
-                }`}
-              >
-                {msg.content}
+              <div className="space-y-1 max-w-2xl">
+                <div
+                  className={`p-4 rounded-2xl text-xs font-medium whitespace-pre-wrap leading-relaxed shadow-sm ${
+                    msg.role === 'user'
+                      ? 'bg-adamas-blue text-white rounded-tr-none'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-tl-none border border-slate-200 dark:border-slate-700'
+                  }`}
+                >
+                  {msg.content}
+                </div>
+                {msg.model_used && (
+                  <div className="flex items-center gap-1 text-[10px] text-slate-400 px-1">
+                    <Cpu className="w-3 h-3 text-adamas-blue" />
+                    <span>Powered by {msg.model_used}</span>
+                  </div>
+                )}
               </div>
-            </div>
+            </motion.div>
           ))
         )}
         {loading && (
@@ -116,12 +190,36 @@ export const AIPage: React.FC = () => {
             <div className="w-8 h-8 rounded-lg bg-adamas-green/20 text-adamas-green flex items-center justify-center">
               AI
             </div>
-            EduPilot is thinking...
+            EduPilot AI is processing your query...
           </div>
         )}
       </div>
 
-      {/* Input */}
+      {/* Attached File Preview Bar */}
+      <AnimatePresence>
+        {attachedFile && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="px-6 py-2 bg-slate-100 dark:bg-slate-800/80 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between"
+          >
+            <div className="flex items-center gap-2 text-xs font-semibold text-slate-800 dark:text-slate-200">
+              {getFileIcon(attachedFile.file_type)}
+              <span>{attachedFile.filename}</span>
+              <span className="text-[10px] text-slate-400 uppercase">({attachedFile.file_type})</span>
+            </div>
+            <button
+              onClick={() => setAttachedFile(null)}
+              className="text-slate-400 hover:text-red-500 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Input Form */}
       <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
         <form
           onSubmit={(e) => {
@@ -130,16 +228,39 @@ export const AIPage: React.FC = () => {
           }}
           className="flex items-center gap-2"
         >
+          {/* File Upload Input Button */}
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileUpload}
+            accept=".pdf,.pptx,.ppt,.xlsx,.xls,.csv,.png,.jpg,.jpeg,.webp"
+            className="hidden"
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            title="Attach file (PDF, PPT, Excel, Image)"
+            className="p-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl transition-colors disabled:opacity-50"
+          >
+            {uploading ? (
+              <Loader2 className="w-4 h-4 animate-spin text-adamas-blue" />
+            ) : (
+              <Paperclip className="w-4 h-4" />
+            )}
+          </button>
+
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask about attendance, timetable, or student performance..."
+            placeholder="Ask about attendance, routine, or upload PDF/PPT/Excel/Image files for AI explanation..."
             className="flex-1 px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-adamas-blue"
           />
+
           <button
             type="submit"
-            disabled={!input.trim() || loading}
+            disabled={(!input.trim() && !attachedFile) || loading}
             className="p-3 bg-adamas-blue hover:bg-adamas-blue-dark text-white rounded-xl shadow disabled:opacity-50 transition-colors"
           >
             <Send className="w-4 h-4" />
