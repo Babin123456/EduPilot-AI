@@ -18,13 +18,12 @@ export const LoginPage: React.FC = () => {
       .catch(() => {});
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const doLogin = async (loginEmail: string, loginPass: string) => {
     setError('');
     setLoading(true);
 
     try {
-      const res = await api.post('/auth/login', { email, password });
+      const res = await api.post('/auth/login', { email: loginEmail, password: loginPass });
       login(res.data.access_token, res.data.teacher);
       navigate('/dashboard');
     } catch (err: any) {
@@ -34,9 +33,15 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  const handleDemoSelect = (demoEmail: string, demoPass: string) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    doLogin(email, password);
+  };
+
+  const handleOneClickDemoLogin = (demoEmail: string, demoPass: string) => {
     setEmail(demoEmail);
     setPassword(demoPass);
+    doLogin(demoEmail, demoPass);
   };
 
   return (
@@ -97,25 +102,29 @@ export const LoginPage: React.FC = () => {
             </button>
           </form>
 
-          {/* Demo Credentials Selector */}
+          {/* Instant 1-Click Demo Login Selector */}
           {demoAccounts.length > 0 && (
             <div className="mt-8 border-t border-slate-200 dark:border-slate-800 pt-6">
-              <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
-                Quick Demo Faculty Login
-              </p>
-              <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                  Instant 1-Click Demo Login
+                </p>
+                <span className="text-[10px] text-adamas-blue font-semibold">10 Demo Faculty</span>
+              </div>
+              <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
                 {demoAccounts.map((acc) => (
                   <button
                     key={acc.faculty_id}
-                    onClick={() => handleDemoSelect(acc.email, acc.password)}
-                    className="w-full text-left p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-adamas-blue dark:hover:border-adamas-green bg-slate-50/50 dark:bg-slate-800/50 transition-colors flex items-center justify-between"
+                    onClick={() => handleOneClickDemoLogin(acc.email, acc.password)}
+                    disabled={loading}
+                    className="w-full text-left p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-adamas-blue dark:hover:border-adamas-green bg-slate-50/50 dark:bg-slate-800/50 transition-colors flex items-center justify-between group"
                   >
                     <div>
-                      <p className="text-xs font-semibold text-slate-900 dark:text-white">{acc.name}</p>
+                      <p className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-adamas-blue dark:group-hover:text-adamas-green">{acc.name}</p>
                       <p className="text-[10px] text-slate-500">{acc.specialization}</p>
                     </div>
-                    <span className="text-[10px] font-mono bg-adamas-blue/10 text-adamas-blue dark:text-adamas-green px-2 py-0.5 rounded">
-                      Use Credentials
+                    <span className="text-[10px] font-bold bg-adamas-blue/10 text-adamas-blue dark:text-adamas-green px-2.5 py-1 rounded-md group-hover:bg-adamas-blue group-hover:text-white transition-colors">
+                      One-Click Login
                     </span>
                   </button>
                 ))}
