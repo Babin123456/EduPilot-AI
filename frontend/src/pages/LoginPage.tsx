@@ -40,7 +40,10 @@ export const LoginPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const res = await api.post('/auth/login', { email: loginEmail, password: loginPass });
+      const res = await api.post('/auth/login', {
+        email: loginEmail.trim().toLowerCase(),
+        password: loginPass.trim(),
+      });
       login(res.data.access_token, res.data.teacher);
       navigate('/dashboard');
     } catch (err: any) {
@@ -50,12 +53,20 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email.trim() || !password.trim()) {
+      setError('Please enter both email and password.');
+      return;
+    }
     doLogin(email, password);
   };
 
-  const handleOneClickDemoLogin = (demoEmail: string, demoPass: string) => {
+  const handleOneClickDemoLogin = (demoEmail: string, demoPass: string, e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setEmail(demoEmail);
     setPassword(demoPass);
     doLogin(demoEmail, demoPass);
@@ -119,7 +130,7 @@ export const LoginPage: React.FC = () => {
             </button>
           </form>
 
-          {/* Instant 1-Click Demo Login Selector */}
+          {/* Instant 1-Click Demo Login Selector (Explicit type="button") */}
           <div className="mt-8 border-t border-slate-200 dark:border-slate-800 pt-6">
             <div className="flex items-center justify-between mb-3">
               <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
@@ -130,8 +141,9 @@ export const LoginPage: React.FC = () => {
             <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
               {demoAccounts.map((acc) => (
                 <button
+                  type="button"
                   key={acc.faculty_id}
-                  onClick={() => handleOneClickDemoLogin(acc.email, acc.password)}
+                  onClick={(e) => handleOneClickDemoLogin(acc.email, acc.password, e)}
                   disabled={loading}
                   className="w-full text-left p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-adamas-blue dark:hover:border-adamas-green bg-slate-50/50 dark:bg-slate-800/50 transition-colors flex items-center justify-between group"
                 >
