@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { api } from '../api/client';
 import { motion } from 'framer-motion';
 import {
@@ -20,6 +21,7 @@ interface DocCard {
 
 export const DocumentStudioPage: React.FC = () => {
   const { activeClass, user } = useAuth();
+  const toast = useToast();
   const [documents, setDocuments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState<string | null>(null);
@@ -35,7 +37,6 @@ export const DocumentStudioPage: React.FC = () => {
     if (!activeClass) return;
     setGenerating('quiz');
     try {
-      // Fetch assessments for the class to generate a sample quiz PDF
       const res = await api.get(`/assessments?class_id=${activeClass.id}`);
       const assessments = res.data || [];
       const assessment = assessments[0];
@@ -59,6 +60,9 @@ export const DocumentStudioPage: React.FC = () => {
           marks: Math.ceil((assessment?.total_marks || 25) / 10),
         })),
       });
+      toast.success('Generated & Downloaded Quiz Paper PDF', `File saved for ${activeClass.course_code} ${activeClass.year_label}.`);
+    } catch (err) {
+      toast.error('Failed to generate Quiz PDF');
     } finally {
       setGenerating(null);
     }
@@ -87,6 +91,9 @@ export const DocumentStudioPage: React.FC = () => {
           riskLevel: s.risk_level,
         })),
       });
+      toast.success('Generated & Downloaded Class Report PDF', `Included ${students.length} student records with attendance and CGPA.`);
+    } catch (err) {
+      toast.error('Failed to generate Class Report PDF');
     } finally {
       setGenerating(null);
     }
@@ -115,9 +122,12 @@ export const DocumentStudioPage: React.FC = () => {
           summary: note.summary || '',
           practiceQuestions: note.practice_questions || [],
         });
+        toast.success('Downloaded Daily Notes PDF', `Saved "${note.topic}.pdf" with Adamas University branding.`);
       } else {
-        alert('No daily notes found. Generate notes from the Daily Notes page first.');
+        toast.info('No daily notes found', 'Generate lecture notes in the Daily Notes module first.');
       }
+    } catch (err) {
+      toast.error('Failed to generate Discussion Notes PDF');
     } finally {
       setGenerating(null);
     }

@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { ToastProvider } from './context/ToastContext';
 import { MainLayout } from './components/MainLayout';
 import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
@@ -26,27 +27,29 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 export const App: React.FC = () => {
   return (
     <ThemeProvider>
-      <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
+      <ToastProvider>
+        <AuthProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
 
-            <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-            <Route path="/attendance" element={<ProtectedRoute><AttendancePage /></ProtectedRoute>} />
-            <Route path="/ai" element={<ProtectedRoute><AIPage /></ProtectedRoute>} />
-            <Route path="/students" element={<ProtectedRoute><StudentsPage /></ProtectedRoute>} />
-            <Route path="/timetable" element={<ProtectedRoute><TimetablePage /></ProtectedRoute>} />
-            <Route path="/analytics" element={<ProtectedRoute><AnalyticsPage /></ProtectedRoute>} />
-            <Route path="/assignments" element={<ProtectedRoute><AssignmentsPage /></ProtectedRoute>} />
-            <Route path="/assessments" element={<ProtectedRoute><AssessmentsPage /></ProtectedRoute>} />
-            <Route path="/daily-notes" element={<ProtectedRoute><DailyNotesPage /></ProtectedRoute>} />
-            <Route path="/documents" element={<ProtectedRoute><DocumentStudioPage /></ProtectedRoute>} />
-            <Route path="/communications" element={<ProtectedRoute><CommunicationsPage /></ProtectedRoute>} />
+              <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+              <Route path="/attendance" element={<ProtectedRoute><AttendancePage /></ProtectedRoute>} />
+              <Route path="/ai" element={<ProtectedRoute><AIPage /></ProtectedRoute>} />
+              <Route path="/students" element={<ProtectedRoute><StudentsPage /></ProtectedRoute>} />
+              <Route path="/timetable" element={<ProtectedRoute><TimetablePage /></ProtectedRoute>} />
+              <Route path="/analytics" element={<ProtectedRoute><AnalyticsPage /></ProtectedRoute>} />
+              <Route path="/assignments" element={<ProtectedRoute><AssignmentsPage /></ProtectedRoute>} />
+              <Route path="/assessments" element={<ProtectedRoute><AssessmentsPage /></ProtectedRoute>} />
+              <Route path="/daily-notes" element={<ProtectedRoute><DailyNotesPage /></ProtectedRoute>} />
+              <Route path="/documents" element={<ProtectedRoute><DocumentStudioPage /></ProtectedRoute>} />
+              <Route path="/communications" element={<ProtectedRoute><CommunicationsPage /></ProtectedRoute>} />
 
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
+      </ToastProvider>
     </ThemeProvider>
   );
 };
