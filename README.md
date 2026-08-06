@@ -30,6 +30,45 @@ This project was crafted for **VibeForge 1.0 Hackathon** by **Team Triangle** fr
 
 ---
 
+## ⚡ Quick Start — Running in Browser Locally
+
+Follow these quick commands to launch EduPilot AI locally in your browser:
+
+### Step 1: Start Backend API (Terminal 1)
+```bash
+cd backend
+python -m venv .venv
+
+# Activate Virtual Environment
+# On Windows:
+.venv\Scripts\activate
+# On Linux/macOS:
+source .venv/bin/activate
+
+pip install -e .
+uvicorn app.main:app --reload --port 8000
+```
+> 🌐 **Backend API**: `http://localhost:8000` (OpenAPI Swagger Docs: `http://localhost:8000/api/docs`)
+
+---
+
+### Step 2: Start Frontend Web Portal (Terminal 2)
+```bash
+cd frontend
+npm install
+npm run dev
+```
+> 💻 **Web Application Portal**: Open **`http://localhost:5173`** (or `http://localhost:5174`) in your browser.
+
+---
+
+### 🔑 Step 3: Log In with Quick Demo Faculty Credentials
+On the login screen, click any of the **Quick Demo Faculty Cards** to pre-fill credentials instantly, then click **Sign In to Portal**:
+- 👨‍🏫 **Prof. Rajesh Banerjee**: `rajesh.banerjee@adamasuniversity.ac.in` / Password: `demo@1234`
+- 👩‍🏫 **Prof. Priya Nair**: `priya.nair@adamasuniversity.ac.in` / Password: `demo@1234`
+
+---
+
 ## 🔗 Documentation & Quick Links
 
 - 📐 **[Architecture Specifications](ARCHITECTURE.md)** — Complete Mermaid Diagrams & System Design
