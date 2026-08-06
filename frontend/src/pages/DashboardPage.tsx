@@ -69,20 +69,27 @@ export const DashboardPage: React.FC = () => {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="bg-gradient-to-r from-adamas-blue to-adamas-blue-dark rounded-2xl p-6 lg:p-8 text-white shadow-lg relative overflow-hidden"
+        className="bg-gradient-to-r from-adamas-blue via-adamas-blue-dark to-slate-900 rounded-2xl p-6 lg:p-8 text-white shadow-lg relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6"
       >
-        <div className="relative z-10">
+        <div className="relative z-10 max-w-xl">
           <span className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-semibold tracking-wide uppercase">
             Teacher Command Center
           </span>
           <h1 className="text-2xl lg:text-3xl font-extrabold mt-3">
             Welcome back, {user?.full_name}
           </h1>
-          <p className="text-adamas-blue-light text-sm mt-1 max-w-2xl">
+          <p className="text-adamas-blue-light text-sm mt-1">
             {activeClass
               ? `Currently managing ${activeClass.course_name} (${activeClass.course_code}) for ${activeClass.year_label} Section ${activeClass.section_name}.`
               : 'Select a class to view targeted insights and manage attendance.'}
           </p>
+        </div>
+        <div className="relative z-10 w-full md:w-64 h-32 md:h-40 rounded-xl overflow-hidden shadow-lg border border-white/20 flex-shrink-0 bg-white/10 backdrop-blur-sm">
+          <img
+            src="/images/computer_science_hero.png"
+            alt="Computer Science Academic Operations"
+            className="w-full h-full object-cover"
+          />
         </div>
         <div className="absolute -right-8 -bottom-8 w-40 h-40 rounded-full bg-white/5" />
         <div className="absolute -right-2 -top-10 w-28 h-28 rounded-full bg-white/5" />

@@ -102,29 +102,31 @@ export const DailyNotesPage: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-adamas-blue/10 text-adamas-blue dark:text-adamas-green flex items-center justify-center font-bold">
-            <Notebook className="w-5 h-5" />
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 w-full">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-2xl overflow-hidden shadow border border-slate-200 dark:border-slate-700 flex-shrink-0">
+              <img src="/images/daily_notes_banner.png" alt="Daily Notes Banner" className="w-full h-full object-cover" />
+            </div>
+            <div>
+              <h1 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                Daily Topic Discussion Notes
+                <span className="text-xs font-semibold px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500">
+                  {activeClass ? `${activeClass.year_label} • Sec ${activeClass.section_name}` : ''}
+                </span>
+              </h1>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Generate AI notes for today's lecture and share via email to all section students in 1-click
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-              Daily Topic Discussion Notes
-              <span className="text-xs font-semibold px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500">
-                {activeClass ? `${activeClass.year_label} • Sec ${activeClass.section_name}` : ''}
-              </span>
-            </h1>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Generate AI notes for today's lecture and share via email to all section students in 1-click
-            </p>
-          </div>
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="px-4 py-2.5 bg-adamas-blue hover:bg-adamas-blue-dark text-white text-xs font-bold rounded-xl shadow transition-all flex items-center gap-2"
+          >
+            <Sparkles className="w-4 h-4" />
+            {showForm ? 'Cancel Form' : 'Generate Today\'s Notes'}
+          </button>
         </div>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="px-4 py-2.5 bg-adamas-blue hover:bg-adamas-blue-dark text-white text-xs font-bold rounded-xl shadow transition-all flex items-center gap-2"
-        >
-          <Sparkles className="w-4 h-4" />
-          {showForm ? 'Cancel Form' : 'Generate Today\'s Notes'}
-        </button>
       </div>
 
       {/* Generate Form */}
