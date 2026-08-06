@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter
 
-from app.api.v1.routes import auth, teachers, classes, timetable, students, attendance, assignments, assessments, analytics, dashboard, ai, documents, communications, notifications
+from app.api.v1.routes import auth, teachers, classes, timetable, students, attendance, assignments, assessments, analytics, dashboard, ai, documents, communications, notifications, daily_notes
 
 api_router = APIRouter()
 
@@ -20,3 +20,4 @@ api_router.include_router(ai.router, prefix="/ai", tags=["AI"])
 api_router.include_router(documents.router, prefix="/documents", tags=["Documents"])
 api_router.include_router(communications.router, prefix="/communications", tags=["Communications"])
 api_router.include_router(notifications.router, prefix="/notifications", tags=["Notifications"])
+api_router.include_router(daily_notes.router, prefix="/daily-notes", tags=["Daily Notes"])

@@ -95,12 +95,15 @@ It unifies daily teaching workflows, institutional data, AI copilot intelligence
 
 ## 🔥 Key System Capabilities
 
-- 📊 **Teacher Command Center**: Instant visibility into daily routine, pending attendance, grading tasks, and at-risk students.
-- 🎯 **Global Academic Context**: Switching active class dynamically updates every context-sensitive module (attendance, analytics, student directory, AI context).
+- 📊 **Teacher Command Center**: Instant visibility into daily routine, pending attendance, grading tasks, and at-risk students with skeleton loaders and staggered animations.
+- 🎯 **Smooth Class/Year Switching**: Changing year and class context updates all pages simultaneously with smooth framer-motion transitions, grouped-by-year dropdown, and animated content re-rendering.
 - 📝 **Interactive Attendance Module**: One-click attendance taking with real-time risk alerts for attendance below 75%.
 - 🤖 **Context-Aware EduPilot AI**: Dual Groq primary LLM execution with automatic Gemini fallback for student queries, lesson planning, and quiz generation.
-- 📈 **Class Analytics**: Real-time grade distributions and attendance trends rendered via accessible charts.
-- 👥 **720 Unique Student Dataset**: Full B.Tech CSE dataset across 4 academic years and 3 sections per year with complete unique identities.
+- 📈 **Class Analytics**: Real-time grade distributions and attendance trends rendered via accessible charts with loading skeletons.
+- 📄 **Professional PDF Downloads (jsPDF)**: Generate and download professionally branded Adamas University PDFs for quizzes, assessment reports, class reports, and daily notes — all from the Document Studio.
+- 📓 **Daily Topic Discussion Notes**: Teachers generate structured notes for topics discussed in class, then share to all students via email in one click.
+- 📧 **Student University Mail System**: Teacher-side communications hub with student email directory, template-based email composer, bulk send to all/selected students, and sent history.
+- 👥 **720 Unique Student Dataset**: Full B.Tech CSE dataset across 4 academic years and 3 sections per year with complete unique identities and `@student.adamasuniversity.ac.in` demo emails.
 
 ---
 
@@ -119,6 +122,8 @@ It unifies daily teaching workflows, institutional data, AI copilot intelligence
 - **Framework**: React 18 + Vite 5 + TypeScript 5
 - **Styling**: Tailwind CSS (Adamas University Brand Blue `#0060B5` & Green `#8CC63F`)
 - **UI Components**: Accessible Lucide React icons & Recharts visualizations
+- **Animations**: Framer Motion for page transitions, staggered card animations, and smooth class switching
+- **PDF Generation**: jsPDF + jspdf-autotable for client-side professional PDF creation with university branding
 - **State & Data**: React Context API & Axios HTTP Client
 
 ---

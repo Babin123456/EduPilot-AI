@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { api } from '../api/client';
 
 export interface ClassItem {
@@ -19,14 +19,14 @@ export interface ClassItem {
 export interface UserProfile {
   id: string;
   faculty_id: string;
-  first_name: str;
-  last_name: str;
-  full_name: str;
-  email: str;
+  first_name: string;
+  last_name: string;
+  full_name: string;
+  email: string;
   phone: string | null;
-  designation: str;
+  designation: string;
   specialization: string | null;
-  department: str;
+  department: string;
   is_demo: boolean;
   avatar_url: string | null;
   classes: ClassItem[];
@@ -36,10 +36,12 @@ interface AuthContextType {
   user: UserProfile | null;
   token: string | null;
   activeClass: ClassItem | null;
+  classChangeKey: number;
   setActiveClass: (cls: ClassItem) => void;
   login: (token: string, user: any) => void;
   logout: () => void;
   isLoading: boolean;
+  classesByYear: Record<string, ClassItem[]>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -49,6 +51,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<UserProfile | null>(null);
   const [activeClass, setActiveClassState] = useState<ClassItem | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [classChangeKey, setClassChangeKey] = useState(0);
 
   useEffect(() => {
     if (token) {
@@ -70,10 +73,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [token]);
 
-  const setActiveClass = (cls: ClassItem) => {
+  const setActiveClass = useCallback((cls: ClassItem) => {
     setActiveClassState(cls);
+    setClassChangeKey((prev) => prev + 1);
     localStorage.setItem('active_class_id', cls.id);
-  };
+  }, []);
 
   const login = (newToken: string, userData: any) => {
     localStorage.setItem('access_token', newToken);
@@ -89,8 +93,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setActiveClassState(null);
   };
 
+  // Group classes by year for dropdown
+  const classesByYear = React.useMemo(() => {
+    if (!user?.classes) return {};
+    const grouped: Record<string, ClassItem[]> = {};
+    for (const cls of user.classes) {
+      const key = cls.year_label || `Year ${cls.year_number}`;
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(cls);
+    }
+    return grouped;
+  }, [user?.classes]);
+
   return (
-    <AuthContext.Provider value={{ user, token, activeClass, setActiveClass, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, token, activeClass, classChangeKey, setActiveClass, login, logout, isLoading, classesByYear }}>
       {children}
     </AuthContext.Provider>
   );

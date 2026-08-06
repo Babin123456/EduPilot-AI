@@ -60,6 +60,7 @@
 - `models/attendance.py`: Daily attendance sessions and per-student attendance status records.
 - `models/assignment.py`: Course assignments, rubrics, and student submission tracking.
 - `models/assessment.py`: Quizzes/exams, question items, and student grade results.
+- `models/daily_note.py`: Daily topic discussion notes model.
 - `models/ai_models.py`: Persistent AI conversation logs and message histories.
 - `models/knowledge.py`: RAG Knowledge base documents and text chunks.
 - `models/notification.py`: Teacher in-app alert notifications.
@@ -74,6 +75,8 @@
 - `api/v1/routes/attendance.py`: Interactive attendance session recording API.
 - `api/v1/routes/analytics.py`: Class grade distribution and attendance analytics API.
 - `api/v1/routes/ai.py`: Groq & Gemini powered context-aware AI chat API endpoint.
+- `api/v1/routes/daily_notes.py`: Daily topic discussion notes generation, listing, and bulk sharing API.
+- `api/v1/routes/communications.py`: Teacher email composer, student email lookup, and communication history API.
 
 ### ⚛️ Frontend Files (`frontend/src/`)
 
@@ -81,16 +84,21 @@
 - `App.tsx`: Top-level router routing authenticated routes through `MainLayout`.
 - `index.css`: Tailwind CSS directives and custom UI scrollbars.
 - `api/client.ts`: Axios client instance equipped with automatic Bearer token injection and 401 redirect handling.
+- `utils/pdfGenerator.ts`: Client-side jsPDF utility for professional Adamas-branded PDF exports (quizzes, reports, notes).
 - `context/AuthContext.tsx`: React Context managing token storage, current teacher profile, and active class selection.
 - `context/ThemeContext.tsx`: React Context managing dark/light theme toggling and localStorage persistence.
-- `components/MainLayout.tsx`: Responsive application shell with sidebar navigation, header class context switcher, and theme toggle.
+- `components/MainLayout.tsx`: Responsive application shell with year-grouped dropdown, framer-motion page transitions, and theme toggle.
 - `pages/LoginPage.tsx`: Adamas-branded sign-in page with prefillable demo faculty cards.
-- `pages/DashboardPage.tsx`: Teacher Command Center dashboard showing statistics, routine, and quick actions.
+- `pages/DashboardPage.tsx`: Teacher Command Center dashboard showing statistics, routine, and quick actions with skeleton loaders.
 - `pages/AttendancePage.tsx`: Attendance-taking interface supporting bulk selection and status updates.
 - `pages/AIPage.tsx`: EduPilot AI Assistant conversational interface.
-- `pages/StudentsPage.tsx`: 720-student directory with risk indicators and search filters.
+- `pages/StudentsPage.tsx`: 720-student directory with university emails, risk indicators, search filters, and PDF report download.
 - `pages/TimetablePage.tsx`: Weekly teaching schedule routine grid.
 - `pages/AnalyticsPage.tsx`: Interactive Recharts data charts for grade and attendance analytics.
+- `pages/AssessmentsPage.tsx`: Assessment and quiz studio with expandable student results and jsPDF downloads.
+- `pages/DailyNotesPage.tsx`: Daily lecture topic notes generator with one-click email distribution and PDF export.
+- `pages/DocumentStudioPage.tsx`: Document Studio for on-demand branded PDF generation and download.
+- `pages/CommunicationsPage.tsx`: Teacher email communications hub with student email directory, template composer, and history.
 
 ---
 

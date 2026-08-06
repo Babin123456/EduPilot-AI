@@ -21,6 +21,7 @@ from app.models.communication import Communication
 from app.models.ai_models import AIConversation, AIMessage
 from app.models.knowledge import KnowledgeDocument, KnowledgeChunk
 from app.models.notification import Notification
+from app.models.daily_note import DailyNote
 
 __all__ = [
     "Base",
@@ -39,4 +40,5 @@ __all__ = [
     "AIConversation", "AIMessage",
     "KnowledgeDocument", "KnowledgeChunk",
     "Notification",
+    "DailyNote",
 ]

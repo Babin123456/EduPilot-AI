@@ -11,7 +11,10 @@ import { StudentsPage } from './pages/StudentsPage';
 import { TimetablePage } from './pages/TimetablePage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 import { AssignmentsPage } from './pages/AssignmentsPage';
-import { PlaceholderPage } from './pages/PlaceholderPage';
+import { AssessmentsPage } from './pages/AssessmentsPage';
+import { DailyNotesPage } from './pages/DailyNotesPage';
+import { DocumentStudioPage } from './pages/DocumentStudioPage';
+import { CommunicationsPage } from './pages/CommunicationsPage';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { token, isLoading } = useAuth();
@@ -35,9 +38,10 @@ export const App: React.FC = () => {
             <Route path="/timetable" element={<ProtectedRoute><TimetablePage /></ProtectedRoute>} />
             <Route path="/analytics" element={<ProtectedRoute><AnalyticsPage /></ProtectedRoute>} />
             <Route path="/assignments" element={<ProtectedRoute><AssignmentsPage /></ProtectedRoute>} />
-            <Route path="/assessments" element={<ProtectedRoute><PlaceholderPage title="Assessments & Quizzes" subtitle="AI Quiz Generation & Student Evaluation Studio" /></ProtectedRoute>} />
-            <Route path="/documents" element={<ProtectedRoute><PlaceholderPage title="Document Studio" subtitle="Generate PDF, PPTX, DOCX & XLSX Reports" /></ProtectedRoute>} />
-            <Route path="/communications" element={<ProtectedRoute><PlaceholderPage title="Academic Communications" subtitle="Gmail SMTP & WhatsApp Distribution Workflows" /></ProtectedRoute>} />
+            <Route path="/assessments" element={<ProtectedRoute><AssessmentsPage /></ProtectedRoute>} />
+            <Route path="/daily-notes" element={<ProtectedRoute><DailyNotesPage /></ProtectedRoute>} />
+            <Route path="/documents" element={<ProtectedRoute><DocumentStudioPage /></ProtectedRoute>} />
+            <Route path="/communications" element={<ProtectedRoute><CommunicationsPage /></ProtectedRoute>} />
 
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>

@@ -1,12 +1,12 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "edupilot-backend"
 version = "1.0.0"
 description = "EduPilot AI — Backend API for AI Academic Operating System"
 requires-python = ">=3.11"
-
-[tool.setuptools.packages.find]
-include = ["app*"]
-
 dependencies = [
     # ---- Web Framework ----
     "fastapi>=0.115.0",
@@ -51,6 +51,10 @@ dependencies = [
     # ---- Logging ----
     "structlog>=24.2.0",
 ]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]
 
 [project.optional-dependencies]
 dev = [
