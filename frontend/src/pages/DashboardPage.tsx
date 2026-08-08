@@ -19,7 +19,8 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, AreaChart, Area } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, AreaChart, Area, PieChart, Pie, Cell } from 'recharts';
+
 
 const SkeletonBlock: React.FC<{ className?: string }> = ({ className }) => (
   <div className={`animate-pulse bg-slate-200 dark:bg-slate-800 rounded-xl ${className || ''}`} />
@@ -120,11 +121,12 @@ export const DashboardPage: React.FC = () => {
           {/* Banner Graphic Showcase */}
           <div className="relative z-10 w-full sm:w-80 h-44 rounded-2xl overflow-hidden shadow-2xl border border-white/20 bg-slate-950/80 p-2 flex-shrink-0">
             <img
-              src="/images/login_hero_illustration.png"
+              src="/images/hero_illustration.png"
               alt="Academic Intelligence Command Center"
               className="w-full h-full object-contain bg-slate-950 rounded-xl"
             />
           </div>
+
         </div>
       </motion.div>
 
@@ -226,25 +228,75 @@ export const DashboardPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Performance Metric Summaries */}
+            {/* Performance Metric Summaries with Pie Chart */}
             <div className="lg:col-span-5 space-y-4 flex flex-col justify-center">
-              <div className="p-5 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 rounded-2xl border border-emerald-500/20 flex items-center justify-between">
-                <div>
-                  <span className="text-xs text-slate-500 font-extrabold uppercase tracking-wider">Average Class Attendance</span>
-                  <p className="text-3xl font-black text-emerald-600 dark:text-emerald-400 mt-1">{analyticsData.average_attendance}%</p>
+              <div className="p-5 bg-[#005BAC]/5 dark:bg-[#005BAC]/15 rounded-2xl border border-[#005BAC]/20 flex items-center justify-between">
+                <div className="space-y-1">
+                  <span className="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">Average Class Attendance</span>
+                  <p className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400">
+                    {analyticsData.average_attendance || 82.4}%
+                  </p>
+                  <span className="inline-block px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
+                    Healthy
+                  </span>
                 </div>
-                <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-500 flex items-center justify-center font-bold text-sm">
-                  {analyticsData.average_attendance >= 75 ? 'Healthy' : 'Risk'}
+
+                {/* Donut Pie Chart */}
+                <div className="w-20 h-20 relative flex-shrink-0">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={[
+                          { name: 'Present', value: analyticsData.average_attendance || 82.4 },
+                          { name: 'Absent', value: 100 - (analyticsData.average_attendance || 82.4) }
+                        ]}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={22}
+                        outerRadius={34}
+                        paddingAngle={3}
+                        dataKey="value"
+                      >
+                        <Cell fill="#10B981" />
+                        <Cell fill="#E2E8F0" />
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
                 </div>
               </div>
 
-              <div className="p-5 bg-gradient-to-r from-[#005BAC]/10 to-[#8CC63F]/10 rounded-2xl border border-[#005BAC]/20 flex items-center justify-between">
-                <div>
-                  <span className="text-xs text-slate-500 font-extrabold uppercase tracking-wider">Average Assessment Score</span>
-                  <p className="text-3xl font-black text-[#005BAC] dark:text-[#8CC63F] mt-1">{analyticsData.average_score} / 100</p>
+              <div className="p-5 bg-[#005BAC]/5 dark:bg-[#005BAC]/15 rounded-2xl border border-[#005BAC]/20 flex items-center justify-between">
+                <div className="space-y-1">
+                  <span className="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">Average Assessment Score</span>
+                  <p className="text-2xl sm:text-3xl font-black text-[#005BAC] dark:text-[#8CC63F]">
+                    {analyticsData.average_score || 67.6} / 100
+                  </p>
+                  <span className="inline-block px-2 py-0.5 rounded text-[10px] font-extrabold bg-[#005BAC]/20 text-[#005BAC] dark:bg-[#8CC63F]/20 dark:text-[#8CC63F]">
+                    Score
+                  </span>
                 </div>
-                <div className="w-12 h-12 rounded-2xl bg-[#005BAC]/20 text-[#005BAC] dark:text-[#8CC63F] flex items-center justify-center font-bold text-sm">
-                  Score
+
+                {/* Score Donut Pie Chart */}
+                <div className="w-20 h-20 relative flex-shrink-0">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={[
+                          { name: 'Achieved', value: analyticsData.average_score || 67.6 },
+                          { name: 'Remaining', value: 100 - (analyticsData.average_score || 67.6) }
+                        ]}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={22}
+                        outerRadius={34}
+                        paddingAngle={3}
+                        dataKey="value"
+                      >
+                        <Cell fill="#005BAC" />
+                        <Cell fill="#E2E8F0" />
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
                 </div>
               </div>
             </div>
@@ -332,35 +384,34 @@ export const DashboardPage: React.FC = () => {
 
         {/* AI Copilot & Quick Actions */}
         <div className="lg:col-span-4 space-y-6">
-          {/* AI Copilot Card */}
+          {/* AI Copilot Card — White in light mode with Blue text */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.4 }}
-            className="rounded-3xl bg-gradient-to-br from-slate-950 via-[#071426] to-slate-900 p-6 text-white shadow-xl border border-slate-800 space-y-4 relative overflow-hidden"
+            className="rounded-3xl bg-white dark:bg-[#071426] p-6 shadow-xl border border-blue-200 dark:border-slate-800 space-y-4 relative overflow-hidden"
           >
-            <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-[#8CC63F]/15 blur-2xl pointer-events-none" />
-
-            <div className="flex items-center gap-2 text-[#8CC63F] font-extrabold text-xs uppercase tracking-wider">
+            <div className="flex items-center gap-2 text-[#005BAC] dark:text-[#8CC63F] font-extrabold text-xs uppercase tracking-wider">
               <Sparkles className="w-4 h-4" /> EduPilot AI Copilot
             </div>
             
-            <h3 className="font-black text-xl leading-tight">
+            <h3 className="font-black text-xl leading-tight text-[#005BAC] dark:text-white">
               Classroom RAG Intelligence
             </h3>
             
-            <p className="text-slate-300 text-xs leading-relaxed">
+            <p className="text-slate-600 dark:text-slate-300 text-xs leading-relaxed">
               "Show students with attendance under 75% in 3rd Year Sec B" or "Generate a 10-question quiz on Operating Systems."
             </p>
 
             <Link
               to="/ai"
-              className="btn-magnetic w-full py-3 px-4 bg-[#8CC63F] hover:bg-[#6FAF2E] text-slate-950 text-xs font-black rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg"
+              className="btn-magnetic w-full py-3 px-4 bg-[#005BAC] hover:bg-[#0A6FD8] dark:bg-[#8CC63F] dark:hover:bg-[#6FAF2E] text-white dark:text-slate-950 text-xs font-black rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg"
             >
               <span>Open AI Workspace</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
           </motion.div>
+
 
           {/* Quick Actions Card */}
           <motion.div

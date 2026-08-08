@@ -85,17 +85,19 @@ export const AssessmentsPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/50 text-purple-500 flex items-center justify-center">
-            <HelpCircle className="w-5 h-5" />
+      <div className="bg-gradient-to-r from-[#005BAC] via-[#0A6FD8] to-slate-900 p-6 sm:p-8 rounded-3xl text-white shadow-xl flex items-center justify-between gap-6 relative overflow-hidden">
+        <div className="space-y-2 relative z-10">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-xs font-extrabold text-[#8CC63F]">
+            <HelpCircle className="w-3.5 h-3.5" /> Quiz & Exam Studio
           </div>
-          <div>
-            <h1 className="text-xl font-extrabold text-slate-900 dark:text-white">Assessments & Quizzes</h1>
-            <p className="text-xs text-slate-500 mt-0.5">AI Quiz Generation & Student Evaluation Studio</p>
-          </div>
+          <h1 className="text-2xl font-black">Assessments & Quizzes Studio</h1>
+          <p className="text-xs text-slate-200">Generate AI question papers, evaluation rubrics, and automated score distribution reports.</p>
+        </div>
+        <div className="w-32 h-20 rounded-xl overflow-hidden border border-white/20 bg-slate-950/80 p-1 hidden sm:block flex-shrink-0">
+          <img src="/images/features_ai_planning.png" alt="Assessments Banner" className="w-full h-full object-contain bg-slate-950 rounded-lg" />
         </div>
       </div>
+
 
       {loading ? (
         <div className="grid grid-cols-1 gap-4">

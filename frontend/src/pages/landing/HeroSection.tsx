@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ArrowRight, Sparkles, CheckCircle2, ChevronDown, GraduationCap, BookOpen, BarChart3 } from 'lucide-react';
+import { ArrowRight, Sparkles, CheckCircle2, ChevronDown } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -36,9 +36,17 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
         y: 30, opacity: 0, duration: 0.8,
         stagger: 0.12, ease: 'power3.out', delay: 1.2,
       });
-      // Parallax on the hero image card
-      gsap.to('.hero-image-card', {
-        y: -80,
+      // Floating animation for the isolated zero-gravity login_hero_illustration graphic
+      gsap.to('.floating-hero-asset', {
+        y: -25,
+        duration: 3,
+        repeat: -1,
+        yoyo: true,
+        ease: 'power1.inOut',
+      });
+      // Parallax scroll on the hero graphic
+      gsap.to('.floating-hero-asset', {
+        y: -60,
         ease: 'none',
         scrollTrigger: {
           trigger: heroRef.current,
@@ -47,19 +55,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
           scrub: 1.5,
         },
       });
-      // Parallax on background orbs
-      gsap.to('.hero-orb-1', {
-        y: -120, ease: 'none',
-        scrollTrigger: { trigger: heroRef.current, start: 'top top', end: 'bottom top', scrub: 2 },
-      });
-      gsap.to('.hero-orb-2', {
-        y: -60, x: 30, ease: 'none',
-        scrollTrigger: { trigger: heroRef.current, start: 'top top', end: 'bottom top', scrub: 3 },
-      });
-      gsap.to('.hero-orb-3', {
-        y: -90, x: -20, ease: 'none',
-        scrollTrigger: { trigger: heroRef.current, start: 'top top', end: 'bottom top', scrub: 2.5 },
-      });
     }, heroRef);
     return () => ctx.revert();
   }, []);
@@ -67,25 +62,21 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
   return (
     <section
       ref={heroRef}
-      className="relative min-h-screen pt-28 pb-20 flex flex-col justify-between overflow-hidden bg-slate-50 dark:bg-[#0F172A] transition-colors duration-200"
+      className="relative min-h-screen pt-28 pb-20 flex flex-col justify-between overflow-hidden bg-slate-50 dark:bg-[#071426] transition-colors duration-200"
     >
-      {/* ─── Animated Background Layers ─── */}
+      {/* ─── Clean Ambient Background Glows ─── */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* Grid pattern */}
+        {/* Subtle grid pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:48px_48px]" />
 
-        {/* Glowing orbs with parallax */}
-        <div className="hero-orb-1 absolute -top-32 -right-32 w-[550px] h-[550px] rounded-full bg-gradient-to-br from-[#005BAC]/25 to-[#0A6FD8]/15 blur-3xl animate-glow" />
-        <div className="hero-orb-2 absolute top-[55%] -left-40 w-[480px] h-[480px] rounded-full bg-gradient-to-tr from-[#8CC63F]/20 to-purple-500/10 blur-3xl opacity-70" />
-        <div className="hero-orb-3 absolute bottom-20 right-20 w-[350px] h-[350px] rounded-full bg-[#8CC63F]/15 blur-2xl opacity-60 animate-glow" />
-
-        {/* Decorative spinning ring */}
-        <div className="absolute top-1/4 right-1/4 w-[200px] h-[200px] border border-[#005BAC]/10 dark:border-[#8CC63F]/10 rounded-full animate-spin-slow" />
-        <div className="absolute bottom-1/3 left-1/3 w-[120px] h-[120px] border border-dashed border-[#8CC63F]/10 rounded-full animate-spin-slow" style={{ animationDirection: 'reverse', animationDuration: '45s' }} />
+        {/* Ambient glow orbs */}
+        <div className="absolute -top-32 -right-32 w-[550px] h-[550px] rounded-full bg-gradient-to-br from-[#005BAC]/20 to-[#0A6FD8]/15 blur-3xl" />
+        <div className="absolute top-[55%] -left-40 w-[480px] h-[480px] rounded-full bg-gradient-to-tr from-[#8CC63F]/15 to-blue-500/10 blur-3xl opacity-70" />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 my-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+          
           {/* ─── Left Column ─── */}
           <div className="lg:col-span-7 space-y-7 text-center lg:text-left">
             {/* Pill Badge */}
@@ -148,29 +139,25 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
             </div>
           </div>
 
-          {/* ─── Right Column Graphic ─── */}
-          <div className="lg:col-span-5 relative">
-            <div className="hero-image-card relative mx-auto max-w-md lg:max-w-none">
-              {/* Glow ring behind card */}
-              <div className="absolute -inset-3 rounded-3xl bg-gradient-to-r from-[#005BAC] to-[#8CC63F] opacity-25 blur-2xl animate-glow" />
-
-              <div className="relative rounded-3xl glass-card p-3 overflow-hidden bg-white dark:bg-[#1E293B]">
-                <img
-                  src="/images/hero_illustration.png"
-                  alt="EduPilot AI Classroom Operations Platform"
-                  className="w-full h-auto rounded-2xl object-contain bg-white dark:bg-[#1E293B]"
-                  loading="eager"
-                />
-              </div>
+          {/* ─── Right Column Floating Image (No Background Box) ─── */}
+          <div className="lg:col-span-5 relative flex items-center justify-center">
+            <div className="floating-hero-asset relative w-full max-w-lg">
+              {/* Isolated transparent floating image without any container box */}
+              <img
+                src="/images/login_hero_illustration.png"
+                alt="EduPilot AI Zero-Gravity Academic Operating System Graphic"
+                className="w-full h-auto object-contain drop-shadow-[0_20px_50px_rgba(0,91,172,0.35)]"
+                loading="eager"
+              />
 
               {/* Floating stat badge — bottom-left */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 1.4, duration: 0.6 }}
-                className="absolute -bottom-6 -left-6 glass-card p-4 rounded-2xl flex items-center gap-3"
+                className="absolute -bottom-4 -left-4 glass-card p-3.5 rounded-2xl flex items-center gap-3 shadow-2xl border border-slate-200 dark:border-slate-800"
               >
-                <div className="w-11 h-11 rounded-xl bg-[#8CC63F]/20 text-[#8CC63F] flex items-center justify-center font-extrabold text-sm">
+                <div className="w-10 h-10 rounded-xl bg-[#8CC63F]/20 text-[#8CC63F] flex items-center justify-center font-extrabold text-sm">
                   98%
                 </div>
                 <div>
@@ -184,15 +171,16 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 1.6, duration: 0.6 }}
-                className="absolute -top-5 -right-5 glass-card p-3 rounded-xl flex items-center gap-2"
+                className="absolute -top-4 -right-4 glass-card p-3 rounded-xl flex items-center gap-2 shadow-xl border border-slate-200 dark:border-slate-800"
               >
-                <div className="w-8 h-8 rounded-lg bg-[#005BAC]/15 text-[#005BAC] dark:text-[#8CC63F] flex items-center justify-center">
-                  <Sparkles className="w-4 h-4" />
+                <div className="w-7 h-7 rounded-lg bg-[#005BAC]/15 text-[#005BAC] dark:text-[#8CC63F] flex items-center justify-center">
+                  <Sparkles className="w-3.5 h-3.5" />
                 </div>
-                <span className="text-[10px] font-bold text-slate-800 dark:text-slate-200">AI-Powered</span>
+                <span className="text-[10px] font-bold text-slate-800 dark:text-slate-200">AI-Powered OS</span>
               </motion.div>
             </div>
           </div>
+
         </div>
       </div>
 
@@ -210,4 +198,3 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
     </section>
   );
 };
-

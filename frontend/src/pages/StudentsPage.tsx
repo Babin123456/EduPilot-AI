@@ -59,17 +59,21 @@ export const StudentsPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-        <div>
-          <h1 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-            <Users className="w-6 h-6 text-adamas-blue" />
-            Student Directory
-          </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            360-Degree Academic Roster & Performance Track
-            {!loading && <span className="ml-2 px-2 py-0.5 bg-adamas-blue/10 text-adamas-blue rounded-full font-bold">{total} students</span>}
+      <div className="bg-gradient-to-r from-[#005BAC] via-[#0A6FD8] to-slate-900 p-6 sm:p-8 rounded-3xl text-white shadow-xl flex items-center justify-between gap-6 relative overflow-hidden">
+        <div className="space-y-2 relative z-10">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-xs font-extrabold text-[#8CC63F]">
+            <Users className="w-3.5 h-3.5" /> Institutional Roster
+          </div>
+          <h1 className="text-2xl font-black">Student Directory & Performance Roster</h1>
+          <p className="text-xs text-slate-200">
+            360-Degree Academic Track {!loading && `(${total} Active Students)`}
           </p>
         </div>
+        <div className="w-32 h-20 rounded-xl overflow-hidden border border-white/20 bg-slate-950/80 p-1 hidden sm:block flex-shrink-0">
+          <img src="/images/analytics_dashboard.png" alt="Students Banner" className="w-full h-full object-contain bg-slate-950 rounded-lg" />
+        </div>
+      </div>
+
         <div className="flex items-center gap-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
