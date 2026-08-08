@@ -170,19 +170,21 @@ export const DocumentStudioPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl overflow-hidden shadow border border-slate-200 dark:border-slate-700 flex-shrink-0">
-            <img src="/images/document_studio_banner.png" alt="Document Studio Banner" className="w-full h-full object-cover" />
+      <div className="bg-gradient-to-r from-[#005BAC] via-[#0A6FD8] to-slate-900 p-6 sm:p-8 rounded-3xl text-white shadow-xl flex items-center justify-between gap-6 relative overflow-hidden">
+        <div className="space-y-2 relative z-10">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-xs font-extrabold text-[#8CC63F]">
+            <FileText className="w-3.5 h-3.5" /> PDF Export & Publishing Engine
           </div>
-          <div>
-            <h1 className="text-xl font-extrabold text-slate-900 dark:text-white">Document Studio & PDF Generator</h1>
-            <p className="text-xs text-slate-500 mt-0.5">Generate & Download Professional Adamas University PDF Documents</p>
-          </div>
+          <h1 className="text-2xl font-black">Document Studio & Publishing Engine</h1>
+          <p className="text-xs text-slate-200">
+            Generate, customize, and export institutional PDF question papers, class rosters, and daily lecture notes.
+          </p>
+        </div>
+        <div className="w-32 h-20 rounded-xl overflow-hidden border border-white/20 bg-slate-950/80 p-1 hidden sm:block flex-shrink-0 relative z-10">
+          <img src="/images/document_studio.png" alt="Document Studio Banner" className="w-full h-full object-contain bg-slate-950 rounded-lg" />
         </div>
       </div>
+
 
       {/* Generate Cards */}
       <div>

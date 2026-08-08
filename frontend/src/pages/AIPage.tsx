@@ -108,25 +108,22 @@ export const AIPage: React.FC = () => {
 
   return (
     <div className="flex flex-col h-[calc(100vh-7rem)] bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-      {/* Header */}
-      <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-adamas-green text-slate-950 flex items-center justify-center font-bold shadow-sm">
-            <Bot className="w-5 h-5" />
+      {/* Header Banner */}
+      <div className="bg-gradient-to-r from-[#005BAC] via-[#0A6FD8] to-slate-900 p-5 sm:p-6 rounded-t-2xl text-white shadow-md flex items-center justify-between gap-6 relative overflow-hidden flex-shrink-0">
+        <div className="space-y-1 relative z-10">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-xs font-extrabold text-[#8CC63F]">
+            <Bot className="w-3.5 h-3.5" /> Classroom RAG Intelligence Engine
           </div>
-          <div>
-            <h2 className="font-extrabold text-slate-900 dark:text-white text-base flex items-center gap-2">
-              EduPilot AI Copilot
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-adamas-blue/10 text-adamas-blue dark:text-adamas-green border border-adamas-blue/20">
-                Groq & Gemini Engine
-              </span>
-            </h2>
-            <p className="text-xs text-slate-500">
-              Academic Operations • File Analysis (PDF, PPT, Excel, Images) • Subject Q&A
-            </p>
-          </div>
+          <h1 className="text-xl sm:text-2xl font-black">EduPilot AI Copilot Workspace</h1>
+          <p className="text-xs text-slate-200">
+            Academic Operations • Multi-file Analysis (PDF, PPT, Excel, Images) • RAG Context Query
+          </p>
+        </div>
+        <div className="w-28 h-16 rounded-xl overflow-hidden border border-white/20 bg-slate-950/80 p-1 hidden sm:block flex-shrink-0 relative z-10">
+          <img src="/images/login_hero_illustration.png" alt="EduPilot AI Copilot Banner" className="w-full h-full object-contain bg-slate-950 rounded-lg" />
         </div>
       </div>
+
 
       {/* Messages Window */}
       <div className="flex-1 p-6 overflow-y-auto space-y-4">

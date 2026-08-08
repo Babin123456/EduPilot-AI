@@ -122,25 +122,21 @@ export const CommunicationsPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-adamas-blue/10 text-adamas-blue dark:text-adamas-green flex items-center justify-center font-bold">
-            <Mail className="w-5 h-5" />
+      <div className="bg-gradient-to-r from-[#005BAC] via-[#0A6FD8] to-slate-900 p-6 sm:p-8 rounded-3xl text-white shadow-xl flex items-center justify-between gap-6 relative overflow-hidden">
+        <div className="space-y-2 relative z-10">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-xs font-extrabold text-[#8CC63F]">
+            <Mail className="w-3.5 h-3.5" /> Institutional Email Dispatcher
           </div>
-          <div>
-            <h1 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-              Student University Mail & Communications
-              <span className="text-xs font-semibold px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500">
-                {activeClass ? `${activeClass.year_label} • Sec ${activeClass.section_name}` : ''}
-              </span>
-            </h1>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Send announcements, warning emails, or document links to individual students or the entire class section
-            </p>
-          </div>
+          <h1 className="text-2xl font-black">Student Mail & Communications Hub</h1>
+          <p className="text-xs text-slate-200">
+            {activeClass ? `${activeClass.course_name} (${activeClass.course_code}) • ${activeClass.year_label} Sec ${activeClass.section_name}` : 'Send official announcements, warning alerts, and course materials.'}
+          </p>
+        </div>
+        <div className="w-32 h-20 rounded-xl overflow-hidden border border-white/20 bg-slate-950/80 p-1 hidden sm:block flex-shrink-0 relative z-10">
+          <img src="/images/cta_background.png" alt="Communications Banner" className="w-full h-full object-contain bg-slate-950 rounded-lg" />
         </div>
       </div>
+
 
       {/* Main 2-Column Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
