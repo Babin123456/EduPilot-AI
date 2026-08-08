@@ -447,15 +447,10 @@ export const DashboardPage: React.FC = () => {
             >
               <span>Open AI Workspace</span>
               <ArrowRight className="w-4 h-4" />
-            </Link>
-          </motion.div>
-
-
           </motion.div>
         </div>
-
-
       </div>
+
 
     </div>
   );
