@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../api/client';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -173,7 +175,38 @@ export const AIPage: React.FC = () => {
                       : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-tl-none border border-slate-200 dark:border-slate-700'
                   }`}
                 >
-                  {msg.content}
+                  {msg.role === 'user' ? (
+                    msg.content
+                  ) : (
+                    <ReactMarkdown 
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        p: ({node, ...props}) => <p className="mb-2 last:mb-0" {...props} />,
+                        ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-2 space-y-1" {...props} />,
+                        ol: ({node, ...props}) => <ol className="list-decimal pl-4 mb-2 space-y-1" {...props} />,
+                        li: ({node, ...props}) => <li className="" {...props} />,
+                        h1: ({node, ...props}) => <h1 className="text-lg font-extrabold mb-2 mt-4 first:mt-0" {...props} />,
+                        h2: ({node, ...props}) => <h2 className="text-base font-extrabold mb-2 mt-4 first:mt-0" {...props} />,
+                        h3: ({node, ...props}) => <h3 className="text-sm font-bold mb-2 mt-3 first:mt-0" {...props} />,
+                        a: ({node, ...props}) => <a className="text-adamas-blue dark:text-adamas-green hover:underline" target="_blank" rel="noopener noreferrer" {...props} />,
+                        strong: ({node, ...props}) => <strong className="font-bold text-slate-900 dark:text-white" {...props} />,
+                        table: ({node, ...props}) => <div className="overflow-x-auto mb-2"><table className="min-w-full divide-y divide-slate-300 dark:divide-slate-700" {...props} /></div>,
+                        thead: ({node, ...props}) => <thead className="bg-slate-200 dark:bg-slate-800" {...props} />,
+                        tbody: ({node, ...props}) => <tbody className="divide-y divide-slate-200 dark:divide-slate-800" {...props} />,
+                        tr: ({node, ...props}) => <tr {...props} />,
+                        th: ({node, ...props}) => <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider" {...props} />,
+                        td: ({node, ...props}) => <td className="px-3 py-2 text-xs border-t border-slate-200 dark:border-slate-800" {...props} />,
+                        code: ({node, inline, className, children, ...props}: any) => 
+                          inline ? (
+                            <code className="bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 rounded text-[11px] font-mono text-slate-800 dark:text-slate-200" {...props}>{children}</code>
+                          ) : (
+                            <pre className="bg-slate-800 dark:bg-slate-950 text-slate-100 p-3 rounded-xl overflow-x-auto text-[11px] font-mono my-2 shadow-inner"><code {...props}>{children}</code></pre>
+                          )
+                      }}
+                    >
+                      {msg.content}
+                    </ReactMarkdown>
+                  )}
                 </div>
                 {msg.model_used && (
                   <div className="flex items-center gap-1 text-[10px] text-slate-400 px-1">
