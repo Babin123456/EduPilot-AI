@@ -1,15 +1,11 @@
 <!-- markdownlint-disable -->
 <div align="center">
 
-<p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:0060B5,100:8CC63F&height=200&section=header&text=Pending%20Tasks%20%26%20Roadmap&fontSize=48&fontColor=ffffff&fontAlign=50&fontAlignY=38" alt="Header Banner" width="100%" />
-</p>
+# 📌 EduPilot AI — Pending Tasks & Roadmap
 
 <p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=20&duration=3000&pause=1000&color=8CC63F&center=true&vCenter=true&width=650&lines=EduPilot+AI+Pending+Backend+Jobs;Unimplemented+Endpoints+%26+Route+Gaps;Test+Suite+%26+DevOps+Infrastructure" alt="Typing SVG" />
+  <strong>Intelligent Academic Operating System for Adamas University</strong>
 </p>
-
----
 
 <p align="center">
   <img src="https://img.shields.io/badge/Status-In%20Progress-F59E0B?style=for-the-badge&logo=githubactions&logoColor=white" alt="Status Badge" />
@@ -49,11 +45,11 @@ This document outlines the **unimplemented routes, missing background infrastruc
 ## 1. 📝 Lesson Plans API Routes
 
 ### 📋 Overview
-The database model `LessonPlan` exists at [`backend/app/models/lesson.py`](file:///Users/subhajyotihalder/Desktop/Vibe_Forge2k26/EduPilot-AI/backend/app/models/lesson.py), but there is **no route file or router registration** in `backend/app/api/v1/router.py`.
+The database model `LessonPlan` exists at [`backend/app/models/lesson.py`](file:///d:/Projects/EduPilot-AI/backend/app/models/lesson.py), but there is **no route file or router registration** in `backend/app/api/v1/router.py`.
 
 ### 🎯 Pending Tasks
 - [ ] Create `backend/app/api/v1/routes/lesson_plans.py`
-- [ ] Register `lesson_plans.router` with prefix `/lesson-plans` inside [`backend/app/api/v1/router.py`](file:///Users/subhajyotihalder/Desktop/Vibe_Forge2k26/EduPilot-AI/backend/app/api/v1/router.py)
+- [ ] Register `lesson_plans.router` with prefix `/lesson-plans` inside [`backend/app/api/v1/router.py`](file:///d:/Projects/EduPilot-AI/backend/app/api/v1/router.py)
 - [ ] Implement Endpoints:
   - `GET /api/v1/lesson-plans?class_id={id}` — List all lesson plans for assigned course
   - `POST /api/v1/lesson-plans` — Create new lesson plan (draft or published)
@@ -67,7 +63,7 @@ The database model `LessonPlan` exists at [`backend/app/models/lesson.py`](file:
 ## 2. 📄 Document Studio & Export Engine
 
 ### 📋 Overview
-[`backend/app/api/v1/routes/documents.py`](file:///Users/subhajyotihalder/Desktop/Vibe_Forge2k26/EduPilot-AI/backend/app/api/v1/routes/documents.py) currently only lists documents. The backend dependencies `reportlab`, `python-docx`, `python-pptx`, and `openpyxl` are installed, but there are no generation/export endpoints.
+[`backend/app/api/v1/routes/documents.py`](file:///d:/Projects/EduPilot-AI/backend/app/api/v1/routes/documents.py) currently only lists documents. The backend dependencies `reportlab`, `python-docx`, `python-pptx`, and `openpyxl` are installed, but there are no generation/export endpoints.
 
 ### 🎯 Pending Tasks
 - [ ] Implement server-side document generators in a new service `backend/app/services/document_builder.py`:
@@ -86,10 +82,10 @@ The database model `LessonPlan` exists at [`backend/app/models/lesson.py`](file:
 ## 3. 📥 Assignment Submissions & AI Grading
 
 ### 📋 Overview
-[`backend/app/models/assignment.py`](file:///Users/subhajyotihalder/Desktop/Vibe_Forge2k26/EduPilot-AI/backend/app/models/assignment.py) defines `AssignmentSubmission`, but routes only list and create assignments.
+[`backend/app/models/assignment.py`](file:///d:/Projects/EduPilot-AI/backend/app/models/assignment.py) defines `AssignmentSubmission`, but routes only list and create assignments.
 
 ### 🎯 Pending Tasks
-- [ ] Implement Submission & Evaluation Routes in [`backend/app/api/v1/routes/assignments.py`](file:///Users/subhajyotihalder/Desktop/Vibe_Forge2k26/EduPilot-AI/backend/app/api/v1/routes/assignments.py):
+- [ ] Implement Submission & Evaluation Routes in [`backend/app/api/v1/routes/assignments.py`](file:///d:/Projects/EduPilot-AI/backend/app/api/v1/routes/assignments.py):
   - `GET /api/v1/assignments/{id}/submissions` — List student submissions with grading status
   - `POST /api/v1/assignments/{id}/submit` — Ingest student submission text / document
   - `POST /api/v1/assignments/{id}/evaluate-ai` — LLM evaluation against assignment rubric & model answers
@@ -101,10 +97,10 @@ The database model `LessonPlan` exists at [`backend/app/models/lesson.py`](file:
 ## 4. 🧪 Assessment & Question Bank Management
 
 ### 📋 Overview
-`Question` and `AssessmentResult` models exist in [`backend/app/models/assessment.py`](file:///Users/subhajyotihalder/Desktop/Vibe_Forge2k26/EduPilot-AI/backend/app/models/assessment.py), but question-level editing and auto-quiz generation are missing.
+`Question` and `AssessmentResult` models exist in [`backend/app/models/assessment.py`](file:///d:/Projects/EduPilot-AI/backend/app/models/assessment.py), but question-level editing and auto-quiz generation are missing.
 
 ### 🎯 Pending Tasks
-- [ ] Implement Endpoints in [`backend/app/api/v1/routes/assessments.py`](file:///Users/subhajyotihalder/Desktop/Vibe_Forge2k26/EduPilot-AI/backend/app/api/v1/routes/assessments.py):
+- [ ] Implement Endpoints in [`backend/app/api/v1/routes/assessments.py`](file:///d:/Projects/EduPilot-AI/backend/app/api/v1/routes/assessments.py):
   - `POST /api/v1/assessments/generate` — Auto-generate MCQs, short answer, and coding questions from topic
   - `GET /api/v1/assessments/{id}/questions` — Retrieve individual question items with Bloom's taxonomy tags
   - `POST /api/v1/assessments/{id}/questions` — Add manual questions to quiz
@@ -178,12 +174,12 @@ Bulk operations (emailing 60–720 students, PDF rendering, background analytics
 ## 9. 🧠 Vector Store & Semantic RAG Layer
 
 ### 📋 Overview
-[`backend/app/models/knowledge.py`](file:///Users/subhajyotihalder/Desktop/Vibe_Forge2k26/EduPilot-AI/backend/app/models/knowledge.py) stores document chunks, but lacks an active vector embedding index for semantic search.
+[`backend/app/models/knowledge.py`](file:///d:/Projects/EduPilot-AI/backend/app/models/knowledge.py) stores document chunks, but lacks an active vector embedding index for semantic search.
 
 ### 🎯 Pending Tasks
 - [ ] Implement text chunker and vector embedding generator (using `langchain` / `google-genai` / `sentence-transformers`)
 - [ ] Implement local Vector Store (e.g. `sqlite-vss`, `ChromaDB`, or `FAISS`)
-- [ ] Wire semantic context retriever into [`backend/app/api/v1/routes/ai.py`](file:///Users/subhajyotihalder/Desktop/Vibe_Forge2k26/EduPilot-AI/backend/app/api/v1/routes/ai.py) to ground AI responses with syllabus documents
+- [ ] Wire semantic context retriever into [`backend/app/api/v1/routes/ai.py`](file:///d:/Projects/EduPilot-AI/backend/app/api/v1/routes/ai.py) to ground AI responses with syllabus documents
 
 ---
 

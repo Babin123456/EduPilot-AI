@@ -4,6 +4,11 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { ToastProvider } from './context/ToastContext';
 import { MainLayout } from './components/MainLayout';
+import { LandingPage } from './pages/landing/LandingPage';
+import { FAQPage } from './pages/landing/FAQPage';
+import { TermsPage } from './pages/landing/TermsPage';
+import { PrivacyPage } from './pages/landing/PrivacyPage';
+import { DocumentationPage } from './pages/landing/DocumentationPage';
 import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { AttendancePage } from './pages/AttendancePage';
@@ -31,7 +36,12 @@ export const App: React.FC = () => {
         <AuthProvider>
           <BrowserRouter>
             <Routes>
+              <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/faq" element={<FAQPage />} />
+              <Route path="/terms" element={<TermsPage />} />
+              <Route path="/privacy" element={<PrivacyPage />} />
+              <Route path="/docs" element={<DocumentationPage />} />
 
               <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
               <Route path="/attendance" element={<ProtectedRoute><AttendancePage /></ProtectedRoute>} />
@@ -45,7 +55,7 @@ export const App: React.FC = () => {
               <Route path="/documents" element={<ProtectedRoute><DocumentStudioPage /></ProtectedRoute>} />
               <Route path="/communications" element={<ProtectedRoute><CommunicationsPage /></ProtectedRoute>} />
 
-              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </BrowserRouter>
         </AuthProvider>
@@ -55,3 +65,4 @@ export const App: React.FC = () => {
 };
 
 export default App;
+

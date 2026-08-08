@@ -10,7 +10,6 @@ import {
   CheckSquare,
   FileText,
   HelpCircle,
-  BarChart3,
   Bot,
   Folder,
   Mail,
@@ -21,8 +20,9 @@ import {
   Menu,
   X,
   Bell,
-  BookOpen,
   Notebook,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from 'lucide-react';
 
 export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -31,6 +31,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [classDropdownOpen, setClassDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -52,7 +53,6 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
     { label: 'Students', path: '/students', icon: Users },
     { label: 'Assignments', path: '/assignments', icon: FileText },
     { label: 'Assessments', path: '/assessments', icon: HelpCircle },
-    { label: 'Analytics', path: '/analytics', icon: BarChart3 },
     { label: 'EduPilot AI', path: '/ai', icon: Bot },
     { label: 'Daily Notes', path: '/daily-notes', icon: Notebook },
     { label: 'Document Studio', path: '/documents', icon: Folder },
@@ -64,18 +64,24 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
   return (
     <div className="flex h-screen bg-slate-50 dark:bg-slate-950 overflow-hidden">
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-transform duration-200 lg:static lg:translate-x-0 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-all duration-300 lg:static ${
+          mobileOpen ? 'translate-x-0 w-64' : '-translate-x-full lg:translate-x-0'
+        } ${sidebarCollapsed ? 'lg:w-20' : 'lg:w-64'}`}
+      >
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-adamas-blue text-white flex items-center justify-center font-bold text-lg shadow-sm">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800">
+            <div className="flex items-center gap-3 overflow-hidden">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#005BAC] to-[#8CC63F] text-white flex items-center justify-center font-bold text-lg shadow-sm flex-shrink-0">
                 EP
               </div>
-              <div>
-                <h1 className="font-bold text-slate-900 dark:text-white leading-none">EduPilot AI</h1>
-                <p className="text-xs text-adamas-blue dark:text-adamas-green font-medium">Adamas University</p>
-              </div>
+              {!sidebarCollapsed && (
+                <div className="truncate">
+                  <h1 className="font-extrabold text-slate-900 dark:text-white leading-none text-base">EduPilot AI</h1>
+                  <p className="text-[10px] text-[#005BAC] dark:text-[#8CC63F] font-bold">Adamas University</p>
+                </div>
+              )}
             </div>
             <button className="lg:hidden text-slate-500" onClick={() => setMobileOpen(false)}>
               <X className="w-5 h-5" />
@@ -92,14 +98,15 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
                   key={item.path}
                   to={item.path}
                   onClick={() => setMobileOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  title={sidebarCollapsed ? item.label : undefined}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                     isActive
-                      ? 'bg-adamas-blue/10 dark:bg-adamas-blue/20 text-adamas-blue dark:text-white font-semibold shadow-sm'
+                      ? 'bg-[#005BAC]/10 dark:bg-[#8CC63F]/20 text-[#005BAC] dark:text-[#8CC63F] font-bold shadow-sm'
                       : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
-                  }`}
+                  } ${sidebarCollapsed ? 'justify-center px-0' : ''}`}
                 >
-                  <Icon className={`w-5 h-5 ${isActive ? 'text-adamas-blue dark:text-adamas-green' : ''}`} />
-                  {item.label}
+                  <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-[#005BAC] dark:text-[#8CC63F]' : ''}`} />
+                  {!sidebarCollapsed && <span className="truncate">{item.label}</span>}
                 </Link>
               );
             })}
@@ -112,18 +119,22 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
                 <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center font-bold text-slate-700 dark:text-slate-200 text-xs flex-shrink-0">
                   {user?.first_name?.[0]}{user?.last_name?.[0]}
                 </div>
-                <div className="truncate">
-                  <p className="text-xs font-semibold text-slate-900 dark:text-white truncate">{user?.full_name}</p>
-                  <p className="text-[10px] text-slate-500 truncate">{user?.designation}</p>
-                </div>
+                {!sidebarCollapsed && (
+                  <div className="truncate">
+                    <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{user?.full_name}</p>
+                    <p className="text-[10px] text-slate-500 truncate">{user?.designation}</p>
+                  </div>
+                )}
               </div>
-              <button
-                onClick={logout}
-                title="Logout"
-                className="p-1.5 text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
+              {!sidebarCollapsed && (
+                <button
+                  onClick={logout}
+                  title="Logout"
+                  className="p-1.5 text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -133,9 +144,20 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Top Navbar */}
         <header className="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 lg:px-8">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            {/* Mobile menu trigger */}
             <button className="lg:hidden text-slate-500" onClick={() => setMobileOpen(true)}>
               <Menu className="w-6 h-6" />
+            </button>
+
+            {/* Desktop Sidebar Toggle Button */}
+            <button
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              className="hidden lg:flex p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              title={sidebarCollapsed ? 'Open Sidebar' : 'Hide Sidebar'}
+              aria-label={sidebarCollapsed ? 'Open Sidebar' : 'Hide Sidebar'}
+            >
+              {sidebarCollapsed ? <PanelLeftOpen className="w-5 h-5" /> : <PanelLeftClose className="w-5 h-5" />}
             </button>
 
             {/* Global Academic Context Selector — Grouped by Year */}
@@ -143,9 +165,9 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setClassDropdownOpen(!classDropdownOpen)}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg text-xs font-semibold text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:border-adamas-blue transition-all duration-200"
+                  className="flex items-center gap-2 px-3.5 py-2 bg-slate-100 dark:bg-slate-800 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:border-[#005BAC] transition-all duration-200"
                 >
-                  <span className="w-2 h-2 rounded-full bg-adamas-green animate-pulse"></span>
+                  <span className="w-2 h-2 rounded-full bg-[#8CC63F] animate-pulse"></span>
                   <span>{activeClass ? `${activeClass.year_label} - Sec ${activeClass.section_name} (${activeClass.course_code})` : 'Select Class'}</span>
                   <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${classDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
@@ -165,7 +187,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
                         if (!classes || classes.length === 0) return null;
                         return (
                           <div key={yearLabel}>
-                            <p className="px-4 py-1.5 text-[10px] font-extrabold tracking-wider text-adamas-blue dark:text-adamas-green uppercase mt-1 border-t border-slate-100 dark:border-slate-800">
+                            <p className="px-4 py-1.5 text-[10px] font-extrabold tracking-wider text-[#005BAC] dark:text-[#8CC63F] uppercase mt-1 border-t border-slate-100 dark:border-slate-800">
                               {yearLabel}
                             </p>
                             {classes.map((cls) => (
@@ -177,7 +199,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
                                 }}
                                 className={`w-full text-left px-4 py-2.5 text-xs flex flex-col transition-all duration-150 hover:bg-slate-50 dark:hover:bg-slate-800 ${
                                   activeClass?.id === cls.id 
-                                    ? 'bg-adamas-blue/5 dark:bg-adamas-blue/10 text-adamas-blue font-bold border-l-2 border-adamas-blue' 
+                                    ? 'bg-[#005BAC]/10 dark:bg-[#8CC63F]/20 text-[#005BAC] dark:text-[#8CC63F] font-bold border-l-2 border-[#005BAC] dark:border-[#8CC63F]' 
                                     : 'text-slate-700 dark:text-slate-300 border-l-2 border-transparent'
                                 }`}
                               >
@@ -198,12 +220,12 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
           <div className="flex items-center gap-3">
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               title="Toggle theme"
             >
               {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5 text-amber-400" />}
             </button>
-            <button className="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors relative">
+            <button className="p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors relative">
               <Bell className="w-5 h-5" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>

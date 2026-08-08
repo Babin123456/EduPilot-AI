@@ -91,6 +91,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setToken(null);
     setUser(null);
     setActiveClassState(null);
+    window.location.href = '/';
   };
 
   // Group classes by year for dropdown
