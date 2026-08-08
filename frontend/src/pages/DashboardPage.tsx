@@ -116,18 +116,56 @@ export const DashboardPage: React.FC = () => {
                 ? `Active Context: ${activeClass.course_name} (${activeClass.course_code}) • ${activeClass.year_label} Section ${activeClass.section_name}.`
                 : 'Select an active class context from the top navigation to view real-time student insights.'}
             </p>
+
+            {/* Quick Action Shortcuts inside Welcome Back Banner */}
+            <div className="pt-2">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-200 block mb-2">
+                Quick Action Shortcuts
+              </span>
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2.5">
+                <Link
+                  to="/attendance"
+                  className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-xs font-bold text-white flex items-center gap-1.5 transition-all shadow-sm"
+                >
+                  <CheckSquare className="w-4 h-4 text-[#8CC63F]" />
+                  <span>Take Attendance</span>
+                </Link>
+                <Link
+                  to="/assignments"
+                  className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-xs font-bold text-white flex items-center gap-1.5 transition-all shadow-sm"
+                >
+                  <FileText className="w-4 h-4 text-purple-300" />
+                  <span>Assignments</span>
+                </Link>
+                <Link
+                  to="/daily-notes"
+                  className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-xs font-bold text-white flex items-center gap-1.5 transition-all shadow-sm"
+                >
+                  <BookOpen className="w-4 h-4 text-emerald-300" />
+                  <span>Daily Notes</span>
+                </Link>
+                <Link
+                  to="/documents"
+                  className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-xs font-bold text-white flex items-center gap-1.5 transition-all shadow-sm"
+                >
+                  <Users className="w-4 h-4 text-amber-300" />
+                  <span>Doc Studio</span>
+                </Link>
+              </div>
+            </div>
           </div>
 
-          {/* Banner Graphic Showcase */}
-          <div className="relative z-10 w-full sm:w-80 h-44 rounded-2xl overflow-hidden shadow-2xl border border-white/20 bg-slate-950/80 p-2 flex-shrink-0">
+          {/* Banner Graphic Showcase (Backgroundless Floating Image) */}
+          <div className="relative z-10 w-full sm:w-80 h-48 flex items-center justify-center flex-shrink-0">
             <img
               src="/images/hero_illustration.png"
               alt="Academic Intelligence Command Center"
-              className="w-full h-full object-contain bg-slate-950 rounded-xl"
+              className="w-full h-auto max-h-48 object-contain drop-shadow-[0_15px_35px_rgba(0,0,0,0.5)]"
             />
           </div>
 
         </div>
+
       </motion.div>
 
       {/* ─── Metric Cards Grid ─── */}
