@@ -204,7 +204,8 @@ export const DocumentationPage: React.FC = () => {
                           initial={{ opacity: 0, y: 15 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.4, delay: idx * 0.06 }}
-                          className="glass-card rounded-2xl p-6 space-y-3 hover:shadow-2xl transition-shadow duration-300"
+                          className="glass-card rounded-2xl p-6 space-y-3 border border-slate-200 dark:border-slate-800 hover:border-[#005BAC] dark:hover:border-[#8CC63F] hover:-translate-y-1.5 hover:shadow-2xl dark:hover:shadow-[0_10px_30px_rgba(140,198,63,0.15)] transition-all duration-300 group cursor-default"
+
                         >
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-xl bg-[#005BAC]/10 text-[#005BAC] dark:bg-[#8CC63F]/15 dark:text-[#8CC63F] flex items-center justify-center flex-shrink-0">

@@ -98,7 +98,8 @@ const AccordionItem: React.FC<{ question: string; answer: string; isOpen: boolea
   }, [isOpen]);
 
   return (
-    <div className={`group border border-slate-200 dark:border-slate-800 rounded-2xl transition-all duration-300 ${isOpen ? 'bg-white dark:bg-[#1E293B] shadow-lg border-[#005BAC]/30 dark:border-[#8CC63F]/30' : 'bg-slate-50/50 dark:bg-slate-900/50 hover:bg-white dark:hover:bg-slate-900'}`}>
+    <div className={`group border rounded-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${isOpen ? 'bg-white dark:bg-[#1E293B] shadow-lg border-[#005BAC] dark:border-[#8CC63F]' : 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 hover:bg-white dark:hover:bg-slate-900 hover:border-[#005BAC]/60 dark:hover:border-[#8CC63F]/60'}`}>
+
       <button
         onClick={onToggle}
         className="w-full flex items-center justify-between gap-4 p-5 text-left"

@@ -87,8 +87,9 @@ export const TermsPage: React.FC = () => {
             const Icon = section.icon;
             return (
               <motion.div key={idx} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: idx * 0.05 }}
-                className="glass-card rounded-2xl p-6 sm:p-8 space-y-4"
+                className="glass-card rounded-2xl p-6 sm:p-8 space-y-4 border border-slate-200 dark:border-slate-800 hover:border-[#005BAC] dark:hover:border-[#8CC63F] hover:-translate-y-1.5 hover:shadow-xl dark:hover:shadow-[0_10px_30px_rgba(140,198,63,0.15)] transition-all duration-300 group cursor-default"
               >
+
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-[#005BAC]/10 text-[#005BAC] dark:bg-[#8CC63F]/15 dark:text-[#8CC63F] flex items-center justify-center flex-shrink-0">
                     <Icon className="w-5 h-5" />
