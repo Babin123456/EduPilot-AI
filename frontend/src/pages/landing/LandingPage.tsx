@@ -4,14 +4,10 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { LandingNavbar } from './LandingNavbar';
 import { HeroSection } from './HeroSection';
-import { ProblemSolutionSection } from './ProblemSolutionSection';
-import { EcosystemSection } from './EcosystemSection';
-import { DayWithEduPilotSection } from './DayWithEduPilotSection';
 import { FeaturesSection } from './FeaturesSection';
 import { WorkflowSection } from './WorkflowSection';
 import { AnalyticsSection } from './AnalyticsSection';
 import { DocumentStudioSection } from './DocumentStudioSection';
-import { ProductShowcaseSection } from './ProductShowcaseSection';
 import { CTASection } from './CTASection';
 import { LandingFooter } from './LandingFooter';
 
@@ -86,18 +82,14 @@ export const LandingPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#071426] text-slate-900 dark:text-white transition-colors duration-200 overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0F172A] text-slate-900 dark:text-white transition-colors duration-200 overflow-x-hidden">
       <LandingNavbar onNavigate={handleNavigate} />
       <main>
         <HeroSection onNavigate={handleNavigate} />
-        <ProblemSolutionSection />
-        <EcosystemSection />
-        <DayWithEduPilotSection />
         <FeaturesSection onNavigate={handleNavigate} />
         <WorkflowSection />
         <AnalyticsSection />
         <DocumentStudioSection />
-        <ProductShowcaseSection />
         <CTASection />
       </main>
       <LandingFooter onNavigate={handleNavigate} />

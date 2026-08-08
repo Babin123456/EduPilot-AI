@@ -1,11 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
   ArrowRight, Sparkles, CheckCircle2, ChevronDown, GraduationCap,
-  BookOpen, BarChart3, Layers, Zap, Clock, ShieldCheck, FileText, Bot
+  Clock, ShieldCheck, Bot
 } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -30,14 +29,17 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
       // Initial Entrance Timeline
       const tl = gsap.timeline();
 
-      tl.from(badgeRef.current, {
-        opacity: 0,
-        y: -20,
-        scale: 0.9,
-        duration: 0.7,
-        ease: 'back.out(1.7)',
-      })
-      .from('.hero-title-word', {
+      if (badgeRef.current) {
+        tl.from(badgeRef.current, {
+          opacity: 0,
+          y: -20,
+          scale: 0.9,
+          duration: 0.7,
+          ease: 'back.out(1.7)',
+        });
+      }
+
+      tl.from('.hero-title-word', {
         opacity: 0,
         y: 60,
         rotateX: -30,
@@ -66,7 +68,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
         stagger: 0.1,
         ease: 'back.out(1.4)',
       }, '-=0.3')
-      .from('.hero-[#hero-preview-window]', {
+      .from('#hero-preview-window', {
         opacity: 0,
         y: 100,
         scale: 0.9,
@@ -86,13 +88,16 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
         },
       });
 
-      scrollTl
-        .to(headlineRef.current, {
+      if (headlineRef.current) {
+        scrollTl.to(headlineRef.current, {
           scale: 0.75,
           y: -40,
           opacity: 0.3,
           ease: 'power1.inOut',
-        })
+        });
+      }
+
+      scrollTl
         .to('.hero-content-left', {
           y: -100,
           opacity: 0,
