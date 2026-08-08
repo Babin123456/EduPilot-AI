@@ -451,36 +451,9 @@ export const DashboardPage: React.FC = () => {
           </motion.div>
 
 
-          {/* Quick Actions Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.4 }}
-            className="glass-card p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-4"
-          >
-            <h3 className="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">
-              Quick Action Shortcuts
-            </h3>
-            <div className="grid grid-cols-2 gap-3">
-              <Link to="/attendance" className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 hover:bg-[#005BAC]/10 dark:hover:bg-[#8CC63F]/20 text-xs font-bold text-slate-800 dark:text-slate-200 flex flex-col items-center gap-2 text-center transition-all border border-slate-200/60 dark:border-slate-700">
-                <CheckSquare className="w-5 h-5 text-[#005BAC] dark:text-[#8CC63F]" />
-                <span>Attendance</span>
-              </Link>
-              <Link to="/assignments" className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 hover:bg-[#005BAC]/10 dark:hover:bg-[#8CC63F]/20 text-xs font-bold text-slate-800 dark:text-slate-200 flex flex-col items-center gap-2 text-center transition-all border border-slate-200/60 dark:border-slate-700">
-                <FileText className="w-5 h-5 text-purple-500" />
-                <span>Assignments</span>
-              </Link>
-              <Link to="/daily-notes" className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 hover:bg-[#005BAC]/10 dark:hover:bg-[#8CC63F]/20 text-xs font-bold text-slate-800 dark:text-slate-200 flex flex-col items-center gap-2 text-center transition-all border border-slate-200/60 dark:border-slate-700">
-                <BookOpen className="w-5 h-5 text-emerald-500" />
-                <span>Daily Notes</span>
-              </Link>
-              <Link to="/documents" className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 hover:bg-[#005BAC]/10 dark:hover:bg-[#8CC63F]/20 text-xs font-bold text-slate-800 dark:text-slate-200 flex flex-col items-center gap-2 text-center transition-all border border-slate-200/60 dark:border-slate-700">
-                <Users className="w-5 h-5 text-amber-500" />
-                <span>Doc Studio</span>
-              </Link>
-            </div>
           </motion.div>
         </div>
+
 
       </div>
 
