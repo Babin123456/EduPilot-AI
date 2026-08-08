@@ -140,12 +140,12 @@ def _call_groq_llm(messages: list[dict], api_key: str, model: str) -> str | None
             "Content-Type": "application/json",
         }
         payload = {
-            "model": model or "llama-3.1-70b-versatile",
+            "model": model or "llama-3.3-70b-versatile",
             "messages": messages,
             "temperature": 0.7,
             "max_tokens": 1024,
         }
-        with httpx.Client(timeout=1.0) as client:
+        with httpx.Client(timeout=15.0) as client:
             response = client.post(url, json=payload, headers=headers)
             if response.status_code == 200:
                 data = response.json()
@@ -166,7 +166,7 @@ def _call_gemini_llm(prompt: str, api_key: str, model: str) -> str | None:
         payload = {
             "contents": [{"parts": [{"text": prompt}]}]
         }
-        with httpx.Client(timeout=1.0) as client:
+        with httpx.Client(timeout=15.0) as client:
             response = client.post(url, json=payload, headers=headers)
             if response.status_code == 200:
                 data = response.json()
@@ -273,7 +273,7 @@ def chat(
     ]
 
     # Attempt Groq LLM primary API call
-    model_used = "Groq Llama-3.1-70B"
+    model_used = "Groq Llama-3.3-70B"
     ai_response = _call_groq_llm(llm_messages, settings.groq_api_key_1, settings.groq_model)
     if not ai_response:
         ai_response = _call_groq_llm(llm_messages, settings.groq_api_key_2, settings.groq_model)
