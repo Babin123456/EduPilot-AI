@@ -129,7 +129,12 @@ export const FAQPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const { theme, toggleTheme } = useTheme();
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const toggleItem = (key: string) => {
+
     setOpenIndex(openIndex === key ? null : key);
   };
 

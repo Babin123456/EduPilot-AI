@@ -129,6 +129,11 @@ export const DocumentationPage: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   const [activeCategory, setActiveCategory] = useState(docSections[0].category);
 
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#0F172A] transition-colors duration-200">
       <header className="sticky top-0 z-50 bg-white/90 dark:bg-[#0F172A]/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 py-4">

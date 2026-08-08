@@ -7,6 +7,11 @@ import { ArrowLeft, Sun, Moon, Shield, Database, Eye, Lock, Server, UserCheck, B
 export const PrivacyPage: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
 
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+
   const sections = [
     {
       icon: Eye,

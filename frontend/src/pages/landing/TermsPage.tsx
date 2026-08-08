@@ -7,6 +7,11 @@ import { ArrowLeft, Sun, Moon, Scale, ShieldCheck, FileText, AlertTriangle, User
 export const TermsPage: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
 
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+
   const sections = [
     {
       icon: Scale,
