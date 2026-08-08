@@ -82,7 +82,7 @@ export const LandingPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0F172A] text-slate-900 dark:text-white transition-colors duration-200 overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#071426] text-slate-900 dark:text-white transition-colors duration-200 overflow-x-hidden">
       <LandingNavbar onNavigate={handleNavigate} />
       <main>
         <HeroSection onNavigate={handleNavigate} />
