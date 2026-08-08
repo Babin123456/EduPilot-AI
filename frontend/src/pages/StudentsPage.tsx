@@ -59,7 +59,7 @@ export const StudentsPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-[#005BAC] via-[#0A6FD8] to-slate-900 p-6 sm:p-8 rounded-3xl text-white shadow-xl flex items-center justify-between gap-6 relative overflow-hidden">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-[#005BAC] via-[#0A6FD8] to-slate-900 p-6 sm:p-8 rounded-3xl text-white shadow-xl relative overflow-hidden">
         <div className="space-y-2 relative z-10">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-xs font-extrabold text-[#8CC63F]">
             <Users className="w-3.5 h-3.5" /> Institutional Roster
@@ -69,12 +69,8 @@ export const StudentsPage: React.FC = () => {
             360-Degree Academic Track {!loading && `(${total} Active Students)`}
           </p>
         </div>
-        <div className="w-32 h-20 rounded-xl overflow-hidden border border-white/20 bg-slate-950/80 p-1 hidden sm:block flex-shrink-0">
-          <img src="/images/analytics_dashboard.png" alt="Students Banner" className="w-full h-full object-contain bg-slate-950 rounded-lg" />
-        </div>
-      </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 relative z-10">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
@@ -82,17 +78,22 @@ export const StudentsPage: React.FC = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name, roll, email..."
-              className="pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-adamas-blue w-64"
+              className="pl-9 pr-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-xs text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-[#8CC63F] w-64"
             />
           </div>
           <button
             onClick={handleDownloadReport}
-            className="px-3 py-2 bg-adamas-blue text-white text-xs font-bold rounded-lg flex items-center gap-1.5 hover:bg-adamas-blue-dark transition-colors shadow-sm"
+            className="px-4 py-2 bg-[#8CC63F] text-slate-950 text-xs font-extrabold rounded-xl flex items-center gap-1.5 hover:bg-[#6FAF2E] transition-colors shadow-md"
           >
             <Download className="w-4 h-4" /> PDF Report
           </button>
         </div>
+
+        <div className="w-32 h-20 rounded-xl overflow-hidden border border-white/20 bg-slate-950/80 p-1 hidden sm:block flex-shrink-0 relative z-10">
+          <img src="/images/analytics_dashboard.png" alt="Students Banner" className="w-full h-full object-contain bg-slate-950 rounded-lg" />
+        </div>
       </div>
+
 
       <motion.div
         initial={{ opacity: 0, y: 12 }}
