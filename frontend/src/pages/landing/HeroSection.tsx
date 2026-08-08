@@ -1,11 +1,9 @@
 import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import {
-  ArrowRight, Sparkles, CheckCircle2, ChevronDown, GraduationCap,
-  Clock, ShieldCheck, Bot
-} from 'lucide-react';
+import { ArrowRight, Sparkles, CheckCircle2, ChevronDown, GraduationCap, BookOpen, BarChart3 } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -16,156 +14,111 @@ interface HeroSectionProps {
 export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
   const navigate = useNavigate();
   const heroRef = useRef<HTMLElement>(null);
-  const heroContainerRef = useRef<HTMLDivElement>(null);
-  const headlineRef = useRef<HTMLHeadingElement>(null);
-  const badgeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!heroRef.current) return;
     const ctx = gsap.context(() => {
-      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (prefersReducedMotion) return;
-
-      // Initial Entrance Timeline
-      const tl = gsap.timeline();
-
-      if (badgeRef.current) {
-        tl.from(badgeRef.current, {
-          opacity: 0,
-          y: -20,
-          scale: 0.9,
-          duration: 0.7,
-          ease: 'back.out(1.7)',
-        });
-      }
-
-      tl.from('.hero-title-word', {
-        opacity: 0,
-        y: 60,
-        rotateX: -30,
-        duration: 0.9,
-        stagger: 0.12,
-        ease: 'power4.out',
-      }, '-=0.4')
-      .from('.hero-subtitle', {
-        opacity: 0,
-        y: 30,
-        duration: 0.7,
-        ease: 'power3.out',
-      }, '-=0.4')
-      .from('.hero-bullets span', {
-        opacity: 0,
-        y: 20,
-        duration: 0.5,
-        stagger: 0.08,
-        ease: 'power2.out',
-      }, '-=0.3')
-      .from('.hero-cta-btn', {
-        opacity: 0,
-        scale: 0.9,
-        y: 20,
-        duration: 0.6,
-        stagger: 0.1,
-        ease: 'back.out(1.4)',
-      }, '-=0.3')
-      .from('#hero-preview-window', {
-        opacity: 0,
-        y: 100,
-        scale: 0.9,
-        duration: 1,
-        ease: 'power3.out',
-      }, '-=0.6');
-
-      // Scroll-Driven Pinned Transformation: Hero converts into Floating Dashboard
-      const scrollTl = gsap.timeline({
+      // Hero title entrance
+      gsap.from('.hero-title-line', {
+        y: 80, opacity: 0, duration: 1.2,
+        stagger: 0.15, ease: 'power4.out', delay: 0.3,
+      });
+      // Subtitle & bullets entrance
+      gsap.from('.hero-subtitle', {
+        y: 40, opacity: 0, duration: 1, ease: 'power3.out', delay: 0.7,
+      });
+      gsap.from('.hero-bullets span', {
+        y: 20, opacity: 0, duration: 0.6,
+        stagger: 0.1, ease: 'power2.out', delay: 1.0,
+      });
+      // CTA buttons entrance
+      gsap.from('.hero-cta', {
+        y: 30, opacity: 0, duration: 0.8,
+        stagger: 0.12, ease: 'power3.out', delay: 1.2,
+      });
+      // Parallax on the hero image card
+      gsap.to('.hero-image-card', {
+        y: -80,
+        ease: 'none',
         scrollTrigger: {
           trigger: heroRef.current,
           start: 'top top',
-          end: '+=120%',
-          pin: true,
-          scrub: 1,
-          anticipatePin: 1,
+          end: 'bottom top',
+          scrub: 1.5,
         },
       });
-
-      if (headlineRef.current) {
-        scrollTl.to(headlineRef.current, {
-          scale: 0.75,
-          y: -40,
-          opacity: 0.3,
-          ease: 'power1.inOut',
-        });
-      }
-
-      scrollTl
-        .to('.hero-content-left', {
-          y: -100,
-          opacity: 0,
-          duration: 0.8,
-          ease: 'power2.in',
-        }, '<')
-        .to('#hero-preview-window', {
-          scale: 1.12,
-          y: -120,
-          boxShadow: '0 30px 100px -10px rgba(0, 91, 172, 0.4), 0 0 50px rgba(140, 198, 63, 0.3)',
-          duration: 1.2,
-          ease: 'power2.out',
-        }, '<')
-        .to('.preview-card-reveal', {
-          opacity: 1,
-          y: 0,
-          stagger: 0.2,
-          duration: 0.6,
-        }, '-=0.4');
-
+      // Parallax on background orbs
+      gsap.to('.hero-orb-1', {
+        y: -120, ease: 'none',
+        scrollTrigger: { trigger: heroRef.current, start: 'top top', end: 'bottom top', scrub: 2 },
+      });
+      gsap.to('.hero-orb-2', {
+        y: -60, x: 30, ease: 'none',
+        scrollTrigger: { trigger: heroRef.current, start: 'top top', end: 'bottom top', scrub: 3 },
+      });
+      gsap.to('.hero-orb-3', {
+        y: -90, x: -20, ease: 'none',
+        scrollTrigger: { trigger: heroRef.current, start: 'top top', end: 'bottom top', scrub: 2.5 },
+      });
     }, heroRef);
-
     return () => ctx.revert();
   }, []);
 
   return (
     <section
       ref={heroRef}
-      className="relative min-h-screen pt-28 pb-16 flex flex-col justify-between overflow-hidden bg-slate-50 dark:bg-[#071426] transition-colors duration-300"
+      className="relative min-h-screen pt-28 pb-20 flex flex-col justify-between overflow-hidden bg-slate-50 dark:bg-[#0F172A] transition-colors duration-200"
     >
-      {/* ─── Ambient Glow Orbs ─── */}
+      {/* ─── Animated Background Layers ─── */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-32 -right-32 w-[600px] h-[600px] rounded-full bg-gradient-to-br from-[#005BAC]/20 to-[#0A6FD8]/15 blur-3xl animate-glow" />
-        <div className="absolute top-[50%] -left-40 w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-[#8CC63F]/20 to-blue-500/10 blur-3xl opacity-70" />
+        {/* Grid pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:48px_48px]" />
+
+        {/* Glowing orbs with parallax */}
+        <div className="hero-orb-1 absolute -top-32 -right-32 w-[550px] h-[550px] rounded-full bg-gradient-to-br from-[#005BAC]/25 to-[#0A6FD8]/15 blur-3xl animate-glow" />
+        <div className="hero-orb-2 absolute top-[55%] -left-40 w-[480px] h-[480px] rounded-full bg-gradient-to-tr from-[#8CC63F]/20 to-purple-500/10 blur-3xl opacity-70" />
+        <div className="hero-orb-3 absolute bottom-20 right-20 w-[350px] h-[350px] rounded-full bg-[#8CC63F]/15 blur-2xl opacity-60 animate-glow" />
+
+        {/* Decorative spinning ring */}
+        <div className="absolute top-1/4 right-1/4 w-[200px] h-[200px] border border-[#005BAC]/10 dark:border-[#8CC63F]/10 rounded-full animate-spin-slow" />
+        <div className="absolute bottom-1/3 left-1/3 w-[120px] h-[120px] border border-dashed border-[#8CC63F]/10 rounded-full animate-spin-slow" style={{ animationDirection: 'reverse', animationDuration: '45s' }} />
       </div>
 
-      <div ref={heroContainerRef} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 my-auto w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
-          
-          {/* ─── Left Column Storytelling ─── */}
-          <div className="hero-content-left lg:col-span-6 space-y-6 text-center lg:text-left">
-            
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 my-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+          {/* ─── Left Column ─── */}
+          <div className="lg:col-span-7 space-y-7 text-center lg:text-left">
             {/* Pill Badge */}
-            <div ref={badgeRef} className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card border border-[#005BAC]/20 dark:border-[#8CC63F]/30 shadow-md">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card"
+            >
               <Sparkles className="w-4 h-4 text-[#8CC63F]" />
-              <span className="text-xs font-extrabold uppercase tracking-wider text-slate-800 dark:text-slate-200">
+              <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
                 Official Adamas University Platform
               </span>
               <span className="w-2 h-2 rounded-full bg-[#8CC63F] animate-pulse" />
-            </div>
+            </motion.div>
 
-            {/* Kinetic Hero Headline */}
-            <h1 ref={headlineRef} className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.08] perspective-1000">
-              <span className="hero-title-word block text-slate-900 dark:text-white">
-                LESS ADMIN.
+            {/* Main Headline */}
+            <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] xl:text-6xl font-extrabold tracking-tight leading-[1.1]">
+              <span className="hero-title-line block text-slate-900 dark:text-white">
+                EduPilot AI –
               </span>
-              <span className="hero-title-word block text-gradient mt-1">
-                MORE TEACHING.
+              <span className="hero-title-line block text-gradient mt-1">
+                Academic Operating System
               </span>
             </h1>
 
             {/* Subtitle */}
-            <p className="hero-subtitle text-base sm:text-lg text-slate-600 dark:text-slate-300 font-normal leading-relaxed max-w-xl mx-auto lg:mx-0">
-              The AI Academic Operating System designed for Adamas University faculty. Automate attendance, lesson planning, student risk monitoring, and assessment grading with 1-click class context.
+            <p className="hero-subtitle text-lg sm:text-xl text-slate-600 dark:text-slate-300 max-w-2xl font-normal leading-relaxed">
+              Less admin, more teaching: harness AI for attendance tracking, automated lesson planning, institutional analytics, and RAG-powered class insights — built for Adamas University.
             </p>
 
-            {/* Key Value Bullets */}
-            <div className="hero-bullets flex flex-wrap justify-center lg:justify-start gap-x-5 gap-y-2 text-xs font-bold text-slate-700 dark:text-slate-200">
+            {/* Value Bullets */}
+            <div className="hero-bullets pt-1 flex flex-wrap justify-center lg:justify-start gap-x-5 gap-y-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
               <span className="flex items-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4 text-[#8CC63F]" /> 1-Click Class Context
               </span>
@@ -173,110 +126,88 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
                 <CheckCircle2 className="w-4 h-4 text-[#8CC63F]" /> Instant Quiz & Slide Gen
               </span>
               <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-[#8CC63F]" /> FERPA & Institutional Audit
+                <CheckCircle2 className="w-4 h-4 text-[#8CC63F]" /> Automated Risk Flagging
               </span>
             </div>
 
             {/* CTA Buttons */}
-            <div className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+            <div className="pt-3 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
               <button
                 onClick={() => navigate('/login')}
-                className="hero-cta-btn btn-magnetic w-full sm:w-auto px-8 py-4 rounded-2xl bg-[#005BAC] hover:bg-[#0A6FD8] text-white font-extrabold text-sm shadow-xl flex items-center justify-center gap-3 group"
+                className="hero-cta btn-magnetic w-full sm:w-auto px-8 py-4 rounded-2xl bg-[#005BAC] hover:bg-[#0A6FD8] text-white font-bold text-sm shadow-xl flex items-center justify-center gap-3 group"
               >
-                <GraduationCap className="w-5 h-5 text-white" />
                 <span>Teacher Login</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform duration-300" />
               </button>
               <button
-                onClick={() => onNavigate('problem')}
-                className="hero-cta-btn btn-magnetic w-full sm:w-auto px-8 py-4 rounded-2xl glass-card text-slate-900 dark:text-white font-bold text-sm text-center"
+                onClick={() => onNavigate('features')}
+                className="hero-cta btn-magnetic w-full sm:w-auto px-8 py-4 rounded-2xl glass-card text-slate-900 dark:text-white font-bold text-sm text-center"
               >
-                See How It Works
+                Explore Features
               </button>
             </div>
           </div>
 
-          {/* ─── Right Column Interactive Product Window Showcase ─── */}
-          <div className="lg:col-span-6 relative">
-            <div
-              id="hero-preview-window"
-              className="relative mx-auto max-w-lg lg:max-w-none rounded-3xl glass-card border border-slate-200 dark:border-slate-800 shadow-2xl p-4 transition-transform duration-300 bg-white dark:bg-[#0F172A]"
-            >
-              {/* Window Controls Header */}
-              <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-200 dark:border-slate-800">
-                <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full bg-red-500/80 inline-block" />
-                  <span className="w-3 h-3 rounded-full bg-amber-500/80 inline-block" />
-                  <span className="w-3 h-3 rounded-full bg-emerald-500/80 inline-block" />
-                  <span className="text-[11px] font-bold text-slate-400 dark:text-slate-400 ml-2 flex items-center gap-1.5">
-                    <ShieldCheck className="w-3.5 h-3.5 text-[#8CC63F]" /> EduPilot OS v1.1 • AU Command Center
-                  </span>
-                </div>
-                <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-[#005BAC]/10 text-[#005BAC] dark:bg-[#8CC63F]/20 dark:text-[#8CC63F]">
-                  LIVE ENGINE
-                </span>
-              </div>
+          {/* ─── Right Column Graphic ─── */}
+          <div className="lg:col-span-5 relative">
+            <div className="hero-image-card relative mx-auto max-w-md lg:max-w-none">
+              {/* Glow ring behind card */}
+              <div className="absolute -inset-3 rounded-3xl bg-gradient-to-r from-[#005BAC] to-[#8CC63F] opacity-25 blur-2xl animate-glow" />
 
-              {/* Central Visual Graphic */}
-              <div className="relative rounded-2xl overflow-hidden bg-slate-900 p-2">
+              <div className="relative rounded-3xl glass-card p-3 overflow-hidden bg-white dark:bg-[#1E293B]">
                 <img
                   src="/images/hero_illustration.png"
-                  alt="EduPilot AI Academic Operating System"
-                  className="w-full h-auto rounded-xl object-contain bg-slate-950"
+                  alt="EduPilot AI Classroom Operations Platform"
+                  className="w-full h-auto rounded-2xl object-contain bg-white dark:bg-[#1E293B]"
+                  loading="eager"
                 />
               </div>
 
-              {/* Reveal Overlay Card 1: Attendance Snapshot */}
-              <div className="preview-card-reveal opacity-0 translate-y-6 mt-3 p-3.5 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-[#005BAC]/15 text-[#005BAC] dark:text-[#8CC63F] flex items-center justify-center font-bold">
-                    <Clock className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-slate-900 dark:text-white">Active Class: 3rd Year CSE (Sec B)</h4>
-                    <p className="text-[10px] text-slate-500">Operating Systems • 60 Students Enrolled</p>
-                  </div>
+              {/* Floating stat badge — bottom-left */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 1.4, duration: 0.6 }}
+                className="absolute -bottom-6 -left-6 glass-card p-4 rounded-2xl flex items-center gap-3"
+              >
+                <div className="w-11 h-11 rounded-xl bg-[#8CC63F]/20 text-[#8CC63F] flex items-center justify-center font-extrabold text-sm">
+                  98%
                 </div>
-                <span className="text-[10px] font-extrabold text-emerald-500 bg-emerald-500/10 px-2.5 py-1 rounded-md">
-                  92% Present
-                </span>
-              </div>
-
-              {/* Reveal Overlay Card 2: AI Copilot Pulse */}
-              <div className="preview-card-reveal opacity-0 translate-y-6 mt-2 p-3.5 rounded-xl bg-gradient-to-r from-[#005BAC]/10 via-[#0A6FD8]/10 to-[#8CC63F]/10 border border-[#005BAC]/20 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-[#8CC63F]/20 text-[#8CC63F] flex items-center justify-center font-bold">
-                    <Bot className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-slate-900 dark:text-white">AI Copilot Trigger</h4>
-                    <p className="text-[10px] text-slate-500">"4 students flagged below 75% attendance threshold."</p>
-                  </div>
+                <div>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase">Admin Time Saved</p>
+                  <p className="text-xs font-extrabold text-slate-900 dark:text-white">5+ Hrs / Week</p>
                 </div>
-                <span className="text-[10px] font-extrabold text-[#005BAC] dark:text-[#8CC63F] border border-[#005BAC]/30 px-2.5 py-1 rounded-md">
-                  RAG Active
-                </span>
-              </div>
+              </motion.div>
 
+              {/* Floating badge — top-right */}
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.6, duration: 0.6 }}
+                className="absolute -top-5 -right-5 glass-card p-3 rounded-xl flex items-center gap-2"
+              >
+                <div className="w-8 h-8 rounded-lg bg-[#005BAC]/15 text-[#005BAC] dark:text-[#8CC63F] flex items-center justify-center">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <span className="text-[10px] font-bold text-slate-800 dark:text-slate-200">AI-Powered</span>
+              </motion.div>
             </div>
           </div>
-
         </div>
       </div>
 
-      {/* ─── Scroll Prompt ─── */}
-      <div className="text-center pt-6 relative z-10">
+      {/* ─── Scroll Indicator ─── */}
+      <div className="text-center pt-8 relative z-10">
         <button
-          onClick={() => onNavigate('problem')}
+          onClick={() => onNavigate('features')}
           className="group inline-flex flex-col items-center gap-1.5 text-slate-400 hover:text-[#005BAC] dark:hover:text-[#8CC63F] transition-colors"
-          aria-label="Scroll to exploration"
+          aria-label="Scroll to features"
         >
-          <span className="text-[10px] uppercase font-extrabold tracking-[0.2em] group-hover:tracking-[0.3em] transition-all">
-            Scroll to Explore Story
-          </span>
+          <span className="text-[10px] uppercase font-bold tracking-[0.2em] group-hover:tracking-[0.3em] transition-all">Explore Features</span>
           <ChevronDown className="w-4 h-4 animate-bounce" />
         </button>
       </div>
     </section>
   );
 };
+
