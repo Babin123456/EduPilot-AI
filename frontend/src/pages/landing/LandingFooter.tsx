@@ -30,15 +30,15 @@ export const LandingFooter: React.FC<LandingFooterProps> = ({ onNavigate }) => {
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: footerRef.current,
-          start: 'top 85%',
+          start: 'top 90%',
           toggleActions: 'play none none none',
         },
       });
 
       // Step 1 & 2: Reveal footer elements
-      tl.from('.footer-eyebrow', { opacity: 0, y: 20, duration: 0.6, ease: 'power2.out' })
-        .from('.footer-svg-typography', { opacity: 0, y: 30, duration: 0.8, ease: 'power3.out' }, '-=0.3')
-        .from('.footer-content-reveal', { opacity: 0, y: 20, duration: 0.6, stagger: 0.1, ease: 'power2.out' }, '-=0.4');
+      tl.from('.footer-eyebrow', { opacity: 0, y: 15, duration: 0.5, ease: 'power2.out' })
+        .from('.footer-content-reveal', { opacity: 0, y: 15, duration: 0.5, stagger: 0.08, ease: 'power2.out' }, '-=0.3')
+        .from('.footer-svg-typography', { opacity: 0, y: 20, duration: 0.6, ease: 'power3.out' }, '-=0.3');
 
       // Continuous Traveling Highlight Sweep loop
       gsap.fromTo(
@@ -64,43 +64,105 @@ export const LandingFooter: React.FC<LandingFooterProps> = ({ onNavigate }) => {
   return (
     <footer
       ref={footerRef}
-      className="relative bg-[#050B16] text-slate-300 overflow-hidden pt-20 pb-12 transition-colors duration-200 border-t border-slate-800/80"
+      className="relative bg-slate-100 dark:bg-[#050B16] text-slate-700 dark:text-slate-300 overflow-hidden py-8 sm:py-10 transition-colors duration-300 border-t border-slate-200 dark:border-slate-800/80 flex flex-col justify-between min-h-none"
     >
       {/* ─── Top Animated Horizontal Divider Line (Blue → Green → Blue) ─── */}
       <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#005BAC] via-[#8CC63F] to-[#005BAC] opacity-80" />
 
       {/* ─── Subtle Ambient Background Glows ─── */}
       <div
-        className="absolute top-1/4 left-[15%] w-[500px] h-[500px] rounded-full pointer-events-none blur-3xl opacity-20"
-        style={{ background: 'radial-gradient(circle, rgba(0,91,172,0.4) 0%, transparent 70%)' }}
+        className="absolute top-1/4 left-[15%] w-[400px] h-[400px] rounded-full pointer-events-none blur-3xl opacity-15 dark:opacity-20"
+        style={{ background: 'radial-gradient(circle, rgba(0,91,172,0.3) 0%, transparent 70%)' }}
       />
       <div
-        className="absolute bottom-1/4 right-[15%] w-[450px] h-[450px] rounded-full pointer-events-none blur-3xl opacity-15"
+        className="absolute bottom-1/4 right-[15%] w-[350px] h-[350px] rounded-full pointer-events-none blur-3xl opacity-10 dark:opacity-15"
         style={{ background: 'radial-gradient(circle, rgba(140,198,63,0.3) 0%, transparent 70%)' }}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-16">
-        {/* ─── LAYER 1 & 2: Eyebrow + Product Branding ─── */}
-        <div className="footer-eyebrow text-center space-y-3">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-slate-700/60 backdrop-blur-md text-[11px] font-extrabold uppercase tracking-[0.25em] text-[#8CC63F]">
-            <Sparkles className="w-3.5 h-3.5 text-[#0A6FD8]" />
-            <span>AI Academic Operating System</span>
-          </div>
-
-          <div className="flex items-center justify-center gap-3 pt-2">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#005BAC] to-[#8CC63F] text-white flex items-center justify-center font-bold text-base shadow-lg">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full space-y-6 sm:space-y-8">
+        
+        {/* ─── TOP BAR: Brand Eyebrow + Faculty Access CTA Buttons ─── */}
+        <div className="footer-eyebrow flex flex-col md:flex-row items-center justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800/60">
+          
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#005BAC] to-[#8CC63F] text-white flex items-center justify-center font-black text-lg shadow-md">
               EP
             </div>
-            <span className="text-xl font-extrabold text-white tracking-tight">EduPilot AI</span>
-            <span className="text-xs text-slate-500 font-semibold">• Adamas University</span>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-black text-slate-900 dark:text-white tracking-tight">EduPilot AI</span>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-[#005BAC]/10 text-[#005BAC] dark:bg-[#8CC63F]/20 dark:text-[#8CC63F]">
+                  <Sparkles className="w-3 h-3" /> AU Academic OS
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Adamas University • Dept. of CSE</p>
+            </div>
           </div>
+
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <button
+              onClick={() => navigate('/login')}
+              className="btn-magnetic flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-[#005BAC] hover:bg-[#0A6FD8] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-all duration-200"
+            >
+              <GraduationCap className="w-4 h-4" />
+              <span>Teacher Login</span>
+            </button>
+            <button
+              onClick={() => onNavigate('features')}
+              className="btn-magnetic flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800/80 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-900 dark:text-white font-bold text-xs border border-slate-300 dark:border-slate-700 flex items-center justify-center gap-1.5 transition-all duration-200"
+            >
+              <span>Explore Features</span>
+              <ArrowRight className="w-3.5 h-3.5 text-[#005BAC] dark:text-[#8CC63F]" />
+            </button>
+          </div>
+
         </div>
 
-        {/* ─── LAYER 3: GIANT ANIMATED OUTLINE TYPOGRAPHY WITH TRAVELING HIGHLIGHT SWEEP ─── */}
-        <div className="footer-svg-typography relative flex justify-center items-center py-4 my-2 select-none overflow-hidden">
+        {/* ─── MIDDLE CONTENT GRID: AI Tools, Resources, Institution ─── */}
+        <div className="footer-content-reveal grid grid-cols-1 sm:grid-cols-3 gap-6 text-xs">
+          
+          {/* Column 1: AI Tools */}
+          <div className="space-y-2">
+            <h4 className="font-extrabold text-slate-900 dark:text-white uppercase tracking-wider text-[11px]">AI Tools</h4>
+            <ul className="space-y-1.5 text-slate-600 dark:text-slate-400">
+              <li><button onClick={() => navigate('/ai')} className="hover:text-[#005BAC] dark:hover:text-white transition-colors">EduPilot AI Copilot</button></li>
+              <li><button onClick={() => onNavigate('features')} className="hover:text-[#005BAC] dark:hover:text-white transition-colors">Lesson Planner & Syllabus Breakdown</button></li>
+              <li><button onClick={() => onNavigate('features')} className="hover:text-[#005BAC] dark:hover:text-white transition-colors">Quiz & Exam Bank Generator</button></li>
+              <li><button onClick={() => onNavigate('documents')} className="hover:text-[#005BAC] dark:hover:text-white transition-colors">Presentation & Document Studio</button></li>
+            </ul>
+          </div>
+
+          {/* Column 2: Resources */}
+          <div className="space-y-2">
+            <h4 className="font-extrabold text-slate-900 dark:text-white uppercase tracking-wider text-[11px]">Resources</h4>
+            <ul className="space-y-1.5 text-slate-600 dark:text-slate-400">
+              <li><Link to="/docs" className="hover:text-[#005BAC] dark:hover:text-white transition-colors flex items-center gap-1.5"><BookOpen className="w-3.5 h-3.5 text-[#005BAC] dark:text-[#0A6FD8]" /> Documentation & Guides</Link></li>
+              <li><Link to="/faq" className="hover:text-[#005BAC] dark:hover:text-white transition-colors flex items-center gap-1.5"><HelpCircle className="w-3.5 h-3.5 text-[#8CC63F]" /> FAQs (15+ Answers)</Link></li>
+              <li><button onClick={() => navigate('/documents')} className="hover:text-[#005BAC] dark:hover:text-white transition-colors">Course Document Repository</button></li>
+            </ul>
+          </div>
+
+          {/* Column 3: Institution & Legal links */}
+          <div className="space-y-2">
+            <h4 className="font-extrabold text-slate-900 dark:text-white uppercase tracking-wider text-[11px]">Institution & Legal</h4>
+            <ul className="space-y-1.5 text-slate-600 dark:text-slate-400">
+              <li><a href="https://adamasuniversity.ac.in" target="_blank" rel="noopener noreferrer" className="hover:text-[#005BAC] dark:hover:text-white transition-colors flex items-center gap-1.5"><Globe className="w-3.5 h-3.5 text-[#005BAC]" /> adamasuniversity.ac.in</a></li>
+              <li><a href="mailto:support@adamasuniversity.ac.in" className="hover:text-[#005BAC] dark:hover:text-white transition-colors flex items-center gap-1.5"><Mail className="w-3.5 h-3.5 text-[#8CC63F]" /> support@adamasuniversity.ac.in</a></li>
+              <li className="flex items-center gap-3 pt-1">
+                <Link to="/terms" className="hover:text-slate-900 dark:hover:text-white transition-colors flex items-center gap-1"><Scale className="w-3 h-3" /> Terms & Service</Link>
+                <span className="text-slate-400">•</span>
+                <Link to="/privacy" className="hover:text-slate-900 dark:hover:text-white transition-colors flex items-center gap-1"><Shield className="w-3 h-3" /> Privacy Policy</Link>
+              </li>
+            </ul>
+          </div>
+
+        </div>
+
+        {/* ─── BOTTOM LAYER: GIANT ANIMATED OUTLINE TYPOGRAPHY AT VERY BOTTOM ─── */}
+        <div className="footer-svg-typography relative flex flex-col justify-center items-center pt-2 select-none overflow-hidden border-t border-slate-200 dark:border-slate-800/60">
           <svg
-            viewBox="0 0 1000 160"
-            className="w-full max-w-[95vw] h-auto max-h-[180px] overflow-visible"
+            viewBox="0 0 1000 140"
+            className="w-full max-w-[95vw] h-auto max-h-[140px] overflow-visible"
             aria-label="EDUPILOT Giant Animated Typography"
           >
             <defs>
@@ -121,36 +183,34 @@ export const LandingFooter: React.FC<LandingFooterProps> = ({ onNavigate }) => {
               </linearGradient>
 
               {/* Mask Element containing moving rectangle */}
-              <mask id="travelingMask" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="160">
+              <mask id="travelingMask" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="140">
                 <rect
                   ref={maskRef}
                   x="-25%"
                   y="0"
                   width="25%"
-                  height="160"
+                  height="140"
                   fill="url(#maskFade)"
                 />
               </mask>
 
               {/* Glowing Drop Shadows for Active Letters */}
               <filter id="activeGlow" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="0" dy="0" stdDeviation="6" floodColor="#0A6FD8" floodOpacity="0.45" />
-                <feDropShadow dx="0" dy="0" stdDeviation="14" floodColor="#8CC63F" floodOpacity="0.25" />
+                <feDropShadow dx="0" dy="0" stdDeviation="6" floodColor="#0A6FD8" floodOpacity="0.4" />
+                <feDropShadow dx="0" dy="0" stdDeviation="12" floodColor="#8CC63F" floodOpacity="0.25" />
               </filter>
             </defs>
 
-            {/* LAYER 1 (SVG): Inactive Thin Blue Outline Typography */}
+            {/* LAYER 1 (SVG): Inactive Outline Typography (Light/Dark Compatible) */}
             <text
               x="500"
-              y="115"
+              y="105"
               textAnchor="middle"
-              className="font-black tracking-[0.08em]"
+              className="font-black tracking-[0.08em] fill-transparent stroke-[#005BAC]/30 dark:stroke-[#005BAC]/40"
               style={{
                 fontFamily: "'Inter', 'Plus Jakarta Sans', sans-serif",
-                fontSize: "125px",
+                fontSize: "115px",
                 fontWeight: 900,
-                fill: "transparent",
-                stroke: "rgba(0, 91, 172, 0.30)",
                 strokeWidth: "1.8px",
               }}
             >
@@ -161,12 +221,12 @@ export const LandingFooter: React.FC<LandingFooterProps> = ({ onNavigate }) => {
             <g mask="url(#travelingMask)" filter="url(#activeGlow)">
               <text
                 x="500"
-                y="115"
+                y="105"
                 textAnchor="middle"
                 className="font-black tracking-[0.08em]"
                 style={{
                   fontFamily: "'Inter', 'Plus Jakarta Sans', sans-serif",
-                  fontSize: "125px",
+                  fontSize: "115px",
                   fontWeight: 900,
                   fill: "url(#sweepGradient)",
                   stroke: "#0A6FD8",
@@ -177,103 +237,25 @@ export const LandingFooter: React.FC<LandingFooterProps> = ({ onNavigate }) => {
               </text>
             </g>
           </svg>
-        </div>
 
-        {/* ─── LAYER 4: Supporting Statement ─── */}
-        <div className="footer-content-reveal text-center max-w-2xl mx-auto space-y-2">
-          <p className="text-xs sm:text-sm text-slate-400 font-medium leading-relaxed">
-            AI-powered academic workflows designed to help university faculty spend less time managing administrative work and more time teaching.
-          </p>
-        </div>
-
-        {/* ─── LAYER 5 & 6: Navigation + CTA ─── */}
-        <div className="footer-content-reveal grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 pt-6 border-t border-slate-800/60 text-xs">
-          {/* Column 1: Platform */}
-          <div className="space-y-3">
-            <h4 className="font-bold text-white uppercase tracking-wider text-[11px]">Platform</h4>
-            <ul className="space-y-2.5 text-slate-400">
-              <li><button onClick={() => navigate('/dashboard')} className="hover:text-white transition-colors duration-200">Dashboard</button></li>
-              <li><button onClick={() => navigate('/attendance')} className="hover:text-white transition-colors duration-200">Attendance</button></li>
-              <li><button onClick={() => navigate('/students')} className="hover:text-white transition-colors duration-200">Students Roster</button></li>
-              <li><button onClick={() => navigate('/assignments')} className="hover:text-white transition-colors duration-200">Assignments</button></li>
-              <li><button onClick={() => navigate('/assessments')} className="hover:text-white transition-colors duration-200">Assessments</button></li>
-            </ul>
-          </div>
-
-          {/* Column 2: AI Tools */}
-          <div className="space-y-3">
-            <h4 className="font-bold text-white uppercase tracking-wider text-[11px]">AI Tools</h4>
-            <ul className="space-y-2.5 text-slate-400">
-              <li><button onClick={() => navigate('/ai')} className="hover:text-white transition-colors duration-200">EduPilot AI Copilot</button></li>
-              <li><button onClick={() => onNavigate('features')} className="hover:text-white transition-colors duration-200">Lesson Planner</button></li>
-              <li><button onClick={() => onNavigate('features')} className="hover:text-white transition-colors duration-200">Quiz Generator</button></li>
-              <li><button onClick={() => onNavigate('documents')} className="hover:text-white transition-colors duration-200">Presentation Studio</button></li>
-            </ul>
-          </div>
-
-          {/* Column 3: Resources */}
-          <div className="space-y-3">
-            <h4 className="font-bold text-white uppercase tracking-wider text-[11px]">Resources</h4>
-            <ul className="space-y-2.5 text-slate-400">
-              <li><Link to="/docs" className="hover:text-white transition-colors duration-200 flex items-center gap-1.5"><BookOpen className="w-3.5 h-3.5 text-[#0A6FD8]" /> Documentation</Link></li>
-              <li><Link to="/faq" className="hover:text-white transition-colors duration-200 flex items-center gap-1.5"><HelpCircle className="w-3.5 h-3.5 text-[#8CC63F]" /> FAQs</Link></li>
-              <li><button onClick={() => navigate('/documents')} className="hover:text-white transition-colors duration-200">Document Studio</button></li>
-            </ul>
-          </div>
-
-          {/* Column 4: Institution */}
-          <div className="space-y-3">
-            <h4 className="font-bold text-white uppercase tracking-wider text-[11px]">Institution</h4>
-            <ul className="space-y-2.5 text-slate-400">
-              <li className="font-semibold text-slate-300">Adamas University</li>
-              <li className="text-[11px] text-slate-400">Department of Computer Science & Engineering</li>
-              <li><a href="https://adamasuniversity.ac.in" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors duration-200 flex items-center gap-1"><Globe className="w-3 h-3 text-[#005BAC]" /> adamasuniversity.ac.in</a></li>
-              <li><a href="mailto:support@adamasuniversity.ac.in" className="hover:text-white transition-colors duration-200 flex items-center gap-1"><Mail className="w-3 h-3 text-[#8CC63F]" /> Support Email</a></li>
-            </ul>
-          </div>
-
-          {/* Column 5: CTA Action Buttons */}
-          <div className="col-span-2 md:col-span-4 lg:col-span-1 space-y-3 flex flex-col justify-start">
-            <h4 className="font-bold text-white uppercase tracking-wider text-[11px]">Faculty Access</h4>
-            <div className="space-y-2.5 pt-1">
-              <button
-                onClick={() => navigate('/login')}
-                className="btn-magnetic w-full py-3 px-4 rounded-xl bg-[#005BAC] hover:bg-[#0A6FD8] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg"
-              >
-                <GraduationCap className="w-4 h-4" />
-                <span>Teacher Login</span>
-              </button>
-              <button
-                onClick={() => onNavigate('features')}
-                className="btn-magnetic w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#005BAC]/30 to-[#8CC63F]/30 hover:from-[#005BAC]/50 hover:to-[#8CC63F]/50 text-white font-bold text-xs border border-slate-700 flex items-center justify-center gap-2"
-              >
-                <span>Explore EduPilot</span>
-                <ArrowRight className="w-3.5 h-3.5 text-[#8CC63F]" />
-              </button>
+          {/* Copyright & Scroll To Top Row */}
+          <div className="w-full flex items-center justify-between pt-2 text-[11px] text-slate-500 dark:text-slate-400">
+            <div className="flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#8CC63F]" />
+              <span>© {new Date().getFullYear()} EduPilot AI — Adamas University. All rights reserved.</span>
             </div>
-          </div>
-        </div>
-
-        {/* ─── LAYER 7: Bottom Bar & Legal ─── */}
-        <div className="footer-content-reveal pt-8 border-t border-slate-800/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-[#8CC63F]" />
-            <span>© {new Date().getFullYear()} EduPilot AI — Adamas University. All rights reserved.</span>
-          </div>
-          <div className="flex items-center gap-5">
-            <Link to="/terms" className="hover:text-white transition-colors duration-200 flex items-center gap-1"><Scale className="w-3 h-3" /> Terms</Link>
-            <Link to="/privacy" className="hover:text-white transition-colors duration-200 flex items-center gap-1"><Shield className="w-3 h-3" /> Privacy</Link>
-            <Link to="/faq" className="hover:text-white transition-colors duration-200">FAQ</Link>
-            <Link to="/docs" className="hover:text-white transition-colors duration-200">Docs</Link>
             <button
               onClick={scrollToTop}
-              className="p-2 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 flex items-center gap-1 transition-all duration-200 hover:scale-105"
+              className="p-1.5 rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 transition-all flex items-center gap-1 text-[10px] font-bold"
               aria-label="Back to top"
             >
-              <ArrowUp className="w-4 h-4" />
+              <ArrowUp className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Top</span>
             </button>
           </div>
+
         </div>
+
       </div>
     </footer>
   );
