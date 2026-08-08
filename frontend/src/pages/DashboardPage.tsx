@@ -12,13 +12,17 @@ import {
   ArrowRight,
   Sparkles,
   BookOpen,
-  BarChart3
+  BarChart3,
+  TrendingUp,
+  Award,
+  Zap,
+  ChevronRight
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, AreaChart, Area } from 'recharts';
 
 const SkeletonBlock: React.FC<{ className?: string }> = ({ className }) => (
-  <div className={`animate-pulse bg-slate-200 dark:bg-slate-800 rounded-lg ${className || ''}`} />
+  <div className={`animate-pulse bg-slate-200 dark:bg-slate-800 rounded-xl ${className || ''}`} />
 );
 
 const cardVariants = {
@@ -60,17 +64,17 @@ export const DashboardPage: React.FC = () => {
   }, [activeClass]);
 
   const metrics = [
-    { label: "Today's Classes", value: summary?.today_classes ?? 0, icon: Calendar, color: 'blue' },
-    { label: 'Pending Attendance', value: summary?.pending_attendance ?? 0, icon: CheckSquare, color: 'amber' },
-    { label: 'Pending Grading', value: summary?.pending_grading ?? 0, icon: FileText, color: 'purple' },
-    { label: 'At-Risk Students', value: summary?.at_risk_students ?? 0, icon: AlertTriangle, color: 'red', isRisk: true },
+    { label: "Today's Classes", value: summary?.today_classes ?? 0, icon: Calendar, color: 'blue', subtext: 'Scheduled sessions' },
+    { label: 'Pending Attendance', value: summary?.pending_attendance ?? 0, icon: CheckSquare, color: 'amber', subtext: 'Requires marking' },
+    { label: 'Pending Grading', value: summary?.pending_grading ?? 0, icon: FileText, color: 'purple', subtext: 'Submission reviews' },
+    { label: 'At-Risk Students', value: summary?.at_risk_students ?? 0, icon: AlertTriangle, color: 'red', isRisk: true, subtext: '< 75% attendance threshold' },
   ];
 
-  const colorMap: Record<string, string> = {
-    blue: 'bg-blue-50 dark:bg-blue-950/50 text-[#005BAC] dark:text-[#0A6FD8]',
-    amber: 'bg-amber-50 dark:bg-amber-950/50 text-amber-500',
-    purple: 'bg-purple-50 dark:bg-purple-950/50 text-purple-500',
-    red: 'bg-red-50 dark:bg-red-950/50 text-red-500',
+  const colorMap: Record<string, { bg: string; text: string; border: string }> = {
+    blue: { bg: 'bg-[#005BAC]/10 dark:bg-[#005BAC]/20', text: 'text-[#005BAC] dark:text-[#38BDF8]', border: 'border-[#005BAC]/20' },
+    amber: { bg: 'bg-amber-500/10 dark:bg-amber-500/20', text: 'text-amber-600 dark:text-amber-400', border: 'border-amber-500/20' },
+    purple: { bg: 'bg-purple-500/10 dark:bg-purple-500/20', text: 'text-purple-600 dark:text-purple-400', border: 'border-purple-500/20' },
+    red: { bg: 'bg-red-500/10 dark:bg-red-500/20', text: 'text-red-600 dark:text-red-400', border: 'border-red-500/20' },
   };
 
   const scoreData = analyticsData ? Object.entries(analyticsData.score_distribution || {}).map(([grade, count]) => ({
@@ -79,50 +83,64 @@ export const DashboardPage: React.FC = () => {
   })) : [];
 
   return (
-    <div className="space-y-8">
-      {/* Welcome Banner */}
+    <div className="space-y-8 pb-12">
+      
+      {/* ─── Ultra-Modern Glassmorphic Welcome Banner ─── */}
       <motion.div
-        initial={{ opacity: 0, y: -10 }}
+        initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="bg-gradient-to-r from-[#005BAC] via-[#0A6FD8] to-slate-900 rounded-2xl p-6 lg:p-8 text-white shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6"
+        className="relative rounded-3xl overflow-hidden glass-card border border-slate-200/80 dark:border-slate-800 shadow-2xl bg-gradient-to-r from-[#005BAC] via-[#0A6FD8] to-[#071426] text-white p-6 sm:p-8 lg:p-10"
       >
-        <div className="relative z-10 max-w-xl">
-          <span className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-semibold tracking-wide uppercase">
-            Teacher Command Center
-          </span>
-          <h1 className="text-2xl lg:text-3xl font-extrabold mt-3">
-            Welcome back, {user?.full_name}
-          </h1>
-          <p className="text-blue-100 text-sm mt-1">
-            {activeClass
-              ? `Currently managing ${activeClass.course_name} (${activeClass.course_code}) for ${activeClass.year_label} Section ${activeClass.section_name}.`
-              : 'Select a class to view targeted insights and manage attendance.'}
-          </p>
+        {/* Glow Orbs */}
+        <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-[#8CC63F]/20 blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full bg-blue-400/20 blur-3xl pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8">
+          <div className="space-y-4 max-w-xl text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-extrabold border border-white/20">
+              <Sparkles className="w-4 h-4 text-[#8CC63F]" />
+              <span>Faculty Command Center • Adamas OS</span>
+            </div>
+            
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight">
+              Welcome Back, <br className="hidden sm:inline" />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-[#8CC63F]">
+                {user?.full_name || 'Faculty Member'}
+              </span>
+            </h1>
+
+            <p className="text-xs sm:text-sm text-slate-200 font-normal leading-relaxed">
+              {activeClass
+                ? `Active Context: ${activeClass.course_name} (${activeClass.course_code}) • ${activeClass.year_label} Section ${activeClass.section_name}.`
+                : 'Select an active class context from the top navigation to view real-time student insights.'}
+            </p>
+          </div>
+
+          {/* Banner Graphic Showcase */}
+          <div className="relative z-10 w-full sm:w-80 h-44 rounded-2xl overflow-hidden shadow-2xl border border-white/20 bg-slate-950/80 p-2 flex-shrink-0">
+            <img
+              src="/images/login_hero_illustration.png"
+              alt="Academic Intelligence Command Center"
+              className="w-full h-full object-contain bg-slate-950 rounded-xl"
+            />
+          </div>
         </div>
-        <div className="relative z-10 w-full md:w-64 h-32 md:h-40 rounded-xl overflow-hidden shadow-lg border border-white/20 flex-shrink-0 bg-white/10 backdrop-blur-sm">
-          <img
-            src="/images/hero_illustration.png"
-            alt="Academic Operations"
-            className="w-full h-full object-cover bg-white/5"
-          />
-        </div>
-        <div className="absolute -right-8 -bottom-8 w-40 h-40 rounded-full bg-white/5" />
-        <div className="absolute -right-2 -top-10 w-28 h-28 rounded-full bg-white/5" />
       </motion.div>
 
-      {/* Metric Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+      {/* ─── Metric Cards Grid ─── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {loading ? (
           Array(4).fill(0).map((_, i) => (
-            <div key={i} className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-              <SkeletonBlock className="h-3 w-24 mb-3" />
-              <SkeletonBlock className="h-8 w-14" />
+            <div key={i} className="glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+              <SkeletonBlock className="h-4 w-24 mb-3" />
+              <SkeletonBlock className="h-8 w-16" />
             </div>
           ))
         ) : (
           metrics.map((m, i) => {
             const Icon = m.icon;
+            const style = colorMap[m.color];
             return (
               <motion.div
                 key={m.label}
@@ -130,15 +148,18 @@ export const DashboardPage: React.FC = () => {
                 initial="hidden"
                 animate="visible"
                 variants={cardVariants}
-                className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between hover:shadow-md transition-all duration-200"
+                className="glass-card-hover p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex items-center justify-between cursor-default transition-all duration-300"
               >
-                <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">{m.label}</p>
-                  <h3 className={`text-2xl font-black mt-1 ${m.isRisk ? 'text-red-600 dark:text-red-400' : 'text-slate-900 dark:text-white'}`}>
+                <div className="space-y-1">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                    {m.label}
+                  </span>
+                  <h3 className={`text-3xl font-black ${m.isRisk ? 'text-red-500' : 'text-slate-900 dark:text-white'}`}>
                     {m.value}
                   </h3>
+                  <p className="text-[10px] text-slate-500 font-medium">{m.subtext}</p>
                 </div>
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${colorMap[m.color]}`}>
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${style.bg} ${style.text} ${style.border}`}>
                   <Icon className="w-6 h-6" />
                 </div>
               </motion.div>
@@ -147,75 +168,82 @@ export const DashboardPage: React.FC = () => {
         )}
       </div>
 
-      {/* Embedded Class Analytics Section */}
+      {/* ─── Embedded Class Analytics Section ─── */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15, duration: 0.4 }}
-        className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6"
+        className="glass-card p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-6"
       >
-        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-500 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#005BAC] to-[#8CC63F] text-white flex items-center justify-center font-black shadow-md">
               <BarChart3 className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-slate-900 dark:text-white">Class Analytics & Performance Intelligence</h2>
-              <p className="text-xs text-slate-500">Live metrics & distribution diagnostics for active class</p>
+              <h2 className="text-lg font-extrabold text-slate-900 dark:text-white">Class Analytics & Performance Diagnostic</h2>
+              <p className="text-xs text-slate-500 font-medium">Real-time attendance velocity & score distribution for active class</p>
             </div>
           </div>
           {analyticsData && (
-            <span className="text-xs font-bold px-3 py-1 rounded-full bg-[#005BAC]/10 text-[#005BAC] dark:bg-[#8CC63F]/20 dark:text-[#8CC63F]">
-              {activeClass?.year_label} - Sec {activeClass?.section_name}
+            <span className="text-xs font-bold px-3.5 py-1.5 rounded-full bg-[#005BAC]/10 text-[#005BAC] dark:bg-[#8CC63F]/20 dark:text-[#8CC63F] border border-[#005BAC]/20 dark:border-[#8CC63F]/30">
+              {activeClass?.year_label} • Section {activeClass?.section_name}
             </span>
           )}
         </div>
 
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <SkeletonBlock className="h-64 rounded-xl" />
-            <SkeletonBlock className="h-64 rounded-xl" />
+            <SkeletonBlock className="h-64 rounded-2xl" />
+            <SkeletonBlock className="h-64 rounded-2xl" />
           </div>
         ) : !analyticsData ? (
-          <div className="p-8 text-center text-slate-500 text-xs bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+          <div className="p-8 text-center text-slate-500 text-xs bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700">
             Select a class from the top menu to view detailed analytics distribution.
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {/* Grade Bar Chart */}
-            <div className="bg-slate-50/50 dark:bg-slate-800/40 p-5 rounded-xl border border-slate-100 dark:border-slate-800">
-              <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-4">Grade Distribution</h4>
-              <div className="h-56">
+            <div className="lg:col-span-7 bg-slate-50/60 dark:bg-slate-800/40 p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+                  Grade Distribution Overview
+                </h4>
+                <span className="text-[10px] font-bold text-[#005BAC] dark:text-[#8CC63F]">
+                  Total Evaluated: 60 Students
+                </span>
+              </div>
+              <div className="h-60 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={scoreData}>
                     <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
-                    <XAxis dataKey="grade" stroke="#888888" fontSize={11} />
-                    <YAxis stroke="#888888" fontSize={11} />
-                    <Tooltip contentStyle={{ backgroundColor: '#0F172A', borderColor: '#334155', borderRadius: '8px', color: '#fff', fontSize: '12px' }} />
-                    <Bar dataKey="count" fill="#005BAC" radius={[4, 4, 0, 0]} />
+                    <XAxis dataKey="grade" stroke="#94a3b8" fontSize={11} />
+                    <YAxis stroke="#94a3b8" fontSize={11} />
+                    <Tooltip contentStyle={{ backgroundColor: '#0F172A', borderColor: '#334155', borderRadius: '12px', color: '#fff', fontSize: '12px' }} />
+                    <Bar dataKey="count" fill="#005BAC" radius={[6, 6, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
-            {/* Performance Metric Cards */}
-            <div className="space-y-4 flex flex-col justify-center">
-              <div className="p-5 bg-slate-50/50 dark:bg-slate-800/40 rounded-xl border border-slate-100 dark:border-slate-800 flex items-center justify-between">
+            {/* Performance Metric Summaries */}
+            <div className="lg:col-span-5 space-y-4 flex flex-col justify-center">
+              <div className="p-5 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 rounded-2xl border border-emerald-500/20 flex items-center justify-between">
                 <div>
-                  <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">Average Class Attendance</span>
-                  <p className="text-3xl font-black text-slate-900 dark:text-white mt-1">{analyticsData.average_attendance}%</p>
+                  <span className="text-xs text-slate-500 font-extrabold uppercase tracking-wider">Average Class Attendance</span>
+                  <p className="text-3xl font-black text-emerald-600 dark:text-emerald-400 mt-1">{analyticsData.average_attendance}%</p>
                 </div>
-                <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-500 flex items-center justify-center font-bold text-sm">
-                  {analyticsData.average_attendance >= 75 ? 'Good' : 'Warning'}
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-500 flex items-center justify-center font-bold text-sm">
+                  {analyticsData.average_attendance >= 75 ? 'Healthy' : 'Risk'}
                 </div>
               </div>
 
-              <div className="p-5 bg-slate-50/50 dark:bg-slate-800/40 rounded-xl border border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <div className="p-5 bg-gradient-to-r from-[#005BAC]/10 to-[#8CC63F]/10 rounded-2xl border border-[#005BAC]/20 flex items-center justify-between">
                 <div>
-                  <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">Average Assessment Score</span>
+                  <span className="text-xs text-slate-500 font-extrabold uppercase tracking-wider">Average Assessment Score</span>
                   <p className="text-3xl font-black text-[#005BAC] dark:text-[#8CC63F] mt-1">{analyticsData.average_score} / 100</p>
                 </div>
-                <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-[#005BAC] dark:text-[#8CC63F] flex items-center justify-center font-bold text-sm">
+                <div className="w-12 h-12 rounded-2xl bg-[#005BAC]/20 text-[#005BAC] dark:text-[#8CC63F] flex items-center justify-center font-bold text-sm">
                   Score
                 </div>
               </div>
@@ -224,30 +252,32 @@ export const DashboardPage: React.FC = () => {
         )}
       </motion.div>
 
-      {/* Main Two-Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* ─── Main Two-Column Layout (Schedule & Quick Actions) ─── */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
         {/* Today's Schedule */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-8 space-y-6">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.4 }}
-            className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm"
+            className="glass-card p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-6"
           >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+              <h2 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
                 <Clock className="w-5 h-5 text-[#005BAC] dark:text-[#8CC63F]" />
-                Today's Teaching Schedule
+                <span>Today's Teaching Schedule</span>
               </h2>
               <Link to="/timetable" className="text-xs font-bold text-[#005BAC] dark:text-[#8CC63F] hover:underline flex items-center gap-1">
-                Full Routine <ArrowRight className="w-3.5 h-3.5" />
+                <span>View Full Routine</span>
+                <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
 
             {loading ? (
               <div className="space-y-3">
                 {Array(3).fill(0).map((_, i) => (
-                  <div key={i} className="p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
+                  <div key={i} className="p-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
                     <SkeletonBlock className="h-3 w-20 mb-2" />
                     <SkeletonBlock className="h-4 w-48 mb-1" />
                     <SkeletonBlock className="h-3 w-36" />
@@ -255,7 +285,7 @@ export const DashboardPage: React.FC = () => {
                 ))}
               </div>
             ) : todaySchedule.length === 0 ? (
-              <div className="py-8 text-center text-slate-500 text-sm">
+              <div className="py-8 text-center text-slate-500 text-xs bg-slate-50 dark:bg-slate-800/50 rounded-2xl">
                 No classes scheduled for today.
               </div>
             ) : (
@@ -266,28 +296,28 @@ export const DashboardPage: React.FC = () => {
                     initial={{ opacity: 0, x: -12 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.1 + i * 0.06, duration: 0.3 }}
-                    className="p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 flex items-center justify-between hover:border-[#005BAC]/30 transition-colors duration-200"
+                    className="p-4 sm:p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-[#005BAC] dark:hover:border-[#8CC63F] transition-all duration-200"
                   >
-                    <div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-900/50 text-[#005BAC] dark:text-blue-300">
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-lg bg-[#005BAC]/10 text-[#005BAC] dark:bg-[#8CC63F]/20 dark:text-[#8CC63F]">
                         {cls.start_time} - {cls.end_time}
                       </span>
-                      <h4 className="font-bold text-sm text-slate-900 dark:text-white mt-1">
+                      <h4 className="font-extrabold text-sm text-slate-900 dark:text-white pt-1">
                         {cls.course_name} ({cls.course_code})
                       </h4>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
                         {cls.year_label} • Section {cls.section_name} • Room: {cls.room}
                       </p>
                     </div>
                     <div>
                       {cls.attendance_taken ? (
-                        <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400">
-                          Attendance Taken
+                        <span className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                          Attendance Completed
                         </span>
                       ) : (
                         <Link
                           to="/attendance"
-                          className="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#005BAC] text-white hover:bg-[#0A6FD8] transition-colors"
+                          className="btn-magnetic px-4 py-2.5 rounded-xl text-xs font-extrabold bg-[#005BAC] text-white hover:bg-[#0A6FD8] transition-colors shadow-md inline-block"
                         >
                           Take Attendance
                         </Link>
@@ -300,55 +330,71 @@ export const DashboardPage: React.FC = () => {
           </motion.div>
         </div>
 
-        {/* Quick Actions & AI Assistant launcher */}
-        <div className="space-y-6">
+        {/* AI Copilot & Quick Actions */}
+        <div className="lg:col-span-4 space-y-6">
+          {/* AI Copilot Card */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.4 }}
-            className="bg-gradient-to-br from-slate-900 to-slate-800 p-6 rounded-2xl text-white shadow-md border border-slate-700/50"
+            className="rounded-3xl bg-gradient-to-br from-slate-950 via-[#071426] to-slate-900 p-6 text-white shadow-xl border border-slate-800 space-y-4 relative overflow-hidden"
           >
-            <div className="flex items-center gap-2 text-[#8CC63F] font-bold text-xs uppercase tracking-wider">
+            <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-[#8CC63F]/15 blur-2xl pointer-events-none" />
+
+            <div className="flex items-center gap-2 text-[#8CC63F] font-extrabold text-xs uppercase tracking-wider">
               <Sparkles className="w-4 h-4" /> EduPilot AI Copilot
             </div>
-            <h3 className="font-extrabold text-lg mt-2">Ask EduPilot Anything</h3>
-            <p className="text-slate-300 text-xs mt-1">
-              "Show students with attendance under 75% in 3rd Year Sec B" or "Generate quiz on Operating Systems".
+            
+            <h3 className="font-black text-xl leading-tight">
+              Classroom RAG Intelligence
+            </h3>
+            
+            <p className="text-slate-300 text-xs leading-relaxed">
+              "Show students with attendance under 75% in 3rd Year Sec B" or "Generate a 10-question quiz on Operating Systems."
             </p>
+
             <Link
               to="/ai"
-              className="mt-4 w-full py-2.5 px-4 bg-[#8CC63F] hover:bg-[#6FAF2E] text-slate-950 text-xs font-extrabold rounded-lg flex items-center justify-center gap-2 transition-colors shadow"
+              className="btn-magnetic w-full py-3 px-4 bg-[#8CC63F] hover:bg-[#6FAF2E] text-slate-950 text-xs font-black rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg"
             >
-              Open AI Workspace
+              <span>Open AI Workspace</span>
+              <ArrowRight className="w-4 h-4" />
             </Link>
           </motion.div>
 
+          {/* Quick Actions Card */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.4 }}
-            className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3"
+            className="glass-card p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-4"
           >
-            <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-              Quick Actions
+            <h3 className="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">
+              Quick Action Shortcuts
             </h3>
-            <div className="grid grid-cols-2 gap-2">
-              <Link to="/attendance" className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200 flex flex-col items-center gap-1.5 text-center transition-colors">
-                <CheckSquare className="w-5 h-5 text-[#005BAC]" /> Take Attendance
+            <div className="grid grid-cols-2 gap-3">
+              <Link to="/attendance" className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 hover:bg-[#005BAC]/10 dark:hover:bg-[#8CC63F]/20 text-xs font-bold text-slate-800 dark:text-slate-200 flex flex-col items-center gap-2 text-center transition-all border border-slate-200/60 dark:border-slate-700">
+                <CheckSquare className="w-5 h-5 text-[#005BAC] dark:text-[#8CC63F]" />
+                <span>Attendance</span>
               </Link>
-              <Link to="/assignments" className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200 flex flex-col items-center gap-1.5 text-center transition-colors">
-                <FileText className="w-5 h-5 text-purple-500" /> Create Assignment
+              <Link to="/assignments" className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 hover:bg-[#005BAC]/10 dark:hover:bg-[#8CC63F]/20 text-xs font-bold text-slate-800 dark:text-slate-200 flex flex-col items-center gap-2 text-center transition-all border border-slate-200/60 dark:border-slate-700">
+                <FileText className="w-5 h-5 text-purple-500" />
+                <span>Assignments</span>
               </Link>
-              <Link to="/daily-notes" className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200 flex flex-col items-center gap-1.5 text-center transition-colors">
-                <BookOpen className="w-5 h-5 text-emerald-500" /> Daily Notes
+              <Link to="/daily-notes" className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 hover:bg-[#005BAC]/10 dark:hover:bg-[#8CC63F]/20 text-xs font-bold text-slate-800 dark:text-slate-200 flex flex-col items-center gap-2 text-center transition-all border border-slate-200/60 dark:border-slate-700">
+                <BookOpen className="w-5 h-5 text-emerald-500" />
+                <span>Daily Notes</span>
               </Link>
-              <Link to="/documents" className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200 flex flex-col items-center gap-1.5 text-center transition-colors">
-                <Users className="w-5 h-5 text-amber-500" /> Document Studio
+              <Link to="/documents" className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 hover:bg-[#005BAC]/10 dark:hover:bg-[#8CC63F]/20 text-xs font-bold text-slate-800 dark:text-slate-200 flex flex-col items-center gap-2 text-center transition-all border border-slate-200/60 dark:border-slate-700">
+                <Users className="w-5 h-5 text-amber-500" />
+                <span>Doc Studio</span>
               </Link>
             </div>
           </motion.div>
         </div>
+
       </div>
+
     </div>
   );
 };

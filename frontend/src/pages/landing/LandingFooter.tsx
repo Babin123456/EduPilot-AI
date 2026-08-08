@@ -65,50 +65,7 @@ export const LandingFooter: React.FC<LandingFooterProps> = ({ onNavigate }) => {
       {/* ─── Top Animated Horizontal Divider Line ─── */}
       <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#005BAC] via-[#8CC63F] to-[#005BAC] opacity-80" />
 
-      {/* ─── MANDALA CORNER BORDER ORNAMENTS ─── */}
-      {/* Top Left Corner Mandala */}
-      <div className="absolute top-0 left-0 w-32 h-32 pointer-events-none text-[#005BAC] dark:text-[#8CC63F] opacity-25 dark:opacity-40">
-        <svg viewBox="0 0 100 100" className="w-full h-full">
-          <path d="M 0 0 L 100 0 C 80 20 80 40 100 60 C 60 60 60 80 60 100 L 0 100 Z" fill="none" stroke="currentColor" strokeWidth="1.5" />
-          <path d="M 0 0 L 70 0 C 50 20 50 35 70 50 C 50 50 50 70 50 70 L 0 70 Z" fill="currentColor" fillOpacity="0.1" />
-          <circle cx="20" cy="20" r="12" fill="none" stroke="currentColor" strokeWidth="1" />
-          <circle cx="20" cy="20" r="6" fill="currentColor" fillOpacity="0.2" />
-          <path d="M 0 40 C 20 40 40 20 40 0" fill="none" stroke="currentColor" strokeWidth="1" strokeDasharray="2 2" />
-        </svg>
-      </div>
 
-      {/* Top Right Corner Mandala */}
-      <div className="absolute top-0 right-0 w-32 h-32 pointer-events-none text-[#005BAC] dark:text-[#8CC63F] opacity-25 dark:opacity-40 transform scale-x-[-1]">
-        <svg viewBox="0 0 100 100" className="w-full h-full">
-          <path d="M 0 0 L 100 0 C 80 20 80 40 100 60 C 60 60 60 80 60 100 L 0 100 Z" fill="none" stroke="currentColor" strokeWidth="1.5" />
-          <path d="M 0 0 L 70 0 C 50 20 50 35 70 50 C 50 50 50 70 50 70 L 0 70 Z" fill="currentColor" fillOpacity="0.1" />
-          <circle cx="20" cy="20" r="12" fill="none" stroke="currentColor" strokeWidth="1" />
-          <circle cx="20" cy="20" r="6" fill="currentColor" fillOpacity="0.2" />
-          <path d="M 0 40 C 20 40 40 20 40 0" fill="none" stroke="currentColor" strokeWidth="1" strokeDasharray="2 2" />
-        </svg>
-      </div>
-
-      {/* Bottom Left Corner Mandala */}
-      <div className="absolute bottom-0 left-0 w-32 h-32 pointer-events-none text-[#005BAC] dark:text-[#8CC63F] opacity-25 dark:opacity-40 transform scale-y-[-1]">
-        <svg viewBox="0 0 100 100" className="w-full h-full">
-          <path d="M 0 0 L 100 0 C 80 20 80 40 100 60 C 60 60 60 80 60 100 L 0 100 Z" fill="none" stroke="currentColor" strokeWidth="1.5" />
-          <path d="M 0 0 L 70 0 C 50 20 50 35 70 50 C 50 50 50 70 50 70 L 0 70 Z" fill="currentColor" fillOpacity="0.1" />
-          <circle cx="20" cy="20" r="12" fill="none" stroke="currentColor" strokeWidth="1" />
-          <circle cx="20" cy="20" r="6" fill="currentColor" fillOpacity="0.2" />
-          <path d="M 0 40 C 20 40 40 20 40 0" fill="none" stroke="currentColor" strokeWidth="1" strokeDasharray="2 2" />
-        </svg>
-      </div>
-
-      {/* Bottom Right Corner Mandala */}
-      <div className="absolute bottom-0 right-0 w-32 h-32 pointer-events-none text-[#005BAC] dark:text-[#8CC63F] opacity-25 dark:opacity-40 transform scale-x-[-1] scale-y-[-1]">
-        <svg viewBox="0 0 100 100" className="w-full h-full">
-          <path d="M 0 0 L 100 0 C 80 20 80 40 100 60 C 60 60 60 80 60 100 L 0 100 Z" fill="none" stroke="currentColor" strokeWidth="1.5" />
-          <path d="M 0 0 L 70 0 C 50 20 50 35 70 50 C 50 50 50 70 50 70 L 0 70 Z" fill="currentColor" fillOpacity="0.1" />
-          <circle cx="20" cy="20" r="12" fill="none" stroke="currentColor" strokeWidth="1" />
-          <circle cx="20" cy="20" r="6" fill="currentColor" fillOpacity="0.2" />
-          <path d="M 0 40 C 20 40 40 20 40 0" fill="none" stroke="currentColor" strokeWidth="1" strokeDasharray="2 2" />
-        </svg>
-      </div>
 
       {/* ─── Ambient Glow Orbs ─── */}
       <div
