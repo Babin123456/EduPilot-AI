@@ -42,6 +42,20 @@ const TAB_ITEMS = [
 export const DocumentStudioSection: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const [activeTab, setActiveTab] = useState<string>('pdf');
+  const [paused, setPaused] = useState(false);
+
+  useEffect(() => {
+    if (paused) return;
+    const interval = setInterval(() => {
+      setActiveTab((prev) => {
+        const currentIndex = TAB_ITEMS.findIndex((t) => t.id === prev);
+        const nextIndex = (currentIndex + 1) % TAB_ITEMS.length;
+        return TAB_ITEMS[nextIndex].id;
+      });
+    }, 4000); // 4-Second Automatic Slide Flow
+
+    return () => clearInterval(interval);
+  }, [paused]);
 
   useEffect(() => {
     if (!sectionRef.current) return;
@@ -55,6 +69,7 @@ export const DocumentStudioSection: React.FC = () => {
   }, []);
 
   const currentTab = TAB_ITEMS.find((t) => t.id === activeTab) || TAB_ITEMS[0];
+
 
   return (
     <section id="documents" ref={sectionRef} className="py-28 bg-slate-50 dark:bg-[#0F172A] relative overflow-hidden transition-colors duration-200 wave-divider">
@@ -104,16 +119,21 @@ export const DocumentStudioSection: React.FC = () => {
           })}
         </div>
 
-        {/* Active Tab Showcase Display Card (Slider Content) */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentTab.id}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -16 }}
-            transition={{ duration: 0.3 }}
-            className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-white dark:bg-[#1E293B] rounded-3xl p-6 sm:p-10 border border-slate-200/80 dark:border-slate-800 shadow-2xl"
-          >
+        {/* Active Tab Showcase Display Card (Slider Content with Auto-Play & Hover Pause) */}
+        <div
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+        >
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentTab.id}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -16 }}
+              transition={{ duration: 0.3 }}
+              className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-white dark:bg-[#1E293B] rounded-3xl p-6 sm:p-10 border border-slate-200/80 dark:border-slate-800 shadow-2xl relative overflow-hidden"
+            >
+
             {/* Left Side: Interactive Document Text Details */}
             <div className="lg:col-span-7 space-y-6">
               <div className="flex items-center gap-3">
@@ -165,8 +185,9 @@ export const DocumentStudioSection: React.FC = () => {
             </div>
           </motion.div>
         </AnimatePresence>
-
+        </div>
       </div>
     </section>
+
   );
 };
