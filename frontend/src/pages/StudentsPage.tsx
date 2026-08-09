@@ -39,13 +39,18 @@ export const StudentsPage: React.FC = () => {
     })
       .then(res => {
         const raw = res.data.students || [];
-        // Clean mobile numbers (10 digits without +91 sign)
-        const enriched = raw.map((s: any, idx: number) => ({
-          ...s,
-          phone: s.phone ? String(s.phone).replace(/^\+91\s*/, '').trim() : `9830${Math.floor(100000 + idx * 12345)}`,
-        }));
+        // Clean mobile numbers (exact 10 digits without any minus signs or prefixes)
+        const enriched = raw.map((s: any, idx: number) => {
+          let cleanPhone = s.phone ? String(s.phone).replace(/\D/g, '') : `9830${Math.floor(100000 + idx * 12345)}`;
+          if (cleanPhone.length > 10) cleanPhone = cleanPhone.slice(-10);
+          return {
+            ...s,
+            phone: cleanPhone,
+          };
+        });
         setStudents(enriched);
         setTotal(res.data.total || 0);
+
       })
       .finally(() => setLoading(false));
   }, [activeClass, search]);

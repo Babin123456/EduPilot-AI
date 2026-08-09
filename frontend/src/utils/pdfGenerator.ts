@@ -352,39 +352,56 @@ export function generateDailyNotePDF(data: DailyNotePDFData) {
     'Date': data.date,
   });
 
-  // Key Concepts
-  y = addSectionTitle(doc, y, 'Key Concepts');
-  y = addBulletList(doc, y, data.keyConcepts);
-
   // Content / Notes body
-  y = addSectionTitle(doc, y, 'Lecture Notes');
-  y = addParagraph(doc, y, data.summary);
+  if (data.content) {
+    y = addSectionTitle(doc, y, 'Lecture Notes & Discussion Summary');
+    // Strip markdown headings for clean PDF text rendering
+    const cleanedContent = data.content
+      .replace(/^#+\s+/gm, '')
+      .replace(/\*\*/g, '')
+      .replace(/`/g, '');
+    y = addParagraph(doc, y, cleanedContent);
+  } else if (data.summary) {
+    y = addSectionTitle(doc, y, 'Lecture Notes');
+    y = addParagraph(doc, y, data.summary);
+  }
+
+  // Key Concepts
+  if (data.keyConcepts && data.keyConcepts.length > 0) {
+    y = addSectionTitle(doc, y, 'Key Concepts Covered');
+    y = addBulletList(doc, y, data.keyConcepts);
+  }
 
   // Discussion Points
-  y = addSectionTitle(doc, y, 'Discussion Points');
-  y = addBulletList(doc, y, data.discussionPoints);
+  if (data.discussionPoints && data.discussionPoints.length > 0) {
+    y = addSectionTitle(doc, y, 'Discussion Points');
+    y = addBulletList(doc, y, data.discussionPoints);
+  }
 
   // Practice Questions
-  y = addSectionTitle(doc, y, 'Practice Questions');
-  data.practiceQuestions.forEach((q, i) => {
-    if (y > doc.internal.pageSize.getHeight() - 30) {
-      doc.addPage();
-      y = 20;
-    }
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(...COLORS.dark);
-    const lines = doc.splitTextToSize(`${i + 1}. ${q}`, doc.internal.pageSize.getWidth() - 50);
-    for (const line of lines) {
-      doc.text(line, 24, y);
-      y += 5;
-    }
-    y += 2;
-  });
+  if (data.practiceQuestions && data.practiceQuestions.length > 0) {
+    y = addSectionTitle(doc, y, 'Practice Questions');
+    data.practiceQuestions.forEach((q, i) => {
+      if (y > doc.internal.pageSize.getHeight() - 30) {
+        doc.addPage();
+        y = 20;
+      }
+      doc.setFontSize(9);
+      doc.setFont('times', 'normal');
+      doc.setTextColor(...COLORS.dark);
+      const lines = doc.splitTextToSize(`${i + 1}. ${q}`, doc.internal.pageSize.getWidth() - 50);
+      for (const line of lines) {
+        doc.text(line, 24, y);
+        y += 5;
+      }
+      y += 2;
+    });
+  }
 
   addFooter(doc);
   doc.save(`Discussion_Notes_${data.topic.replace(/\s+/g, '_')}.pdf`);
 }
+
 
 export interface ClassReportPDFData {
   courseName: string;
