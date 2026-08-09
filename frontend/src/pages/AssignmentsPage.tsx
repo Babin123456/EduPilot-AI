@@ -14,22 +14,108 @@ export const AssignmentsPage: React.FC = () => {
   const toast = useToast();
   const [assignments, setAssignments] = useState<any[]>([]);
 
-  // AI Generator Modal State
-  const [showGenModal, setShowGenModal] = useState(false);
-  const [topic, setTopic] = useState('');
-  const [numQuestions, setNumQuestions] = useState(5);
-  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
-  const [generating, setGenerating] = useState(false);
+  // Subject & Sub-Topic Catalog State
+  const [selectedSubject, setSelectedSubject] = useState<string>('');
 
-  // Markdown Preview State
-  const [generatedMarkdown, setGeneratedMarkdown] = useState<string | null>(null);
-  const [generatedQuestionsData, setGeneratedQuestionsData] = useState<any[]>([]);
-  const [activeTitle, setActiveTitle] = useState('');
+  const subjectCatalog: Record<string, string[]> = {
+    'Database Management Systems (DBMS)': [
+      'Relational Algebra & Tuple Calculus',
+      'Entity-Relationship (ER) & EER Modeling',
+      '1NF, 2NF, 3NF & BCNF Normalization',
+      'SQL Complex DDL, DML & Subqueries',
+      'Joins (Inner, Outer, Cross, Self-Join)',
+      'Indexing Structures & B/B+ Trees',
+      'Transaction Processing & ACID Properties',
+      'Concurrency Control & 2PL Locks',
+      'Deadlock Detection & Prevention Algorithms',
+      'Database Recovery & WAL Write-Ahead Logging',
+      'Query Optimization & Cost Estimation',
+      'NoSQL Databases & MongoDB Document Store',
+      'Distributed Databases & CAP Theorem',
+      'Sharding & Horizontal Partitioning',
+      'Stored Procedures, Triggers & Views',
+      'Database Security & Role-Based Access',
+      'Data Warehousing & OLAP Cubes',
+      'Object-Relational Mapping (ORM) Patterns',
+      'Vector Databases & Embedding Indexing',
+      'Cloud Relational Engines (Spanner & BigQuery)',
+    ],
+    'Operating Systems (OS)': [
+      'Process State Transitions & PCB',
+      'CPU Scheduling (FCFS, SJF, RR, Priority)',
+      'Thread Synchronization & Mutex Locks',
+      'Semaphores & Classical IPC Problems',
+      'Deadlock Characterization & Banker Algorithm',
+      'Memory Paging & Segmentation Models',
+      'Virtual Memory & Page Replacement (LRU, FIFO)',
+      'Thrashing & Working Set Model',
+      'File System Implementation & Inodes',
+      'Disk Storage Scheduling (SSTF, SCAN, C-SCAN)',
+      'I/O Subsystem & DMA Controller',
+      'Kernel Microkernel vs Monolithic Design',
+      'System Calls & Interrupt Service Routines',
+      'Virtualization & Hypervisors (KVM, ESXi)',
+      'Containerization Architecture (Docker)',
+      'Distributed OS & Clock Synchronization',
+      'Real-Time Operating Systems (RTOS)',
+      'Memory Allocation (First Fit, Best Fit, Buddy)',
+      'Security, Authentication & Access Control',
+      'POSIX Signal Handling & Process Forking',
+    ],
+    'Computer Networks (CN)': [
+      'OSI 7-Layer vs TCP/IP Protocol Stack',
+      'Physical Layer Transmission Media & Modulation',
+      'Data Link Layer Framing & Error Control',
+      'CSMA/CD & CSMA/CA MAC Protocols',
+      'Ethernet Standards & Switching Mechanics',
+      'IP Addressing, Subnetting & CIDR Notation',
+      'IPv4 vs IPv6 Header Comparison',
+      'Routing Algorithms (Dijkstra Link-State, Distance-Vector)',
+      'BGP & OSPF Autonomous Routing',
+      'Transport Layer TCP 3-Way Handshake & Teardown',
+      'TCP Congestion Control & Sliding Window',
+      'UDP Protocol Architecture & Real-Time Streaming',
+      'DNS Domain Resolution Architecture',
+      'HTTP/1.1 vs HTTP/2 vs HTTP/3 QUIC',
+      'DHCP Automatic IP Assignment',
+      'Network Security (TLS/SSL Handshake & IPsec)',
+      'Firewalls, NAT & Proxy Server Architectures',
+      'Wireless Networks & 802.11 Wi-Fi Standards',
+      'Software-Defined Networking (SDN)',
+      'Packet Sniffing & Network Traffic Analysis',
+    ],
+    'Data Structures & Algorithms (DSA)': [
+      'Asymptotic Notation (Big-O, Omega, Theta)',
+      'Array Operations & Dynamic Sizing',
+      'Singly, Doubly & Circular Linked Lists',
+      'Stack Implementation & Expression Parsing',
+      'Queue Variants (Deque, Priority Queue, Circular)',
+      'Binary Trees & Tree Traversals (In/Pre/Post/Level)',
+      'Binary Search Trees (BST) & Operations',
+      'AVL Trees & Rotations Balancing',
+      'Red-Black Trees & Properties',
+      'Binary Heaps & HeapSort Mechanics',
+      'Hash Tables, Hash Functions & Collision Resolution',
+      'Graph Representations (Adjacency Matrix/List)',
+      'Breadth-First Search (BFS) & Depth-First Search (DFS)',
+      'Minimum Spanning Trees (Kruskal & Prim)',
+      'Single-Source Shortest Paths (Dijkstra & Bellman-Ford)',
+      'All-Pairs Shortest Paths (Floyd-Warshall)',
+      'Divide and Conquer (MergeSort & QuickSort)',
+      'Dynamic Programming (Knapsack, LCS, LIS)',
+      'Greedy Algorithms & Huffman Coding',
+      'Trie Data Structures & String Matching Algorithms',
+    ],
+  };
 
   useEffect(() => {
     if (!activeClass) return;
     fetchAssignments();
+    // Default subject selection
+    const defaultSub = Object.keys(subjectCatalog).find(s => s.toLowerCase().includes(activeClass.course_name.toLowerCase())) || Object.keys(subjectCatalog)[0];
+    setSelectedSubject(defaultSub);
   }, [activeClass]);
+
 
   const fetchAssignments = () => {
     api.get(`/assignments?class_id=${activeClass?.id}`)
@@ -220,42 +306,55 @@ export const AssignmentsPage: React.FC = () => {
               {/* Subject Specification Selection */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
-                  Subject Specification *
+                  Select Subject Specification *
                 </label>
-                <div className="p-3 bg-blue-50 dark:bg-blue-950/40 rounded-xl border border-blue-200 dark:border-blue-800 text-xs font-bold text-[#005BAC] dark:text-[#8CC63F] flex items-center justify-between">
-                  <span>{activeClass?.course_name || 'Computer Science & Engineering'} ({activeClass?.course_code || 'CS301'})</span>
-                  <span className="text-[10px] px-2 py-0.5 bg-white dark:bg-slate-900 rounded font-semibold uppercase">{activeClass?.year_label}</span>
+                <select
+                  value={selectedSubject}
+                  onChange={(e) => {
+                    const newSub = e.target.value;
+                    setSelectedSubject(newSub);
+                    const subTopics = subjectCatalog[newSub] || [];
+                    if (subTopics.length > 0) setTopic(subTopics[0]);
+                  }}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-bold text-[#005BAC] dark:text-[#8CC63F] focus:outline-none cursor-pointer"
+                >
+                  {Object.keys(subjectCatalog).map((subKey) => (
+                    <option key={subKey} value={subKey}>{subKey}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* 20 Sub-Topics Picker */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase">
+                    Select Syllabus Sub-Topic (20 Available) *
+                  </label>
+                  <span className="text-[10px] font-bold text-slate-400">
+                    {(subjectCatalog[selectedSubject] || []).length} Topics
+                  </span>
+                </div>
+                <div className="max-h-40 overflow-y-auto border border-slate-200 dark:border-slate-800 rounded-xl p-2 bg-slate-50/50 dark:bg-slate-950/50 space-y-1">
+                  {(subjectCatalog[selectedSubject] || []).map((subTopic, idx) => {
+                    const isSelected = topic === subTopic;
+                    return (
+                      <div
+                        key={idx}
+                        onClick={() => setTopic(subTopic)}
+                        className={`p-2 rounded-lg text-xs cursor-pointer flex items-center justify-between transition-colors ${
+                          isSelected
+                            ? 'bg-[#005BAC] text-white font-bold shadow-sm'
+                            : 'hover:bg-slate-200/60 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200'
+                        }`}
+                      >
+                        <span className="truncate pr-2">{idx + 1}. {subTopic}</span>
+                        {isSelected && <span className="text-[10px] px-1.5 py-0.5 bg-white/20 rounded">Selected</span>}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* Recommended Topics Selector */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
-                  Recommended Syllabus Topics (Click to Select 1)
-                </label>
-                <div className="flex flex-wrap gap-1.5 mb-2">
-                  {[
-                    `${activeClass?.course_name || 'Subject'} Fundamentals & Architecture`,
-                    `Advanced ${activeClass?.course_name || 'Algorithmic'} Implementation`,
-                    `Real-World Case Study & Optimization`,
-                    `Mathematical Proofs & System Bounds`,
-                    `Enterprise Security & Fault Tolerance`,
-                  ].map((recTopic, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setTopic(recTopic)}
-                      className={`text-[11px] px-2.5 py-1 rounded-lg border font-semibold transition-all ${
-                        topic === recTopic
-                          ? 'bg-[#005BAC] text-white border-[#005BAC] shadow-sm scale-105'
-                          : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-[#005BAC]'
-                      }`}
-                    >
-                      {recTopic}
-                    </button>
-                  ))}
-                </div>
-              </div>
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Selected Assignment Topic *</label>
