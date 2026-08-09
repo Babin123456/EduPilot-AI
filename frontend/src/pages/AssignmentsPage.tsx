@@ -30,8 +30,30 @@ export const AssignmentsPage: React.FC = () => {
   const [selectedSubject, setSelectedSubject] = useState<string>('');
 
   const subjectCatalog: Record<string, string[]> = {
-    'Blockchain Technology': [
+    'Cyber Security': [
 
+      'Network Security Fundamentals & CIA Triad',
+      'Symmetric & Asymmetric Encryption Architecture',
+      'Public Key Infrastructure (PKI) & Digital Certificates',
+      'Web Application Vulnerabilities (OWASP Top 10)',
+      'SQL Injection & Cross-Site Scripting (XSS) Prevention',
+      'Ethical Hacking & Penetration Testing Frameworks',
+      'Firewalls, IDS & IPS Intrusion Detection Systems',
+      'Malware Analysis (Ransomware, Trojans, Rootkits)',
+      'Security Information and Event Management (SIEM)',
+      'Zero Trust Security Architecture & Micro-segmentation',
+      'Cloud Security & Identity Access Management (IAM)',
+      'Incident Response & Forensics Investigation',
+      'Network Sniffing, MITM Attacks & Packet Analysis',
+      'Authentication Protocols (OAuth2, SAML, Multi-Factor)',
+      'Endpoint Detection and Response (EDR) Systems',
+      'Cryptography Hash Functions (SHA-3) & Collision Resistance',
+      'Buffer Overflow Exploitation & Stack Protections',
+      'Denial of Service (DoS/DDoS) Mitigation Strategies',
+      'Cyber Threat Intelligence & MITRE ATT&CK Framework',
+      'Compliance Standards (ISO 27001, GDPR, NIST)',
+    ],
+    'Blockchain Technology': [
       'Distributed Ledger Technology (DLT) Architecture',
       'Cryptographic Hashing (SHA-256) & Merkle Trees',
       'Asymmetric Encryption & Elliptic Curve Digital Signatures (ECDSA)',
@@ -53,6 +75,7 @@ export const AssignmentsPage: React.FC = () => {
       'Consensus Attack Vectors (51% Attack, Sybil Attack)',
       'CBDC & Enterprise Blockchain Integration',
     ],
+
     'Database Management Systems (DBMS)': [
       'Relational Algebra & Tuple Calculus',
       'Entity-Relationship (ER) & EER Modeling',
@@ -157,13 +180,15 @@ export const AssignmentsPage: React.FC = () => {
     );
 
     if (!matchedSub) {
-      if (courseLower.includes('block') || courseLower.includes('chain')) matchedSub = 'Blockchain Technology';
+      if (courseLower.includes('cyber') || courseLower.includes('security')) matchedSub = 'Cyber Security';
+      else if (courseLower.includes('block') || courseLower.includes('chain')) matchedSub = 'Blockchain Technology';
       else if (courseLower.includes('dbms') || courseLower.includes('database')) matchedSub = 'Database Management Systems (DBMS)';
       else if (courseLower.includes('os') || courseLower.includes('operating')) matchedSub = 'Operating Systems (OS)';
       else if (courseLower.includes('network')) matchedSub = 'Computer Networks (CN)';
       else if (courseLower.includes('algo') || courseLower.includes('structure') || courseLower.includes('dsa')) matchedSub = 'Data Structures & Algorithms (DSA)';
       else matchedSub = Object.keys(subjectCatalog)[0];
     }
+
 
 
     setSelectedSubject(matchedSub);
