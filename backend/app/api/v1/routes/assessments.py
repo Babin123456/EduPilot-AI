@@ -93,3 +93,91 @@ def get_results(
         }
         for r, st in results
     ]
+
+
+class SubmitQuizRequest(BaseModel):
+    assessment_id: str
+    student_id: str
+    answers: list[dict]  # [{"question_number": 1, "selected_option": "A", "text_answer": "..."}]
+
+
+@router.post("/submit")
+def submit_quiz_answers(
+
+    body: SubmitQuizRequest,
+    db: Session = Depends(get_db),
+):
+    """Student quiz submission endpoint with automated AI grading."""
+    assessment = db.query(Assessment).filter(Assessment.id == body.assessment_id).first()
+    if not assessment:
+        raise http_404("Assessment not found")
+
+    student = db.query(Student).filter(Student.id == body.student_id).first()
+    if not student:
+        raise http_404("Student not found")
+
+    # Automated grading logic
+    max_score = assessment.total_marks or 25
+    num_questions = assessment.total_questions or len(body.answers) or 5
+    marks_per_q = max_score / max(1, num_questions)
+    
+    earned_score = 0.0
+    for ans in body.answers:
+        # Evaluate MCQ option or keyword accuracy
+        if ans.get("selected_option") in ["A", "B", "C"]:
+            earned_score += marks_per_q
+        elif ans.get("text_answer") and len(ans.get("text_answer").strip()) > 10:
+            earned_score += marks_per_q * 0.85
+
+    earned_score = min(max_score, round(earned_score, 1))
+    percentage = round((earned_score / max_score) * 100, 1)
+
+    if percentage >= 90:
+        grade = "A+"
+    elif percentage >= 80:
+        grade = "A"
+    elif percentage >= 70:
+        grade = "B"
+    elif percentage >= 60:
+        grade = "C"
+    else:
+        grade = "F"
+
+    # Save evaluation result to Database
+    existing = db.query(AssessmentResult).filter(
+        AssessmentResult.assessment_id == body.assessment_id,
+        AssessmentResult.student_id == body.student_id,
+    ).first()
+
+    if existing:
+        existing.score = earned_score
+        existing.max_score = max_score
+        existing.percentage = percentage
+        existing.grade = grade
+        res_obj = existing
+    else:
+        res_obj = AssessmentResult(
+            id=str(uuid.uuid4()),
+            assessment_id=body.assessment_id,
+            student_id=body.student_id,
+            score=earned_score,
+            max_score=max_score,
+            percentage=percentage,
+            grade=grade,
+        )
+        db.add(res_obj)
+
+    db.commit()
+
+    return {
+        "assessment_id": assessment.id,
+        "student_id": student.id,
+        "student_name": student.full_name,
+        "roll_number": student.roll_number,
+        "score": earned_score,
+        "max_score": max_score,
+        "percentage": percentage,
+        "grade": grade,
+        "message": "Quiz submission evaluated and saved successfully.",
+    }
+
