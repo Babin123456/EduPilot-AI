@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { api } from '../api/client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FileText, Sparkles, Download, Send, Eye, X, Loader2 } from 'lucide-react';
+import { FileText, Sparkles, Download, Send, Eye, X, Loader2, ClipboardList } from 'lucide-react';
 
 import { generateQuizPDF } from '../utils/pdfGenerator';
 
@@ -343,7 +343,24 @@ export const AssignmentsPage: React.FC = () => {
 
       {/* Assignment List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {assignments.map((a) => (
+        {assignments.length === 0 ? (
+          <div className="md:col-span-2 lg:col-span-3 rounded-3xl border border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-10 text-center shadow-sm">
+            <div className="w-14 h-14 mx-auto rounded-2xl bg-[#005BAC]/10 dark:bg-[#8CC63F]/15 text-[#005BAC] dark:text-[#8CC63F] flex items-center justify-center">
+              <ClipboardList className="w-7 h-7" />
+            </div>
+            <h2 className="mt-4 text-base font-black text-slate-900 dark:text-white">No assignments yet</h2>
+            <p className="mt-1 max-w-md mx-auto text-xs leading-relaxed text-slate-500">
+              There are no assignments for {activeClass?.course_name || 'this class'} yet. Generate an AI assignment to get started.
+            </p>
+            <button
+              onClick={() => setShowGenModal(true)}
+              className="mt-5 px-4 py-2.5 bg-[#005BAC] hover:bg-[#0A6FD8] text-white text-xs font-black rounded-xl inline-flex items-center gap-2 transition-colors"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[#8CC63F]" />
+              Generate Assignment
+            </button>
+          </div>
+        ) : assignments.map((a) => (
           <div key={a.id} className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-bold uppercase px-2 py-0.5 bg-blue-50 text-adamas-blue rounded">
@@ -501,4 +518,3 @@ export const AssignmentsPage: React.FC = () => {
     </div>
   );
 };
-
