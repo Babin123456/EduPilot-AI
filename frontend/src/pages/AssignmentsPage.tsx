@@ -285,6 +285,7 @@ export const AssignmentsPage: React.FC = () => {
           </div>
           <h1 className="text-2xl font-black">Assignments & Coursework Manager</h1>
           <p className="text-xs text-slate-100 font-medium">Generate AI assignment questions in raw Markdown, export styled PDFs, and email them to students in 1-Click.</p>
+        </div>
         <div className="flex items-center gap-3 relative z-10 flex-shrink-0">
           <button
             onClick={() => setShowGenModal(true)}
@@ -298,6 +299,8 @@ export const AssignmentsPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+
 
 
 
