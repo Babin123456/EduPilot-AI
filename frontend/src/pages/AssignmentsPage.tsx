@@ -29,8 +29,30 @@ export const AssignmentsPage: React.FC = () => {
   // Subject & Sub-Topic Catalog State
   const [selectedSubject, setSelectedSubject] = useState<string>('');
 
-
   const subjectCatalog: Record<string, string[]> = {
+    'Blockchain Technology': [
+
+      'Distributed Ledger Technology (DLT) Architecture',
+      'Cryptographic Hashing (SHA-256) & Merkle Trees',
+      'Asymmetric Encryption & Elliptic Curve Digital Signatures (ECDSA)',
+      'Consensus Mechanisms: Proof of Work (PoW) vs Proof of Stake (PoS)',
+      'Byzantine Fault Tolerance (BFT) & Raft Consensus',
+      'Bitcoin Architecture & UTXO Transaction Model',
+      'Ethereum Virtual Machine (EVM) Architecture',
+      'Smart Contract Development in Solidity & Life Cycle',
+      'Gas Optimization, Execution Fees & Opcode Analysis',
+      'Decentralized Finance (DeFi) Protocols & Automated Market Makers',
+      'Zero-Knowledge Proofs (zk-SNARKs & zk-STARKs)',
+      'Layer 2 Scaling Solutions (Rollups, State Channels, Plasma)',
+      'Interoperability Protocols & Cross-Chain Bridges',
+      'ERC-20, ERC-721 (NFT) & ERC-1155 Token Standards',
+      'Decentralized Autonomous Organizations (DAOs) & Governance',
+      'Smart Contract Vulnerabilities (Reentrancy, Overflow, Front-Running)',
+      'Hyperledger Fabric Enterprise Permissioned Architecture',
+      'Decentralized Storage (IPFS & Arweave)',
+      'Consensus Attack Vectors (51% Attack, Sybil Attack)',
+      'CBDC & Enterprise Blockchain Integration',
+    ],
     'Database Management Systems (DBMS)': [
       'Relational Algebra & Tuple Calculus',
       'Entity-Relationship (ER) & EER Modeling',
@@ -121,6 +143,7 @@ export const AssignmentsPage: React.FC = () => {
     ],
   };
 
+
   useEffect(() => {
     if (!activeClass) return;
     fetchAssignments();
@@ -134,12 +157,14 @@ export const AssignmentsPage: React.FC = () => {
     );
 
     if (!matchedSub) {
-      if (courseLower.includes('dbms') || courseLower.includes('database')) matchedSub = 'Database Management Systems (DBMS)';
+      if (courseLower.includes('block') || courseLower.includes('chain')) matchedSub = 'Blockchain Technology';
+      else if (courseLower.includes('dbms') || courseLower.includes('database')) matchedSub = 'Database Management Systems (DBMS)';
       else if (courseLower.includes('os') || courseLower.includes('operating')) matchedSub = 'Operating Systems (OS)';
       else if (courseLower.includes('network')) matchedSub = 'Computer Networks (CN)';
       else if (courseLower.includes('algo') || courseLower.includes('structure') || courseLower.includes('dsa')) matchedSub = 'Data Structures & Algorithms (DSA)';
       else matchedSub = Object.keys(subjectCatalog)[0];
     }
+
 
     setSelectedSubject(matchedSub);
     const availableTopics = subjectCatalog[matchedSub] || [];
