@@ -55,11 +55,13 @@ export const DashboardPage: React.FC = () => {
       fetchPromises.push(api.get(`/analytics/classes/${activeClass.id}/overview`));
     }
 
-    Promise.all(fetchPromises).then(([sumRes, ttRes, analyticsRes]) => {
-      setSummary(sumRes?.data || null);
-      setTodaySchedule(ttRes?.data || []);
-      if (analyticsRes) {
-        setAnalyticsData(analyticsRes.data);
+    Promise.allSettled(fetchPromises).then(([sumResult, timetableResult, analyticsResult]) => {
+      setSummary(sumResult.status === 'fulfilled' ? sumResult.value.data : null);
+      setTodaySchedule(timetableResult.status === 'fulfilled' ? timetableResult.value.data || [] : []);
+      if (activeClass) {
+        setAnalyticsData(analyticsResult?.status === 'fulfilled'
+          ? analyticsResult.value.data
+          : { score_distribution: { A: 0, B: 0, C: 0, D: 0, F: 0 }, average_attendance: 0, average_score: 0 });
       }
     }).finally(() => setLoading(false));
   }, [activeClass]);
@@ -238,10 +240,10 @@ export const DashboardPage: React.FC = () => {
             <SkeletonBlock className="h-64 rounded-2xl" />
             <SkeletonBlock className="h-64 rounded-2xl" />
           </div>
-        ) : !analyticsData ? (
-          <div className="p-8 text-center text-slate-500 text-xs bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700">
-            Select a class from the top menu to view detailed analytics distribution.
-          </div>
+          ) : !activeClass ? (
+           <div className="p-8 text-center text-slate-500 text-xs bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700">
+             Select a class from the top menu to view its performance overview.
+           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {/* Grade Bar Chart */}
