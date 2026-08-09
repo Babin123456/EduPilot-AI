@@ -3,7 +3,6 @@ import { useAuth } from '../context/AuthContext';
 import { api } from '../api/client';
 import { motion } from 'framer-motion';
 import {
-  User,
   ShieldCheck,
   BookOpen,
   Award,
@@ -74,8 +73,8 @@ export const ProfilePage: React.FC = () => {
           <h1 className="text-2xl sm:text-3xl font-black">Personalized Teacher Profile</h1>
           <p className="text-xs text-slate-100 font-medium">Select your 3D academic avatar, manage official contact info, and review teaching context portfolio.</p>
         </div>
-        <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 flex-shrink-0">
-          <User className="w-8 h-8 text-[#8CC63F]" />
+        <div className="w-24 h-24 flex items-center justify-center flex-shrink-0">
+          <img src="/images/avatar.png" alt="Teacher profile avatar" className="w-full h-full object-contain" />
         </div>
       </div>
 
