@@ -151,16 +151,47 @@ export const DailyNotesPage: React.FC = () => {
                 Subject: {activeClass?.course_name || 'Select Class Top Bar'} ({activeClass?.course_code})
               </span>
             </div>
+            {/* Dynamic Syllabus Topics Selector for Active Course */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                Select Course Syllabus Topic for {activeClass?.course_name || 'Subject'} *
+              </label>
+              <div className="flex flex-wrap gap-1.5 mb-2 max-h-28 overflow-y-auto p-2 bg-slate-50 dark:bg-slate-950/50 rounded-xl border border-slate-200 dark:border-slate-800">
+                {[
+                  `Introduction to ${activeClass?.course_name || 'Subject'} & System Bounds`,
+                  `Core Architecture & Operational Invariants in ${activeClass?.course_name || 'Course'}`,
+                  `Advanced Algorithmic Design & Optimization`,
+                  `Real-World Case Study Analysis & Execution`,
+                  `Performance Tuning, Benchmarking & Metrics`,
+                  `Security Protocols, Authentication & Authorization`,
+                  `Fault Tolerance & Error Recovery Strategies`,
+                ].map((recTopic, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setTopic(recTopic)}
+                    className={`text-[11px] px-2.5 py-1 rounded-lg border font-semibold transition-all ${
+                      topic === recTopic
+                        ? 'bg-[#005BAC] text-white border-[#005BAC] shadow-sm scale-105'
+                        : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-[#005BAC]'
+                    }`}
+                  >
+                    {recTopic}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="md:col-span-2">
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">
-                  Topic Discussed in Class *
+                  Selected Topic *
                 </label>
                 <input
                   type="text"
                   value={topic}
                   onChange={(e) => setTopic(e.target.value)}
-                  placeholder="e.g., TCP/IP Protocol Suite & 3-Way Handshake"
+                  placeholder="Select a syllabus topic above or enter custom topic..."
                   className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-adamas-blue focus:outline-none"
                 />
               </div>
@@ -177,6 +208,7 @@ export const DailyNotesPage: React.FC = () => {
                 />
               </div>
             </div>
+
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">
                 Additional Notes or Key Points (Optional)

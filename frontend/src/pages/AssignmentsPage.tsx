@@ -124,10 +124,30 @@ export const AssignmentsPage: React.FC = () => {
   useEffect(() => {
     if (!activeClass) return;
     fetchAssignments();
-    // Default subject selection
-    const defaultSub = Object.keys(subjectCatalog).find(s => s.toLowerCase().includes(activeClass.course_name.toLowerCase())) || Object.keys(subjectCatalog)[0];
-    setSelectedSubject(defaultSub);
+
+    // Map teacher's active course specification to subject topics
+    const courseName = activeClass.course_name || '';
+    const courseLower = courseName.toLowerCase();
+
+    let matchedSub = Object.keys(subjectCatalog).find(sub => 
+      sub.toLowerCase().includes(courseLower) || courseLower.includes(sub.toLowerCase())
+    );
+
+    if (!matchedSub) {
+      if (courseLower.includes('dbms') || courseLower.includes('database')) matchedSub = 'Database Management Systems (DBMS)';
+      else if (courseLower.includes('os') || courseLower.includes('operating')) matchedSub = 'Operating Systems (OS)';
+      else if (courseLower.includes('network')) matchedSub = 'Computer Networks (CN)';
+      else if (courseLower.includes('algo') || courseLower.includes('structure') || courseLower.includes('dsa')) matchedSub = 'Data Structures & Algorithms (DSA)';
+      else matchedSub = Object.keys(subjectCatalog)[0];
+    }
+
+    setSelectedSubject(matchedSub);
+    const availableTopics = subjectCatalog[matchedSub] || [];
+    if (availableTopics.length > 0) {
+      setTopic(availableTopics[0]);
+    }
   }, [activeClass]);
+
 
 
   const fetchAssignments = () => {
