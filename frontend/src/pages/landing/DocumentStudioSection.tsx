@@ -52,19 +52,7 @@ export const DocumentStudioSection: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          {/* Left Column: Clean Isolated Illustration */}
-          <div className="lg:col-span-6 relative flex justify-center">
-            <div className="doc-image relative w-full flex justify-center">
-              <img
-                src="/images/document_studio.png"
-                alt="Publish & Distribute Class Materials Effortlessly Visual"
-                className="w-full h-auto max-h-[440px] object-contain drop-shadow-[0_20px_45px_rgba(0,91,172,0.3)]"
-                loading="lazy"
-              />
-            </div>
-          </div>
-
-          {/* Right Column: Studio Document Features & Actions */}
+          {/* Left Column: Studio Document Features & Text Box */}
           <div className="doc-preview lg:col-span-6 space-y-6">
             <div className="doc-list space-y-4">
               {[
@@ -89,18 +77,21 @@ export const DocumentStudioSection: React.FC = () => {
                 );
               })}
             </div>
+          </div>
 
-            {/* Distribution Channels */}
-            <div className="p-5 rounded-2xl bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-4">
-              <span className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200">
-                <Mail className="w-4 h-4 text-[#005BAC]" /> Direct Institutional Email
-              </span>
-              <span className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200">
-                <MessageSquare className="w-4 h-4 text-[#8CC63F]" /> Parent WhatsApp Alerts
-              </span>
+          {/* Right Column: Clean Isolated Illustration */}
+          <div className="lg:col-span-6 relative flex justify-center">
+            <div className="doc-image relative w-full flex justify-center">
+              <img
+                src="/images/document_studio.png"
+                alt="Publish & Distribute Class Materials Effortlessly Visual"
+                className="w-full h-auto max-h-[440px] object-contain drop-shadow-[0_20px_45px_rgba(0,91,172,0.3)]"
+                loading="lazy"
+              />
             </div>
           </div>
         </div>
+
       </div>
     </section>
   );
