@@ -19,7 +19,7 @@
 
 ## 💡 Overview
 
-The backend service powers EduPilot AI using FastAPI, SQLAlchemy, and SQLite WAL mode. It manages data access for 720 unique students, teacher authentication, class scheduling, attendance persistence, and context-aware LLM query routing using Groq (dual primary keys) and Gemini (fallback).
+The backend service powers EduPilot AI using FastAPI, SQLAlchemy, and SQLite WAL mode. It manages data access for 720 unique students, teacher authentication, class scheduling, attendance persistence, profile photo uploads, and context-aware LLM query routing using Groq (dual primary keys) and Gemini (fallback).
 
 ---
 
@@ -31,6 +31,12 @@ The backend service powers EduPilot AI using FastAPI, SQLAlchemy, and SQLite WAL
 - 💾 **SQLite** with `aiosqlite` and WAL Mode
 - 🔐 **JWT Authentication** (`python-jose`, `passlib`, `bcrypt`)
 - 🤖 **Groq & Google Gemini APIs**
+
+## 📊 Analytics & Profile APIs
+
+- `GET /api/v1/analytics/classes/{class_id}/overview` returns attendance and assessment metrics scoped to the selected teacher class.
+- `PATCH /api/v1/auth/me` updates teacher profile details and avatar URL.
+- `POST /api/v1/auth/me/avatar` accepts JPG, PNG, or WebP uploads up to 5 MB and returns the stored profile-photo URL.
 
 ---
 
