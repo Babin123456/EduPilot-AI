@@ -91,7 +91,21 @@ def generate_ai_mcq_quiz(
         is_ai_generated=True,
     )
     db.add(assessment)
+
+    # Save to Document Studio Vault for this class
+    from app.models.document import Document
+    doc = Document(
+        id=str(uuid.uuid4()),
+        teacher_course_assignment_id=body.class_id,
+        teacher_id=teacher.id,
+        title=f"MCQ Quiz — {topic}",
+        document_type="quiz",
+        format="pdf",
+    )
+    db.add(doc)
+
     db.commit()
+
 
     return {
         "id": assessment.id,

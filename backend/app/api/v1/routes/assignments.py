@@ -121,7 +121,21 @@ def generate_ai_assignment(
         is_ai_generated=True,
     )
     db.add(assignment)
+
+    # Save to Document Studio Vault for this class
+    from app.models.document import Document
+    doc = Document(
+        id=str(uuid.uuid4()),
+        teacher_course_assignment_id=body.class_id,
+        teacher_id=teacher.id,
+        title=f"Assignment — {topic}",
+        document_type="assignment",
+        format="pdf",
+    )
+    db.add(doc)
+
     db.commit()
+
 
     return {
         "assignment_id": assignment.id,

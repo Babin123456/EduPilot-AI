@@ -197,8 +197,22 @@ def generate_note(
         status="published",
     )
     db.add(note)
+
+    # Save to Document Studio Vault for this class
+    from app.models.document import Document
+    doc = Document(
+        id=str(uuid.uuid4()),
+        teacher_course_assignment_id=body.class_id,
+        teacher_id=teacher.id,
+        title=f"Lecture Notes — {body.topic}",
+        document_type="notes",
+        format="pdf",
+    )
+    db.add(doc)
+
     db.commit()
     db.refresh(note)
+
 
     year = db.query(Year).filter(Year.id == tca.year_id).first()
     section = db.query(Section).filter(Section.id == tca.section_id).first()
