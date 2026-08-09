@@ -167,8 +167,11 @@ export const DocumentStudioPage: React.FC = () => {
     blue: { bg: 'bg-blue-50 dark:bg-blue-950/50', icon: 'text-adamas-blue', border: 'hover:border-blue-300' },
     emerald: { bg: 'bg-emerald-50 dark:bg-emerald-950/50', icon: 'text-emerald-500', border: 'hover:border-emerald-300' },
     amber: { bg: 'bg-amber-50 dark:bg-amber-950/50', icon: 'text-amber-500', border: 'hover:border-amber-300' },
+  };
+
   return (
     <div className="space-y-6">
+
 
       <div className="bg-gradient-to-r from-[#005BAC] via-[#0A6FD8] to-[#8CC63F] p-6 sm:p-8 rounded-3xl text-white shadow-xl flex items-center justify-between gap-6 relative overflow-hidden">
         <div className="space-y-2 relative z-10">
