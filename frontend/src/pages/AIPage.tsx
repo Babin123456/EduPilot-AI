@@ -322,14 +322,15 @@ export const AIPage: React.FC = () => {
                   </div>
                 )}
 
-                <div className="space-y-1 max-w-2xl group">
+                <div className="space-y-1 max-w-xl group">
                   <div
-                    className={`p-4 rounded-2xl text-xs font-medium whitespace-pre-wrap leading-relaxed shadow-sm relative ${
+                    className={`p-3.5 rounded-2xl text-xs font-medium whitespace-pre-wrap leading-relaxed shadow-sm relative ${
                       msg.role === 'user'
                         ? 'bg-[#005BAC] text-white rounded-tr-none'
                         : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-tl-none border border-slate-200 dark:border-slate-700'
                     }`}
                   >
+
                     {msg.role === 'user' ? (
                       msg.content
                     ) : (
