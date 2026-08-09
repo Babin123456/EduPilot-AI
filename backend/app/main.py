@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -51,6 +52,9 @@ def create_app() -> FastAPI:
     # ── API Routes ──
     from app.api.v1.router import api_router
     app.include_router(api_router, prefix="/api/v1")
+    storage_path = Path(settings.storage_local_path).resolve()
+    storage_path.mkdir(parents=True, exist_ok=True)
+    app.mount("/media", StaticFiles(directory=storage_path), name="media")
 
     # ── Health Check ──
     @app.get("/api/health")

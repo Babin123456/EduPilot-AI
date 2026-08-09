@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
+from pathlib import Path
+import uuid
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 
@@ -11,6 +13,7 @@ from app.core.security import verify_password, create_access_token, create_refre
 from app.core.exceptions import http_401
 from app.api.deps import get_current_teacher
 from app.models.teacher import Teacher
+from app.core.config import get_settings
 from app.models.enrollment import TeacherCourseAssignment
 from app.models.academic import Course, Section, Year, Semester
 
@@ -163,6 +166,30 @@ def update_me(
         setattr(teacher, field, value)
     db.commit()
     return {"avatar_url": teacher.avatar_url, "phone": teacher.phone, "specialization": teacher.specialization}
+
+
+@router.post("/me/avatar")
+async def upload_avatar(
+    image: UploadFile = File(...),
+    teacher: Teacher = Depends(get_current_teacher),
+    db: Session = Depends(get_db),
+):
+    """Store a teacher-uploaded profile image and make it immediately available."""
+    allowed_types = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp"}
+    if image.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Upload a JPG, PNG, or WebP image.")
+    content = await image.read()
+    if len(content) > 5 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Image must be smaller than 5 MB.")
+
+    settings = get_settings()
+    filename = f"teacher-{teacher.id}-{uuid.uuid4().hex}{allowed_types[image.content_type]}"
+    storage_path = Path(settings.storage_local_path).resolve()
+    storage_path.mkdir(parents=True, exist_ok=True)
+    (storage_path / filename).write_bytes(content)
+    teacher.avatar_url = f"{settings.backend_url}/media/{filename}"
+    db.commit()
+    return {"avatar_url": teacher.avatar_url}
 
 
 @router.get("/demo-accounts", response_model=list[DemoTeacherCard])

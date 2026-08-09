@@ -12,7 +12,8 @@ import {
   Building,
   CheckCircle2,
   Save,
-  Check
+  Check,
+  Upload
 } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 
@@ -39,6 +40,7 @@ export const ProfilePage: React.FC = () => {
   const [phone, setPhone] = useState(user?.phone || '+91 98301 23456');
   const [specialization, setSpecialization] = useState(user?.specialization || 'Distributed Systems & Cybersecurity');
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (user?.avatar_url) setSelectedAvatar(user.avatar_url);
@@ -58,6 +60,25 @@ export const ProfilePage: React.FC = () => {
       toast.error('Failed to update profile');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      const response = await api.post('/auth/me/avatar', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+      setSelectedAvatar(response.data.avatar_url);
+      updateUser(response.data);
+      toast.success('Profile photo uploaded', 'Your new photo is now visible across the dashboard.');
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || 'Failed to upload profile photo');
+    } finally {
+      setUploading(false);
+      event.target.value = '';
     }
   };
 
@@ -83,7 +104,7 @@ export const ProfilePage: React.FC = () => {
         {/* ─── Left Column: Active Avatar & Bio Badge ─── */}
         <div className="lg:col-span-4 space-y-6">
           <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 text-center space-y-4 shadow-sm">
-            <div className="relative w-28 h-28 mx-auto">
+             <div className="relative w-28 h-28 mx-auto">
               <img
                 src={selectedAvatar}
                 alt="Selected Teacher Avatar"
@@ -93,6 +114,11 @@ export const ProfilePage: React.FC = () => {
                 <Sparkles className="w-4 h-4" />
               </span>
             </div>
+            <label className="mx-auto inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-2 text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:border-[#005BAC] hover:text-[#005BAC]">
+              <Upload className="w-3.5 h-3.5" />
+              {uploading ? 'Uploading...' : 'Upload your photo'}
+              <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAvatarUpload} disabled={uploading} className="sr-only" />
+            </label>
 
             <div>
               <h2 className="text-lg font-black text-slate-900 dark:text-white">{user?.full_name}</h2>
