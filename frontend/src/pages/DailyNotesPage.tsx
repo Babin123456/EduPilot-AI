@@ -66,7 +66,10 @@ export const DailyNotesPage: React.FC = () => {
   const handleShare = async (note: any) => {
     setSharing(note.id);
     try {
-      const res = await api.post(`/daily-notes/${note.id}/share`);
+      const res = await api.post(`/daily-notes/share`, {
+        note_id: note.id,
+        class_id: activeClass?.id,
+      });
       setShareSuccess(note.id);
       setNotes(prev => prev.map(n => n.id === note.id ? { ...n, is_shared: true, shared_at: res.data.shared_at } : n));
       toast.success(`Notes shared to ${res.data.recipient_count} students!`, `Emailed "${note.topic}" to all students in ${activeClass?.year_label} Sec ${activeClass?.section_name}.`);
@@ -77,6 +80,7 @@ export const DailyNotesPage: React.FC = () => {
       setSharing(null);
     }
   };
+
 
   const handleDownloadPDF = (note: any) => {
     try {
@@ -120,18 +124,14 @@ export const DailyNotesPage: React.FC = () => {
             className="px-5 py-2.5 bg-slate-950 hover:bg-slate-900 text-white text-xs font-black rounded-xl transition-all shadow-lg active:scale-95 flex items-center gap-2 border border-slate-700"
           >
             <Sparkles className="w-4 h-4 text-[#8CC63F]" />
-            <span>{showForm ? 'Cancel Form' : "Generate Today's Notes"}</span>
+            <span>{showForm ? 'Cancel Form' : "Generate Note"}</span>
           </button>
         </div>
-
-
 
         <div className="w-36 h-24 flex items-center justify-center hidden sm:flex flex-shrink-0 relative z-10">
           <img src="/images/daily_notes_banner.png" alt="Daily Notes Banner" className="w-full h-auto max-h-24 object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.4)]" />
         </div>
       </div>
-
-
 
       {/* Generate Form */}
       <AnimatePresence>
@@ -142,14 +142,19 @@ export const DailyNotesPage: React.FC = () => {
             exit={{ opacity: 0, y: -12 }}
             className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-adamas-blue/30 shadow-md space-y-4"
           >
-            <h3 className="font-extrabold text-slate-900 dark:text-white text-sm flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-adamas-blue dark:text-adamas-green" />
-              Generate Daily Discussion Notes
-            </h3>
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <h3 className="font-extrabold text-slate-900 dark:text-white text-sm flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-[#005BAC] dark:text-[#8CC63F]" />
+                Generate Lecture Discussion Note
+              </h3>
+              <span className="text-xs font-bold px-3 py-1 bg-blue-50 dark:bg-blue-950/60 text-[#005BAC] dark:text-blue-300 rounded-lg border border-blue-200">
+                Subject: {activeClass?.course_name || 'Select Class Top Bar'} ({activeClass?.course_code})
+              </span>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="md:col-span-2">
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">
-                  Topic Discussed in Class Today *
+                  Topic Discussed in Class *
                 </label>
                 <input
                   type="text"
@@ -159,6 +164,7 @@ export const DailyNotesPage: React.FC = () => {
                   className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-adamas-blue focus:outline-none"
                 />
               </div>
+
               <div>
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">
                   Lecture Duration (Mins)

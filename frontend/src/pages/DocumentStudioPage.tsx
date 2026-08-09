@@ -224,90 +224,29 @@ export const DocumentStudioPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Studio Tools */}
+      {/* Main Class Document Repository Vault */}
       <div>
-        <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">AI Academic Material Generators</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          {/* Card 1: Quiz & Assessments */}
-          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-purple-200 dark:border-purple-950/60 shadow-sm hover:border-purple-400 transition-all group flex flex-col justify-between">
-            <div>
-              <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/50 text-purple-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                <HelpCircle className="w-5 h-5" />
-              </div>
-              <h3 className="font-bold text-slate-900 dark:text-white text-sm">Quiz & Assessment Studio</h3>
-              <p className="text-xs text-slate-500 mt-1">Generate AI quizzes with answer rubrics as PDF or Excel CSV.</p>
-            </div>
-            <button
-              onClick={() => handleOpenGenerator('assessment')}
-              className="mt-4 w-full py-2 bg-[#005BAC] hover:bg-[#0A6FD8] text-white text-xs font-extrabold rounded-xl flex items-center justify-center gap-1.5 transition-colors"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-[#8CC63F]" /> Customize & Export
-            </button>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">
+              Class Document Vault ({activeClass?.course_name} • {activeClass?.year_label} Sec {activeClass?.section_name})
+            </h2>
+            <p className="text-xs text-slate-500">All materials generated in Assignment, Quiz, or Daily Notes for this class are archived here.</p>
           </div>
-
-          {/* Card 2: Assignments */}
-          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-blue-200 dark:border-blue-950/60 shadow-sm hover:border-blue-400 transition-all group flex flex-col justify-between">
-            <div>
-              <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-[#005BAC] flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                <FileText className="w-5 h-5" />
-              </div>
-              <h3 className="font-bold text-slate-900 dark:text-white text-sm">Assignment Task Generator</h3>
-              <p className="text-xs text-slate-500 mt-1">Create homework problem sets and submission marksheets.</p>
-            </div>
-            <button
-              onClick={() => handleOpenGenerator('assignment')}
-              className="mt-4 w-full py-2 bg-[#005BAC] hover:bg-[#0A6FD8] text-white text-xs font-extrabold rounded-xl flex items-center justify-center gap-1.5 transition-colors"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-[#8CC63F]" /> Customize & Export
-            </button>
-          </div>
-
-          {/* Card 3: PPT Presentations */}
-          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-amber-200 dark:border-amber-950/60 shadow-sm hover:border-amber-400 transition-all group flex flex-col justify-between">
-            <div>
-              <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                <Presentation className="w-5 h-5" />
-              </div>
-              <h3 className="font-bold text-slate-900 dark:text-white text-sm">PPT Presentation Studio</h3>
-              <p className="text-xs text-slate-500 mt-1">Generate slide topic outlines and bullet structures for PowerPoint.</p>
-            </div>
-            <button
-              onClick={() => handleOpenGenerator('ppt')}
-              className="mt-4 w-full py-2 bg-[#005BAC] hover:bg-[#0A6FD8] text-white text-xs font-extrabold rounded-xl flex items-center justify-center gap-1.5 transition-colors"
-            >
-              <Presentation className="w-3.5 h-3.5 text-[#8CC63F]" /> Generate PPT Outline
-            </button>
-          </div>
-
-          {/* Card 4: Excel Analytics */}
-          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-emerald-200 dark:border-emerald-950/60 shadow-sm hover:border-emerald-400 transition-all group flex flex-col justify-between">
-            <div>
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                <FileSpreadsheet className="w-5 h-5" />
-              </div>
-              <h3 className="font-bold text-slate-900 dark:text-white text-sm">Excel Student Roster</h3>
-              <p className="text-xs text-slate-500 mt-1">Export full student attendance, scores, and risk data as CSV.</p>
-            </div>
-            <button
-              onClick={() => handleOpenGenerator('excel')}
-              className="mt-4 w-full py-2 bg-[#005BAC] hover:bg-[#0A6FD8] text-white text-xs font-extrabold rounded-xl flex items-center justify-center gap-1.5 transition-colors"
-            >
-              <FileSpreadsheet className="w-3.5 h-3.5 text-[#8CC63F]" /> Export Excel CSV
-            </button>
-          </div>
+          <span className="text-xs font-bold px-3 py-1 bg-blue-50 dark:bg-blue-950/60 text-[#005BAC] dark:text-[#8CC63F] rounded-xl border border-blue-200">
+            {documents.length} Saved Files
+          </span>
         </div>
-      </div>
 
-      {/* Recent Documents & 1-Click Dispatch */}
-      <div>
-        <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Saved Documents & 1-Click Mail Dispatch</h2>
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
           {documents.length === 0 ? (
             <div className="p-12 text-center">
-              <File className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-              <p className="text-xs text-slate-500">No documents generated yet. Use the cards above to generate AI question papers or rosters.</p>
+              <File className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+              <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300">Vault Empty for {activeClass?.course_code}</h3>
+              <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Generate any Question Paper, Quiz, or Lecture Note in Assignment, Quiz, or Daily Notes section to auto-save them into this studio.</p>
             </div>
           ) : (
+
             <div className="divide-y divide-slate-100 dark:divide-slate-800">
               {documents.map((doc, i) => (
                 <motion.div

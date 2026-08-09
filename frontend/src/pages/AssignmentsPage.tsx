@@ -175,9 +175,30 @@ export const AssignmentsPage: React.FC = () => {
               <span>Submissions: <strong>{a.submitted_count}/{a.total_students}</strong></span>
               <span>Marks: <strong>{a.total_marks}</strong></span>
             </div>
+            <button
+              onClick={() => {
+                const qData = Array.from({ length: 5 }, (_, i) => ({
+                  number: i + 1,
+                  text: `Assignment Question ${i + 1} on ${a.topic || 'Course Topic'}: Write a detailed analysis and solution.`,
+                  type: 'short',
+                  marks: Math.ceil((a.total_marks || 25) / 5),
+                }));
+                const mdText = `# ${a.title}\n**Course:** ${activeClass?.course_name || ''} (${activeClass?.course_code || ''})\n**Total Marks:** ${a.total_marks} | **Difficulty:** ${a.difficulty || 'MEDIUM'}\n\n---\n\n` +
+                  qData.map(q => `### Question ${q.number} [${q.marks} Marks]\n${q.text}`).join('\n\n');
+                setGeneratedQuestionsData(qData);
+                setGeneratedMarkdown(mdText);
+                setActiveTitle(a.title);
+                toast.info('Opened Assignment View', `Review "${a.title}" in Markdown format.`);
+              }}
+              className="w-full py-2 bg-slate-100 dark:bg-slate-800 hover:bg-[#005BAC] hover:text-white text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-colors"
+            >
+              <Eye className="w-3.5 h-3.5" />
+              <span>View Material & PDF</span>
+            </button>
           </div>
         ))}
       </div>
+
 
       {/* Modal Form */}
       <AnimatePresence>

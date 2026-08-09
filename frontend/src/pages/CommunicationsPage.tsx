@@ -203,7 +203,7 @@ export const CommunicationsPage: React.FC = () => {
                 <div
                   key={student.id}
                   onClick={() => {
-                    if (sendMode !== 'selected') setSendMode('selected');
+                    setSendMode('selected');
                     handleToggleStudent(student.id);
                   }}
                   className={`p-3 rounded-xl flex items-center justify-between transition-colors cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 ${
@@ -218,14 +218,11 @@ export const CommunicationsPage: React.FC = () => {
                   <input
                     type="checkbox"
                     checked={isSelected}
-                    onChange={(e) => {
-                      e.stopPropagation();
-                      if (sendMode !== 'selected') setSendMode('selected');
-                      handleToggleStudent(student.id);
-                    }}
+                    readOnly
                     className="w-4 h-4 rounded text-[#005BAC] focus:ring-[#005BAC] cursor-pointer"
                   />
                 </div>
+
 
               );
             })}
