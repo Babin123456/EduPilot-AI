@@ -82,9 +82,12 @@ export const LandingFooter: React.FC<LandingFooterProps> = ({ onNavigate }) => {
         {/* ─── TOP BAR: Brand Header & Platform Mission ─── */}
         <div className="footer-eyebrow flex flex-col md:flex-row items-center justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800/60">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#005BAC] to-[#8CC63F] text-white flex items-center justify-center font-black text-xl shadow-md">
-              EP
-            </div>
+            <img
+              src="/brand_logo.png"
+              alt="EduPilot AI Logo"
+              className="w-10 h-10 object-contain"
+            />
+
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xl font-black text-slate-900 dark:text-white tracking-tight">EduPilot AI</span>

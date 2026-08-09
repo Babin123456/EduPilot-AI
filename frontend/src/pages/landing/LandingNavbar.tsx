@@ -49,9 +49,12 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ onNavigate }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         {/* Brand Logo */}
         <Link to="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#005BAC] to-[#8CC63F] text-white flex items-center justify-center font-bold text-xl shadow-md group-hover:scale-105 transition-transform duration-200">
-            EP
-          </div>
+          <img
+            src="/brand_logo.png"
+            alt="EduPilot AI Logo"
+            className="w-10 h-10 object-contain group-hover:scale-105 transition-transform duration-200"
+          />
+
           <div>
             <div className="flex items-center gap-1.5">
               <span className="font-extrabold text-lg text-slate-900 dark:text-white tracking-tight">

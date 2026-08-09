@@ -167,9 +167,9 @@ export const DocumentStudioPage: React.FC = () => {
     blue: { bg: 'bg-blue-50 dark:bg-blue-950/50', icon: 'text-adamas-blue', border: 'hover:border-blue-300' },
     emerald: { bg: 'bg-emerald-50 dark:bg-emerald-950/50', icon: 'text-emerald-500', border: 'hover:border-emerald-300' },
     amber: { bg: 'bg-amber-50 dark:bg-amber-950/50', icon: 'text-amber-500', border: 'hover:border-amber-300' },
-  };
-
   return (
+    <div className="space-y-6">
+
       <div className="bg-gradient-to-r from-[#005BAC] via-[#0A6FD8] to-[#8CC63F] p-6 sm:p-8 rounded-3xl text-white shadow-xl flex items-center justify-between gap-6 relative overflow-hidden">
         <div className="space-y-2 relative z-10">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-extrabold text-white">
@@ -184,6 +184,7 @@ export const DocumentStudioPage: React.FC = () => {
           <img src="/images/document_studio.png" alt="Document Studio Banner" className="w-full h-auto max-h-24 object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.4)]" />
         </div>
       </div>
+
 
 
 

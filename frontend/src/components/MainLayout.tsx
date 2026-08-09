@@ -72,17 +72,18 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800">
-            <div className="flex items-center gap-3 overflow-hidden">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#005BAC] to-[#8CC63F] text-white flex items-center justify-center font-bold text-lg shadow-sm flex-shrink-0">
-                EP
-              </div>
+              <img
+                src="/brand_logo.png"
+                alt="EduPilot AI Logo"
+                className="w-9 h-9 object-contain flex-shrink-0"
+              />
               {!sidebarCollapsed && (
                 <div className="truncate">
                   <h1 className="font-extrabold text-slate-900 dark:text-white leading-none text-base">EduPilot AI</h1>
                   <p className="text-[10px] text-[#005BAC] dark:text-[#8CC63F] font-bold">Adamas University</p>
                 </div>
               )}
-            </div>
+
             <button className="lg:hidden text-slate-500" onClick={() => setMobileOpen(false)}>
               <X className="w-5 h-5" />
             </button>
