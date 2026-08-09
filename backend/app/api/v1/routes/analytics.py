@@ -113,22 +113,6 @@ def get_class_analytics(
         else:
             score_distribution["F"] += 1
 
-    # Demo and newly created classes may not have saved assessment results yet.
-    # Use the student snapshots so every assigned class still has meaningful data.
-    if not results:
-        for student in students:
-            pct = student.average_score or 0
-            if pct >= 90:
-                score_distribution["A"] += 1
-            elif pct >= 75:
-                score_distribution["B"] += 1
-            elif pct >= 60:
-                score_distribution["C"] += 1
-            elif pct >= 40:
-                score_distribution["D"] += 1
-            else:
-                score_distribution["F"] += 1
-
     # ── Risk distribution ──
     risk_dist = {"normal": 0, "low": 0, "medium": 0, "high": 0}
     for s in students:
@@ -148,6 +132,13 @@ def get_class_analytics(
         for s in students if s.risk_level in ("medium", "high")
     ]
 
+    attendance_total = sum(
+        s.total_present + s.total_absent + s.total_late + s.total_excused for s in sessions
+    )
+    attendance_present = sum(s.total_present + s.total_late for s in sessions)
+    average_attendance = round(attendance_present / attendance_total * 100, 1) if attendance_total else None
+    average_score = round(sum(pct for (pct,) in results) / len(results), 1) if results else None
+
     return {
         "class_id": class_id,
         "total_students": len(students),
@@ -156,6 +147,7 @@ def get_class_analytics(
         "score_distribution": score_distribution,
         "risk_distribution": risk_dist,
         "at_risk_students": at_risk,
-        "average_attendance": round(sum(s.attendance_percentage for s in students) / len(students), 1) if students else 0,
-        "average_score": round(sum(s.average_score for s in students) / len(students), 1) if students else 0,
+        "average_attendance": average_attendance,
+        "average_score": average_score,
+        "has_performance_data": bool(sessions or results),
     }
