@@ -349,13 +349,13 @@ def _generate_contextual_response(
                     .all()
                 )
         if students:
-            lines = [f"⚠️ **Students with Attendance Below 75% Threshold:**\n"]
+            lines = ["**Students with Attendance Below 75% Threshold:**\n"]
             for i, s in enumerate(students, 1):
                 lines.append(f"{i}. **{s.full_name}** (`{s.roll_number}`) — **{s.attendance_percentage}%** attendance | Email: `{s.email}`")
-            lines.append(f"\n📊 **Total:** {len(students)} students require attendance warning emails.")
-            lines.append(f"\n💡 *Tip: Go to **Communications** page to send warning emails in one click.*")
+            lines.append(f"\n**Total At-Risk:** {len(students)} students require attendance warning emails.")
+            lines.append(f"\n*Note: Go to the **Communications** page to send warning emails in one click.*")
             return "\n".join(lines)
-        return "✅ Great news! All students in the active class section have attendance above the 75% threshold."
+        return "Great news! All students in the active class section have attendance above the 75% threshold."
 
     # Timetable / Schedule query
     if any(kw in msg_lower for kw in ["schedule", "routine", "timetable", "today", "classes"]):
@@ -367,45 +367,46 @@ def _generate_contextual_response(
             .all()
         )
         if entries:
-            lines = [f"📅 **Your Today's Routine (Monday):**\n"]
+            lines = ["**Your Schedule for Today (Monday):**\n"]
             for e in entries:
                 tca = db.query(TeacherCourseAssignment).filter(TeacherCourseAssignment.id == e.teacher_course_assignment_id).first()
                 course = db.query(Course).filter(Course.id == tca.course_id).first() if tca else None
                 year = db.query(Year).filter(Year.id == tca.year_id).first() if tca else None
                 sec = db.query(Section).filter(Section.id == tca.section_id).first() if tca else None
-                lines.append(f"⏰ **{e.start_time} - {e.end_time}**: {course.name if course else 'Course'} (`{course.code if course else ''}`) — {year.label if year else ''} Sec {sec.name if sec else ''} (Room {e.room or '101'})")
+                lines.append(f"- **{e.start_time} - {e.end_time}**: {course.name if course else 'Course'} (`{course.code if course else ''}`) — {year.label if year else ''} Sec {sec.name if sec else ''} (Room {e.room or '101'})")
             lines.append("\nView full weekly grid under the **Timetable** section.")
             return "\n".join(lines)
-        return "📅 You have no classes scheduled for today. Check the **Timetable** module for full weekly routine."
+        return "You have no classes scheduled for today. Check the **Timetable** module for full weekly routine."
 
     # General Study / Subject queries
     if any(kw in msg_lower for kw in ["what is", "explain", "how does", "difference", "algorithm", "network", "operating system", "data structure", "protocol"]):
         return (
-            f"📚 **Academic Subject Guidance — {message.title()}**\n\n"
+            f"**Academic Topic Breakdown: {message.title()}**\n\n"
             f"Here is a structured breakdown of **{message}**:\n\n"
-            f"### 1. Definition & Core Concept\n"
-            f"{message} is an essential topic in Computer Science & Engineering. It provides the foundation for system architecture and software design.\n\n"
-            f"### 2. Key Features & Principles\n"
-            f"- **Efficiency**: Optimizes resource utilization and processing time.\n"
-            f"- **Scalability**: Handles growing workloads seamlessly.\n"
-            f"- **Reliability**: Ensures robust operation under varied conditions.\n\n"
-            f"### 3. Practical Applications\n"
-            f"- Enterprise system architecture\n"
-            f"- Real-time data processing\n"
-            f"- Cloud computing & distributed systems\n\n"
-            f"💡 *You can generate lecture notes for this topic in **Daily Notes** or export a PDF quiz in **Document Studio**!*"
+            f"### 1. Core Concept & Definition\n"
+            f"{message} is a foundational subject concept in Computer Science & Engineering, governing system execution, algorithmic logic, and operational performance.\n\n"
+            f"### 2. Key Technical Principles\n"
+            f"- **Efficiency**: Optimizes processing cycles and throughput.\n"
+            f"- **Scalability**: Handles expanding workloads and data flow.\n"
+            f"- **Reliability**: Guarantees deterministic outcome and error control.\n\n"
+            f"### 3. Practical Industry Applications\n"
+            f"- Enterprise software architecture and backend systems\n"
+            f"- Distributed cloud computing infrastructure\n"
+            f"- Real-time data processing and analytics\n\n"
+            f"*Recommendation: Use **Daily Notes** to generate discussion summaries or **Document Studio** to export a PDF quiz on this topic.*"
         )
 
     # Default friendly greeting / help response
     return (
-        f"Hello Prof. {teacher.last_name}! 👋 I am **EduPilot AI**, your academic copilot at Adamas University.\n\n"
-        f"Here is what I can help you with:\n"
-        f"- 📊 **Class Metrics**: Ask *'Which students have attendance below 75%?'*\n"
-        f"- 📅 **Schedule Routine**: Ask *'What classes do I have today?'*\n"
-        f"- 📄 **File Analysis**: Upload any PDF, PPT, Excel, or Image using the 📎 button to get a full explanation!\n"
-        f"- 📚 **Academic Guidance**: Ask any study or subject question (e.g., *'Explain TCP/IP protocol suite'* or *'Generate quiz outline'*).\n"
-        f"- 📓 **Daily Discussion Notes**: Go to **Daily Notes** to generate and email lecture summaries to your class section in one click."
+        f"Welcome Professor {teacher.last_name}. I am **EduPilot AI**, your institutional copilot.\n\n"
+        f"### How I Can Assist You:\n"
+        f"- **Class Metrics**: Ask *'Show students with attendance under 75%'*\n"
+        f"- **Schedule & Routine**: Ask *'What classes do I have today?'*\n"
+        f"- **File Analysis**: Upload any PDF, PPT, Excel, or Image using the attachment button.\n"
+        f"- **Academic Material**: Ask any subject or curriculum question.\n"
+        f"- **Daily Notes & Publish**: Use **Daily Notes** or **Document Studio** to generate and dispatch materials."
     )
+
 
 
 @router.get("/conversations")

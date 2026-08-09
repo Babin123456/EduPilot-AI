@@ -161,10 +161,11 @@ export const AIPage: React.FC = () => {
               className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               {msg.role === 'assistant' && (
-                <div className="w-8 h-8 rounded-lg bg-adamas-green text-slate-950 flex items-center justify-center flex-shrink-0 text-xs font-bold shadow-sm">
-                  AI
+                <div className="w-8 h-8 rounded-lg bg-[#8CC63F] text-slate-950 flex items-center justify-center flex-shrink-0 shadow-sm">
+                  <Bot className="w-4 h-4" />
                 </div>
               )}
+
               <div className="space-y-1 max-w-2xl">
                 <div
                   className={`p-4 rounded-2xl text-xs font-medium whitespace-pre-wrap leading-relaxed shadow-sm ${
