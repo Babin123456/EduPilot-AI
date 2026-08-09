@@ -130,7 +130,8 @@ def parse_uploaded_file(file_bytes: bytes, filename: str, content_type: str) -> 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 def _call_groq_llm(messages: list[dict], api_key: str, model: str) -> str | None:
-    """Call Groq API directly using httpx with 1.0s timeout."""
+    """Call Groq API directly using httpx with 15.0s timeout."""
+    api_key = (api_key or "").strip()
     if not api_key or "your_" in api_key or len(api_key) < 25:
         return None
     try:
@@ -156,7 +157,8 @@ def _call_groq_llm(messages: list[dict], api_key: str, model: str) -> str | None
 
 
 def _call_gemini_llm(prompt: str, api_key: str, model: str) -> str | None:
-    """Call Gemini API directly using httpx with 1.0s timeout."""
+    """Call Gemini API directly using httpx with 15.0s timeout."""
+    api_key = (api_key or "").strip()
     if not api_key or "your_" in api_key or len(api_key) < 25:
         return None
     try:

@@ -216,8 +216,10 @@ Uploaded syllabus files and slides are parsed in-memory and discarded without fi
 - [ ] `docker-compose.prod.yml` — Production stack with Nginx reverse proxy and SSL
 - [ ] `.dockerignore` files for both frontend and backend
 
----
+
+
 
 <div align="center">
   <sub>EduPilot-AI • Adamas University Intelligent Academic Operating System</sub>
 </div>
+
