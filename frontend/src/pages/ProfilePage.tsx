@@ -19,16 +19,16 @@ import { useToast } from '../context/ToastContext';
 
 // 10 Curated Cartoon 3D Avatars for Teachers
 const AVATARS = [
-  { id: 'avatar-1', name: 'Prof. Alpha', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=ProfAlpha' },
-  { id: 'avatar-2', name: 'Dr. Cyber', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=DrCyber' },
-  { id: 'avatar-3', name: 'Tech Mentor', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=TechMentor' },
-  { id: 'avatar-4', name: 'Data Scientist', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=DataScientist' },
-  { id: 'avatar-5', name: 'Code Architect', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=CodeArchitect' },
-  { id: 'avatar-6', name: 'Dept. Chair', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=DeptChair' },
-  { id: 'avatar-7', name: 'Algo Wizard', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=AlgoWizard' },
-  { id: 'avatar-8', name: 'AI Specialist', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=AISpecialist' },
-  { id: 'avatar-9', name: 'Campus Dean', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=CampusDean' },
-  { id: 'avatar-10', name: 'Creative Educator', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=CreativeEducator' },
+  { id: 'avatar-1', name: 'Prof. Alpha', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=ProfAlpha&backgroundColor=transparent' },
+  { id: 'avatar-2', name: 'Dr. Cyber', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=DrCyber&backgroundColor=transparent' },
+  { id: 'avatar-3', name: 'Tech Mentor', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=TechMentor&backgroundColor=transparent' },
+  { id: 'avatar-4', name: 'Data Scientist', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=DataScientist&backgroundColor=transparent' },
+  { id: 'avatar-5', name: 'Code Architect', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=CodeArchitect&backgroundColor=transparent' },
+  { id: 'avatar-6', name: 'Dept. Chair', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=DeptChair&backgroundColor=transparent' },
+  { id: 'avatar-7', name: 'Algo Wizard', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=AlgoWizard&backgroundColor=transparent' },
+  { id: 'avatar-8', name: 'AI Specialist', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=AISpecialist&backgroundColor=transparent' },
+  { id: 'avatar-9', name: 'Campus Dean', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=CampusDean&backgroundColor=transparent' },
+  { id: 'avatar-10', name: 'Creative Educator', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=CreativeEducator&backgroundColor=transparent' },
 ];
 
 
@@ -88,7 +88,7 @@ export const ProfilePage: React.FC = () => {
               <img
                 src={selectedAvatar}
                 alt="Selected Teacher Avatar"
-                className="w-full h-full rounded-3xl object-cover border-4 border-[#005BAC] dark:border-[#8CC63F] shadow-lg"
+                className="w-full h-full rounded-3xl object-contain"
               />
               <span className="absolute -bottom-2 -right-2 p-1.5 bg-[#8CC63F] text-slate-950 rounded-full shadow-md">
                 <Sparkles className="w-4 h-4" />
@@ -166,7 +166,7 @@ export const ProfilePage: React.FC = () => {
                     }`}
                   >
                     <div className="w-14 h-14 mx-auto rounded-xl overflow-hidden mb-1.5">
-                      <img src={av.url} alt={av.name} className="w-full h-full object-cover" />
+                      <img src={av.url} alt={av.name} className="w-full h-full object-contain" />
                     </div>
                     <span className="text-[10px] font-bold text-slate-800 dark:text-slate-200 block truncate">{av.name}</span>
                     {isSelected && (

@@ -159,7 +159,7 @@ export const DashboardPage: React.FC = () => {
            {/* Teacher avatar is shared with the profile page through AuthContext. */}
            <div className="relative z-10 w-full sm:w-80 h-48 flex items-center justify-center flex-shrink-0">
              {user?.avatar_url ? (
-               <img src={user.avatar_url} alt={`${user.full_name} avatar`} className="w-36 h-36 rounded-[2rem] object-cover border-4 border-white/40 shadow-2xl" />
+               <img src={user.avatar_url} alt={`${user.full_name} avatar`} className="w-36 h-36 rounded-[2rem] object-contain" />
              ) : (
                <img src="/images/hero_illustration.png" alt="Academic Intelligence Command Center" className="w-full h-auto max-h-48 object-contain drop-shadow-[0_15px_35px_rgba(0,0,0,0.5)]" />
              )}
