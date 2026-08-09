@@ -491,3 +491,24 @@ def get_conversation(
             for m in messages
         ],
     }
+
+
+@router.delete("/conversations/{conversation_id}")
+def delete_conversation(
+    conversation_id: str,
+    teacher: Teacher = Depends(get_current_teacher),
+    db: Session = Depends(get_db),
+):
+    """Delete a conversation and its messages."""
+    convo = db.query(AIConversation).filter(
+        AIConversation.id == conversation_id,
+        AIConversation.teacher_id == teacher.id,
+    ).first()
+    if not convo:
+        raise http_404("Conversation not found")
+
+    db.query(AIMessage).filter(AIMessage.conversation_id == conversation_id).delete()
+    db.delete(convo)
+    db.commit()
+    return {"success": True, "message": "Conversation deleted successfully"}
+
