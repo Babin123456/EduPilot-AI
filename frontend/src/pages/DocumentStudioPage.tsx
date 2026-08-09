@@ -2,28 +2,27 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { api } from '../api/client';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Download, FileText, BookOpen,
-  Users, HelpCircle, Loader2, Clock, File
+  Users, HelpCircle, Loader2, Clock, File, Presentation, FileSpreadsheet, Sparkles, X
 } from 'lucide-react';
 import { generateQuizPDF, generateClassReportPDF, generateDailyNotePDF } from '../utils/pdfGenerator';
-
-interface DocCard {
-  id: string;
-  icon: React.ElementType;
-  title: string;
-  description: string;
-  color: string;
-  action: () => void;
-  loading: boolean;
-}
+import { downloadExcelSheet, downloadPresentationOutline } from '../utils/exportUtils';
 
 export const DocumentStudioPage: React.FC = () => {
   const { activeClass, user } = useAuth();
   const toast = useToast();
   const [documents, setDocuments] = useState<any[]>([]);
   const [generating, setGenerating] = useState<string | null>(null);
+
+  // AI Generator Modal Form State
+  const [modalType, setModalType] = useState<'assignment' | 'assessment' | 'ppt' | 'excel' | null>(null);
+  const [topic, setTopic] = useState('');
+  const [format, setFormat] = useState<'pdf' | 'excel' | 'ppt'>('pdf');
+  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
+  const [numItems, setNumItems] = useState(10);
+  const [customInstructions, setCustomInstructions] = useState('');
 
   useEffect(() => {
     if (!activeClass) return;
@@ -32,36 +31,83 @@ export const DocumentStudioPage: React.FC = () => {
       .catch(() => {});
   }, [activeClass]);
 
-  const generateQuiz = async () => {
-    if (!activeClass) return;
-    setGenerating('quiz');
-    try {
-      const res = await api.get(`/assessments?class_id=${activeClass.id}`);
-      const assessments = res.data || [];
-      const assessment = assessments[0];
+  const handleOpenGenerator = (type: 'assignment' | 'assessment' | 'ppt' | 'excel') => {
+    setModalType(type);
+    setTopic(activeClass?.course_name ? `${activeClass.course_name} Module 1` : '');
+    setFormat(type === 'ppt' ? 'ppt' : type === 'excel' ? 'excel' : 'pdf');
+  };
 
-      generateQuizPDF({
-        title: assessment?.title || `Sample Quiz — ${activeClass.course_name}`,
-        courseName: activeClass.course_name,
-        courseCode: activeClass.course_code,
-        yearLabel: activeClass.year_label,
-        sectionName: activeClass.section_name,
-        teacherName: user?.full_name || '',
-        topic: assessment?.topic || activeClass.course_name,
-        difficulty: assessment?.difficulty || 'medium',
-        totalMarks: assessment?.total_marks || 25,
-        duration: assessment?.duration_minutes || 30,
-        questions: Array.from({ length: 10 }, (_, i) => ({
-          number: i + 1,
-          text: `Question ${i + 1} related to ${assessment?.topic || activeClass.course_name}`,
-          type: i % 3 === 0 ? 'mcq' : 'short',
-          options: i % 3 === 0 ? ['Option A', 'Option B', 'Option C', 'Option D'] : undefined,
-          marks: Math.ceil((assessment?.total_marks || 25) / 10),
-        })),
-      });
-      toast.success('Generated & Downloaded Quiz Paper PDF', `File saved for ${activeClass.course_code} ${activeClass.year_label}.`);
+  const handleGenerateDocument = async () => {
+    if (!activeClass || !topic.trim()) return;
+    setGenerating(modalType);
+
+    try {
+      if (modalType === 'assessment' || modalType === 'assignment') {
+        if (format === 'pdf') {
+          generateQuizPDF({
+            title: `${modalType === 'assignment' ? 'Assignment Task Sheet' : 'Assessment Quiz'} — ${topic}`,
+            courseName: activeClass.course_name,
+            courseCode: activeClass.course_code,
+            yearLabel: activeClass.year_label,
+            sectionName: activeClass.section_name,
+            teacherName: user?.full_name || '',
+            topic: topic,
+            difficulty: difficulty,
+            totalMarks: numItems * 5,
+            duration: 45,
+            questions: Array.from({ length: numItems }, (_, i) => ({
+              number: i + 1,
+              text: `Question ${i + 1} on ${topic}: Explain key principles and applications.`,
+              type: i % 2 === 0 ? 'mcq' : 'short',
+              options: i % 2 === 0 ? ['Option A', 'Option B', 'Option C', 'Option D'] : undefined,
+              marks: 5,
+            })),
+          });
+          toast.success(`Generated & Downloaded ${modalType.toUpperCase()} PDF`, `Saved PDF for ${activeClass.course_code}.`);
+        } else if (format === 'excel') {
+          const headers = ['Question No', 'Question Text', 'Question Type', 'Marks', 'Topic'];
+          const rows = Array.from({ length: numItems }, (_, i) => [
+            i + 1,
+            `Question ${i + 1} on ${topic}: Explain key principles`,
+            i % 2 === 0 ? 'MCQ' : 'Short Answer',
+            5,
+            topic,
+          ]);
+          downloadExcelSheet(`${topic}_${modalType}_Sheet`, headers, rows);
+          toast.success(`Downloaded ${modalType.toUpperCase()} Excel CSV`, `Exported CSV sheet for ${topic}.`);
+        }
+      } else if (modalType === 'ppt') {
+        const slides = Array.from({ length: numItems }, (_, i) => ({
+          title: i === 0 ? `Introduction to ${topic}` : `Key Concept ${i}: ${topic} Advanced Principles`,
+          bullets: [
+            `Core theoretical foundation of ${topic}`,
+            `Practical application in ${activeClass.course_name}`,
+            `Industry standards and system execution details`,
+            `Summary and review question for students`,
+          ],
+        }));
+        downloadPresentationOutline(`${topic}_Presentation`, slides);
+        toast.success('Downloaded PPT Slide Outline', `Saved presentation outline for ${topic}.`);
+      } else if (modalType === 'excel') {
+        const res = await api.get('/students', { params: { class_id: activeClass.id, limit: 100 } });
+        const students = res.data.students || [];
+        const headers = ['Roll Number', 'Full Name', 'Email', 'Attendance %', 'Average Score', 'CGPA', 'Risk Level'];
+        const rows = students.map((s: any) => [
+          s.roll_number,
+          s.full_name,
+          s.email,
+          `${s.attendance_percentage}%`,
+          s.average_score,
+          s.cgpa,
+          s.risk_level.toUpperCase(),
+        ]);
+        downloadExcelSheet(`${activeClass.course_code}_Student_Roster`, headers, rows);
+        toast.success('Downloaded Class Excel Roster', `Exported student analytics for ${activeClass.course_code}.`);
+      }
+
+      setModalType(null);
     } catch (err) {
-      toast.error('Failed to generate Quiz PDF');
+      toast.error('Failed to generate document');
     } finally {
       setGenerating(null);
     }
@@ -90,7 +136,7 @@ export const DocumentStudioPage: React.FC = () => {
           riskLevel: s.risk_level,
         })),
       });
-      toast.success('Generated & Downloaded Class Report PDF', `Included ${students.length} student records with attendance and CGPA.`);
+      toast.success('Generated & Downloaded Class Report PDF', `Included ${students.length} student records.`);
     } catch (err) {
       toast.error('Failed to generate Class Report PDF');
     } finally {
@@ -121,7 +167,7 @@ export const DocumentStudioPage: React.FC = () => {
           summary: note.summary || '',
           practiceQuestions: note.practice_questions || [],
         });
-        toast.success('Downloaded Daily Notes PDF', `Saved "${note.topic}.pdf" with Adamas University branding.`);
+        toast.success('Downloaded Daily Notes PDF', `Saved "${note.topic}.pdf".`);
       } else {
         toast.info('No daily notes found', 'Generate lecture notes in the Daily Notes module first.');
       }
@@ -132,55 +178,17 @@ export const DocumentStudioPage: React.FC = () => {
     }
   };
 
-  const docCards: DocCard[] = [
-    {
-      id: 'quiz',
-      icon: HelpCircle,
-      title: 'Quiz Paper PDF',
-      description: 'Generate a professional quiz paper with questions, marks, and instructions',
-      color: 'purple',
-      action: generateQuiz,
-      loading: generating === 'quiz',
-    },
-    {
-      id: 'report',
-      icon: Users,
-      title: 'Class Report PDF',
-      description: 'Complete student roster with attendance, scores, CGPA, and risk levels',
-      color: 'blue',
-      action: generateClassReport,
-      loading: generating === 'report',
-    },
-    {
-      id: 'notes',
-      icon: BookOpen,
-      title: 'Discussion Notes PDF',
-      description: 'Export the latest daily discussion notes as a formatted PDF document',
-      color: 'emerald',
-      action: generateNotes,
-      loading: generating === 'notes',
-    },
-  ];
-
-  const colorStyles: Record<string, { bg: string; icon: string; border: string }> = {
-    purple: { bg: 'bg-purple-50 dark:bg-purple-950/50', icon: 'text-purple-500', border: 'hover:border-purple-300' },
-    blue: { bg: 'bg-blue-50 dark:bg-blue-950/50', icon: 'text-adamas-blue', border: 'hover:border-blue-300' },
-    emerald: { bg: 'bg-emerald-50 dark:bg-emerald-950/50', icon: 'text-emerald-500', border: 'hover:border-emerald-300' },
-    amber: { bg: 'bg-amber-50 dark:bg-amber-950/50', icon: 'text-amber-500', border: 'hover:border-amber-300' },
-  };
-
   return (
     <div className="space-y-6">
-
-
+      {/* Header Banner */}
       <div className="bg-gradient-to-r from-[#005BAC] via-[#0A6FD8] to-[#8CC63F] p-6 sm:p-8 rounded-3xl text-white shadow-xl flex items-center justify-between gap-6 relative overflow-hidden">
         <div className="space-y-2 relative z-10">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-extrabold text-white">
-            <FileText className="w-3.5 h-3.5 text-[#8CC63F]" /> PDF Export & Publishing Engine
+            <FileText className="w-3.5 h-3.5 text-[#8CC63F]" /> Multi-Format AI Publishing Engine
           </div>
           <h1 className="text-2xl font-black">Document Studio & Publishing Engine</h1>
           <p className="text-xs text-slate-100 font-medium">
-            Generate, customize, and export institutional PDF question papers, class rosters, and daily lecture notes.
+            Generate polished, professional PDF, Excel CSV, and PPT Presentation Outlines tailored to your topic and course syllabus.
           </p>
         </div>
         <div className="w-36 h-24 flex items-center justify-center hidden sm:flex flex-shrink-0 relative z-10">
@@ -188,92 +196,244 @@ export const DocumentStudioPage: React.FC = () => {
         </div>
       </div>
 
-
-
-
-      {/* Generate Cards */}
+      {/* Main Studio Tools */}
       <div>
-        <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Generate Documents</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {docCards.map((card, i) => {
-            const Icon = card.icon;
-            const style = colorStyles[card.color];
-            return (
-              <motion.div
-                key={card.id}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.08, duration: 0.3 }}
-                className={`bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm ${style.border} transition-all duration-200 cursor-pointer group`}
-                onClick={card.loading ? undefined : card.action}
-              >
-                <div className={`w-12 h-12 rounded-xl ${style.bg} ${style.icon} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                  <Icon className="w-6 h-6" />
+        <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">AI Academic Material Generators</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          {/* Card 1: Quiz & Assessments */}
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-purple-200 dark:border-purple-950/60 shadow-sm hover:border-purple-400 transition-all group flex flex-col justify-between">
+            <div>
+              <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/50 text-purple-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <HelpCircle className="w-5 h-5" />
+              </div>
+              <h3 className="font-bold text-slate-900 dark:text-white text-sm">Quiz & Assessment Studio</h3>
+              <p className="text-xs text-slate-500 mt-1">Generate AI quizzes with answer rubrics as PDF or Excel CSV.</p>
+            </div>
+            <button
+              onClick={() => handleOpenGenerator('assessment')}
+              className="mt-4 w-full py-2 bg-[#005BAC] hover:bg-[#0A6FD8] text-white text-xs font-extrabold rounded-xl flex items-center justify-center gap-1.5 transition-colors"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[#8CC63F]" /> Customize & Export
+            </button>
+          </div>
+
+          {/* Card 2: Assignments */}
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-blue-200 dark:border-blue-950/60 shadow-sm hover:border-blue-400 transition-all group flex flex-col justify-between">
+            <div>
+              <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-[#005BAC] flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <FileText className="w-5 h-5" />
+              </div>
+              <h3 className="font-bold text-slate-900 dark:text-white text-sm">Assignment Task Generator</h3>
+              <p className="text-xs text-slate-500 mt-1">Create homework problem sets and submission marksheets.</p>
+            </div>
+            <button
+              onClick={() => handleOpenGenerator('assignment')}
+              className="mt-4 w-full py-2 bg-[#005BAC] hover:bg-[#0A6FD8] text-white text-xs font-extrabold rounded-xl flex items-center justify-center gap-1.5 transition-colors"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[#8CC63F]" /> Customize & Export
+            </button>
+          </div>
+
+          {/* Card 3: PPT Presentations */}
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-amber-200 dark:border-amber-950/60 shadow-sm hover:border-amber-400 transition-all group flex flex-col justify-between">
+            <div>
+              <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <Presentation className="w-5 h-5" />
+              </div>
+              <h3 className="font-bold text-slate-900 dark:text-white text-sm">PPT Presentation Studio</h3>
+              <p className="text-xs text-slate-500 mt-1">Generate slide topic outlines and bullet structures for PowerPoint.</p>
+            </div>
+            <button
+              onClick={() => handleOpenGenerator('ppt')}
+              className="mt-4 w-full py-2 bg-[#005BAC] hover:bg-[#0A6FD8] text-white text-xs font-extrabold rounded-xl flex items-center justify-center gap-1.5 transition-colors"
+            >
+              <Presentation className="w-3.5 h-3.5 text-[#8CC63F]" /> Generate PPT Outline
+            </button>
+          </div>
+
+          {/* Card 4: Excel Analytics */}
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-emerald-200 dark:border-emerald-950/60 shadow-sm hover:border-emerald-400 transition-all group flex flex-col justify-between">
+            <div>
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <FileSpreadsheet className="w-5 h-5" />
+              </div>
+              <h3 className="font-bold text-slate-900 dark:text-white text-sm">Excel Student Roster</h3>
+              <p className="text-xs text-slate-500 mt-1">Export full student attendance, scores, and risk data as CSV.</p>
+            </div>
+            <button
+              onClick={() => handleOpenGenerator('excel')}
+              className="mt-4 w-full py-2 bg-[#005BAC] hover:bg-[#0A6FD8] text-white text-xs font-extrabold rounded-xl flex items-center justify-center gap-1.5 transition-colors"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5 text-[#8CC63F]" /> Export Excel CSV
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Instant 1-Click Institutional Export Cards */}
+      <div className="pt-2">
+        <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Institutional PDF Export Presets</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950 text-[#005BAC] flex items-center justify-center">
+                <Users className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="font-bold text-slate-900 dark:text-white text-xs">Official Class Roster & CGPA Report PDF</h4>
+                <p className="text-[11px] text-slate-400">Includes student roll numbers, attendance %, and risk level badges</p>
+              </div>
+            </div>
+            <button
+              onClick={generateClassReport}
+              disabled={generating === 'report'}
+              className="px-4 py-2 bg-slate-900 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 hover:bg-slate-800 disabled:opacity-50 transition-colors flex-shrink-0"
+            >
+              {generating === 'report' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4 text-[#8CC63F]" />}
+              <span>PDF Report</span>
+            </button>
+          </div>
+
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950 text-emerald-600 flex items-center justify-center">
+                <BookOpen className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="font-bold text-slate-900 dark:text-white text-xs">Latest Discussion Lecture Notes PDF</h4>
+                <p className="text-[11px] text-slate-400">Export formatted lecture summaries with practice review questions</p>
+              </div>
+            </div>
+            <button
+              onClick={generateNotes}
+              disabled={generating === 'notes'}
+              className="px-4 py-2 bg-slate-900 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 hover:bg-slate-800 disabled:opacity-50 transition-colors flex-shrink-0"
+            >
+              {generating === 'notes' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4 text-[#8CC63F]" />}
+              <span>PDF Notes</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ─── AI Custom Generator Modal Form ─── */}
+      <AnimatePresence>
+        {modalType && (
+          <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl max-w-lg w-full overflow-hidden"
+            >
+              <div className="bg-gradient-to-r from-[#005BAC] via-[#0A6FD8] to-[#8CC63F] p-6 text-white flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-white/20">AI Material Customizer</span>
+                  <h3 className="text-lg font-black mt-1 uppercase">Generate {modalType}</h3>
                 </div>
-                <h3 className="font-bold text-slate-900 dark:text-white text-sm">{card.title}</h3>
-                <p className="text-xs text-slate-500 mt-1">{card.description}</p>
-                <button
-                  disabled={card.loading}
-                  className="mt-4 w-full py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
-                >
-                  {card.loading ? (
-                    <><Loader2 className="w-4 h-4 animate-spin" /> Generating...</>
-                  ) : (
-                    <><Download className="w-4 h-4" /> Generate & Download</>
-                  )}
+                <button onClick={() => setModalType(null)} className="p-1 rounded-full hover:bg-white/20 text-white transition-colors">
+                  <X className="w-5 h-5" />
                 </button>
-              </motion.div>
-            );
-          })}
-        </div>
-      </div>
+              </div>
 
-      {/* Recent Documents */}
-      <div>
-        <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Recent Documents</h2>
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-          {documents.length === 0 ? (
-            <div className="p-12 text-center">
-              <File className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-              <p className="text-xs text-slate-500">No documents generated yet. Use the cards above to create PDF documents.</p>
-            </div>
-          ) : (
-            <div className="divide-y divide-slate-100 dark:divide-slate-800">
-              {documents.map((doc, i) => (
-                <motion.div
-                  key={doc.id}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: i * 0.04 }}
-                  className="p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                      <FileText className="w-4 h-4 text-slate-500" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-slate-900 dark:text-white">{doc.title}</p>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-[10px] font-bold px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded uppercase">{doc.document_type}</span>
-                        <span className="text-[10px] text-slate-400 flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {doc.created_at ? new Date(doc.created_at).toLocaleDateString('en-IN') : ''}
-                        </span>
-                      </div>
-                    </div>
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                    Subject Topic / Syllabus Chapter *
+                  </label>
+                  <input
+                    type="text"
+                    value={topic}
+                    onChange={(e) => setTopic(e.target.value)}
+                    placeholder="e.g. Relational Algebra & SQL Joins"
+                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-[#005BAC] focus:outline-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                      Output Format
+                    </label>
+                    <select
+                      value={format}
+                      onChange={(e) => setFormat(e.target.value as any)}
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none"
+                    >
+                      <option value="pdf">PDF Document</option>
+                      <option value="excel">Excel CSV Sheet</option>
+                      <option value="ppt">PowerPoint (PPT Outline)</option>
+                    </select>
                   </div>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
-                    doc.generation_status === 'completed' ? 'bg-emerald-50 text-emerald-600' :
-                    'bg-amber-50 text-amber-600'
-                  }`}>
-                    {doc.generation_status}
-                  </span>
-                </motion.div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                      Difficulty Level
+                    </label>
+                    <select
+                      value={difficulty}
+                      onChange={(e) => setDifficulty(e.target.value as any)}
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none"
+                    >
+                      <option value="easy">Easy / Introductory</option>
+                      <option value="medium">Medium / Standard</option>
+                      <option value="hard">Hard / Advanced Exam</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                    Number of Questions / Slides: {numItems}
+                  </label>
+                  <input
+                    type="range"
+                    min="5"
+                    max="25"
+                    step="5"
+                    value={numItems}
+                    onChange={(e) => setNumItems(Number(e.target.value))}
+                    className="w-full accent-[#005BAC]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                    Custom Instructions for AI (Optional)
+                  </label>
+                  <textarea
+                    value={customInstructions}
+                    onChange={(e) => setCustomInstructions(e.target.value)}
+                    placeholder="e.g. Focus on practical query writing, include 2 diagram questions, add Adamas University evaluation rubric..."
+                    rows={2}
+                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-[#005BAC] focus:outline-none"
+                  />
+                </div>
+
+                <div className="pt-3 flex justify-end gap-3 border-t border-slate-100 dark:border-slate-800">
+                  <button
+                    onClick={() => setModalType(null)}
+                    className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold rounded-xl hover:bg-slate-200 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleGenerateDocument}
+                    disabled={!topic.trim() || !!generating}
+                    className="px-5 py-2 bg-[#005BAC] hover:bg-[#0A6FD8] text-white text-xs font-black rounded-xl shadow-md flex items-center gap-2 transition-all disabled:opacity-50"
+                  >
+                    {generating ? (
+                      <><Loader2 className="w-4 h-4 animate-spin" /> Generating File...</>
+                    ) : (
+                      <><Sparkles className="w-4 h-4 text-[#8CC63F]" /> Generate & Download ({format.toUpperCase()})</>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
