@@ -83,12 +83,18 @@ export const AttendancePage: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 relative z-10">
+        <div className="flex flex-wrap items-center gap-2 relative z-10">
           <button
             onClick={() => handleBulkMark('present')}
             className="px-3.5 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 text-white text-xs font-bold rounded-xl transition-colors shadow-sm"
           >
             Mark All Present
+          </button>
+          <button
+            onClick={() => handleBulkMark('absent')}
+            className="px-3.5 py-2 bg-red-500/30 hover:bg-red-500/40 backdrop-blur-md border border-red-300/40 text-white text-xs font-bold rounded-xl transition-colors shadow-sm"
+          >
+            Mark All Absent
           </button>
           <button
             onClick={handleSubmit}
@@ -149,17 +155,15 @@ export const AttendancePage: React.FC = () => {
                   </td>
                   <td className="px-6 py-3.5 text-right">
                     <div className="inline-flex rounded-lg p-0.5 bg-slate-100 dark:bg-slate-800">
-                      {['present', 'absent', 'late'].map((st) => (
+                      {['present', 'absent'].map((st) => (
                         <button
                           key={st}
                           onClick={() => handleStatusChange(s.id, st)}
-                          className={`px-3 py-1 rounded-md text-[10px] font-extrabold uppercase transition-all ${
+                          className={`px-3.5 py-1 rounded-md text-[10px] font-extrabold uppercase transition-all ${
                             records[s.id] === st
                               ? st === 'present'
                                 ? 'bg-emerald-500 text-white shadow'
-                                : st === 'absent'
-                                ? 'bg-red-500 text-white shadow'
-                                : 'bg-amber-500 text-white shadow'
+                                : 'bg-red-500 text-white shadow'
                               : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
                           }`}
                         >
@@ -172,6 +176,7 @@ export const AttendancePage: React.FC = () => {
               ))}
             </tbody>
           </table>
+
         </div>
       </div>
     </div>
