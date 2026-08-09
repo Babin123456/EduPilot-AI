@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import uuid
+from pydantic import BaseModel
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
+
 
 from app.core.database import get_db
 from app.api.deps import get_current_teacher

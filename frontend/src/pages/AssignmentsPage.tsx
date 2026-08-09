@@ -5,7 +5,8 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { api } from '../api/client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FileText, Sparkles, Download, Send, Eye, X, Loader2, Plus } from 'lucide-react';
+import { FileText, Sparkles, Download, Send, Eye, X, Loader2 } from 'lucide-react';
+
 import { generateQuizPDF } from '../utils/pdfGenerator';
 
 export const AssignmentsPage: React.FC = () => {
