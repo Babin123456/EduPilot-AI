@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../api/client';
 import { motion } from 'framer-motion';
@@ -17,22 +17,23 @@ import {
 } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 
-// 10 Curated Avatars for Teachers
+// 10 Curated Cartoon 3D Avatars for Teachers
 const AVATARS = [
-  { id: 'avatar-1', name: 'Professor Alpha', url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80' },
-  { id: 'avatar-2', name: 'Dr. Cyber', url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop&q=80' },
-  { id: 'avatar-3', name: 'Tech Mentor', url: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=200&auto=format&fit=crop&q=80' },
-  { id: 'avatar-4', name: 'Data Scientist', url: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&auto=format&fit=crop&q=80' },
-  { id: 'avatar-5', name: 'Code Architect', url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80' },
-  { id: 'avatar-6', name: 'Department Chair', url: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=200&auto=format&fit=crop&q=80' },
-  { id: 'avatar-7', name: 'Algorithm Wizard', url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&auto=format&fit=crop&q=80' },
-  { id: 'avatar-8', name: 'AI Specialist', url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&auto=format&fit=crop&q=80' },
-  { id: 'avatar-9', name: 'Campus Dean', url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&auto=format&fit=crop&q=80' },
-  { id: 'avatar-10', name: 'Creative Educator', url: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=200&auto=format&fit=crop&q=80' },
+  { id: 'avatar-1', name: 'Prof. Alpha', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=ProfAlpha' },
+  { id: 'avatar-2', name: 'Dr. Cyber', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=DrCyber' },
+  { id: 'avatar-3', name: 'Tech Mentor', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=TechMentor' },
+  { id: 'avatar-4', name: 'Data Scientist', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=DataScientist' },
+  { id: 'avatar-5', name: 'Code Architect', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=CodeArchitect' },
+  { id: 'avatar-6', name: 'Dept. Chair', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=DeptChair' },
+  { id: 'avatar-7', name: 'Algo Wizard', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=AlgoWizard' },
+  { id: 'avatar-8', name: 'AI Specialist', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=AISpecialist' },
+  { id: 'avatar-9', name: 'Campus Dean', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=CampusDean' },
+  { id: 'avatar-10', name: 'Creative Educator', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=CreativeEducator' },
 ];
 
+
 export const ProfilePage: React.FC = () => {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const toast = useToast();
   
   const [selectedAvatar, setSelectedAvatar] = useState<string>(user?.avatar_url || AVATARS[0].url);
@@ -40,9 +41,19 @@ export const ProfilePage: React.FC = () => {
   const [specialization, setSpecialization] = useState(user?.specialization || 'Distributed Systems & Cybersecurity');
   const [saving, setSaving] = useState(false);
 
+  useEffect(() => {
+    if (user?.avatar_url) setSelectedAvatar(user.avatar_url);
+  }, [user?.avatar_url]);
+
   const handleSaveProfile = async () => {
     setSaving(true);
     try {
+      const response = await api.patch('/auth/me', {
+        avatar_url: selectedAvatar,
+        phone,
+        specialization,
+      });
+      updateUser(response.data);
       toast.success('Teacher Profile Saved Successfully!', 'Selected Avatar & Profile options updated across EduPilot OS.');
     } catch (err) {
       toast.error('Failed to update profile');
@@ -138,7 +149,7 @@ export const ProfilePage: React.FC = () => {
                 <Sparkles className="w-4 h-4 text-[#8CC63F]" />
                 <span>Choose Your Faculty Avatar (10 Available)</span>
               </h3>
-              <p className="text-xs text-slate-500 mt-1">Select an avatar to personalize your Welcome Back dashboard banner and teacher badge.</p>
+               <p className="text-xs text-slate-500 mt-1">Choose an avatar, then save your profile. It will appear in the dashboard welcome banner and teacher badge.</p>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-2">

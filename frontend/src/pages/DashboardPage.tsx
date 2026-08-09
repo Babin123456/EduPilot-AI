@@ -156,13 +156,13 @@ export const DashboardPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Banner Graphic Showcase (Backgroundless Floating Image) */}
-          <div className="relative z-10 w-full sm:w-80 h-48 flex items-center justify-center flex-shrink-0">
-            <img
-              src="/images/hero_illustration.png"
-              alt="Academic Intelligence Command Center"
-              className="w-full h-auto max-h-48 object-contain drop-shadow-[0_15px_35px_rgba(0,0,0,0.5)]"
-            />
+           {/* Teacher avatar is shared with the profile page through AuthContext. */}
+           <div className="relative z-10 w-full sm:w-80 h-48 flex items-center justify-center flex-shrink-0">
+             {user?.avatar_url ? (
+               <img src={user.avatar_url} alt={`${user.full_name} avatar`} className="w-36 h-36 rounded-[2rem] object-cover border-4 border-white/40 shadow-2xl" />
+             ) : (
+               <img src="/images/hero_illustration.png" alt="Academic Intelligence Command Center" className="w-full h-auto max-h-48 object-contain drop-shadow-[0_15px_35px_rgba(0,0,0,0.5)]" />
+             )}
           </div>
 
         </div>
@@ -222,8 +222,8 @@ export const DashboardPage: React.FC = () => {
               <BarChart3 className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-extrabold text-slate-900 dark:text-white">Class Analytics & Performance Diagnostic</h2>
-              <p className="text-xs text-slate-500 font-medium">Real-time attendance velocity & score distribution for active class</p>
+              <h2 className="text-lg font-extrabold text-slate-900 dark:text-white">Class Performance Overview</h2>
+              <p className="text-xs text-slate-500 font-medium">See attendance, assessment results, and grade patterns for the selected class.</p>
             </div>
           </div>
           {analyticsData && (
@@ -248,10 +248,10 @@ export const DashboardPage: React.FC = () => {
             <div className="lg:col-span-7 bg-slate-50/60 dark:bg-slate-800/40 p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 space-y-4">
               <div className="flex items-center justify-between">
                 <h4 className="text-xs font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
-                  Grade Distribution Overview
+                   Assessment Results by Grade
                 </h4>
                 <span className="text-[10px] font-bold text-[#005BAC] dark:text-[#8CC63F]">
-                  Total Evaluated: 60 Students
+                   {scoreData.reduce((total, item) => total + Number(item.count), 0)} students evaluated
                 </span>
               </div>
               <div className="h-60 w-full">

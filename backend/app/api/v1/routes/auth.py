@@ -24,6 +24,12 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class TeacherProfileUpdate(BaseModel):
+    phone: str | None = None
+    specialization: str | None = None
+    avatar_url: str | None = None
+
+
 class TokenResponse(BaseModel):
     access_token: str
     refresh_token: str
@@ -144,6 +150,19 @@ def get_me(teacher: Teacher = Depends(get_current_teacher), db: Session = Depend
         "avatar_url": teacher.avatar_url,
         "classes": classes,
     }
+
+
+@router.patch("/me")
+def update_me(
+    profile: TeacherProfileUpdate,
+    teacher: Teacher = Depends(get_current_teacher),
+    db: Session = Depends(get_db),
+):
+    """Update editable teacher profile preferences."""
+    for field, value in profile.model_dump(exclude_unset=True).items():
+        setattr(teacher, field, value)
+    db.commit()
+    return {"avatar_url": teacher.avatar_url, "phone": teacher.phone, "specialization": teacher.specialization}
 
 
 @router.get("/demo-accounts", response_model=list[DemoTeacherCard])
