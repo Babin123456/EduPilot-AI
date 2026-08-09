@@ -52,7 +52,7 @@ export const DocumentStudioSection: React.FC = () => {
         const nextIndex = (currentIndex + 1) % TAB_ITEMS.length;
         return TAB_ITEMS[nextIndex].id;
       });
-    }, 4000); // 4-Second Automatic Slide Flow
+    }, 2000); // 4-Second Automatic Slide Flow
 
     return () => clearInterval(interval);
   }, [paused]);
