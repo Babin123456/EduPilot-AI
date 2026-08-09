@@ -217,13 +217,53 @@ export const AssignmentsPage: React.FC = () => {
                 <button onClick={() => setShowGenModal(false)}><X className="w-5 h-5 text-slate-400" /></button>
               </div>
 
+              {/* Subject Specification Selection */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Topic / Syllabus Module *</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                  Subject Specification *
+                </label>
+                <div className="p-3 bg-blue-50 dark:bg-blue-950/40 rounded-xl border border-blue-200 dark:border-blue-800 text-xs font-bold text-[#005BAC] dark:text-[#8CC63F] flex items-center justify-between">
+                  <span>{activeClass?.course_name || 'Computer Science & Engineering'} ({activeClass?.course_code || 'CS301'})</span>
+                  <span className="text-[10px] px-2 py-0.5 bg-white dark:bg-slate-900 rounded font-semibold uppercase">{activeClass?.year_label}</span>
+                </div>
+              </div>
+
+              {/* Recommended Topics Selector */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                  Recommended Syllabus Topics (Click to Select 1)
+                </label>
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {[
+                    `${activeClass?.course_name || 'Subject'} Fundamentals & Architecture`,
+                    `Advanced ${activeClass?.course_name || 'Algorithmic'} Implementation`,
+                    `Real-World Case Study & Optimization`,
+                    `Mathematical Proofs & System Bounds`,
+                    `Enterprise Security & Fault Tolerance`,
+                  ].map((recTopic, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setTopic(recTopic)}
+                      className={`text-[11px] px-2.5 py-1 rounded-lg border font-semibold transition-all ${
+                        topic === recTopic
+                          ? 'bg-[#005BAC] text-white border-[#005BAC] shadow-sm scale-105'
+                          : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-[#005BAC]'
+                      }`}
+                    >
+                      {recTopic}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Selected Assignment Topic *</label>
                 <input
                   type="text"
                   value={topic}
                   onChange={(e) => setTopic(e.target.value)}
-                  placeholder="e.g. Memory Management & Paging Algorithms"
+                  placeholder="Select a recommended topic above or enter custom topic..."
                   className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-[#005BAC] focus:outline-none"
                 />
               </div>
@@ -248,6 +288,7 @@ export const AssignmentsPage: React.FC = () => {
                     className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none"
                   >
                     <option value="easy">Easy</option>
+
                     <option value="medium">Medium</option>
                     <option value="hard">Hard</option>
                   </select>
