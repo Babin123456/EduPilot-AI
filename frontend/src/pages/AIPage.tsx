@@ -489,8 +489,11 @@ export const AIPage: React.FC = () => {
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 };
+
+
 
 
 
