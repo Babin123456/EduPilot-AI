@@ -12,31 +12,15 @@ import {
   Building,
   CheckCircle2,
   Save,
-  Check,
   Upload
 } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
-
-// 10 Curated Cartoon 3D Avatars for Teachers
-const AVATARS = [
-  { id: 'avatar-1', name: 'Prof. Alpha', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=ProfAlpha&backgroundColor=transparent' },
-  { id: 'avatar-2', name: 'Dr. Cyber', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=DrCyber&backgroundColor=transparent' },
-  { id: 'avatar-3', name: 'Tech Mentor', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=TechMentor&backgroundColor=transparent' },
-  { id: 'avatar-4', name: 'Data Scientist', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=DataScientist&backgroundColor=transparent' },
-  { id: 'avatar-5', name: 'Code Architect', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=CodeArchitect&backgroundColor=transparent' },
-  { id: 'avatar-6', name: 'Dept. Chair', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=DeptChair&backgroundColor=transparent' },
-  { id: 'avatar-7', name: 'Algo Wizard', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=AlgoWizard&backgroundColor=transparent' },
-  { id: 'avatar-8', name: 'AI Specialist', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=AISpecialist&backgroundColor=transparent' },
-  { id: 'avatar-9', name: 'Campus Dean', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=CampusDean&backgroundColor=transparent' },
-  { id: 'avatar-10', name: 'Creative Educator', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=CreativeEducator&backgroundColor=transparent' },
-];
-
 
 export const ProfilePage: React.FC = () => {
   const { user, updateUser } = useAuth();
   const toast = useToast();
   
-  const [selectedAvatar, setSelectedAvatar] = useState<string>(user?.avatar_url || AVATARS[0].url);
+  const [selectedAvatar, setSelectedAvatar] = useState<string>(user?.avatar_url || '/images/avatar.png');
   const [phone, setPhone] = useState(user?.phone || '+91 98301 23456');
   const [specialization, setSpecialization] = useState(user?.specialization || 'Distributed Systems & Cybersecurity');
   const [saving, setSaving] = useState(false);
@@ -92,7 +76,7 @@ export const ProfilePage: React.FC = () => {
             <ShieldCheck className="w-3.5 h-3.5 text-[#8CC63F]" /> Faculty Identity Command
           </div>
           <h1 className="text-2xl sm:text-3xl font-black">Personalized Teacher Profile</h1>
-          <p className="text-xs text-slate-100 font-medium">Select your 3D academic avatar, manage official contact info, and review teaching context portfolio.</p>
+          <p className="text-xs text-slate-100 font-medium">Upload your profile photo, manage official contact info, and review teaching context portfolio.</p>
         </div>
         <div className="w-24 h-24 flex items-center justify-center flex-shrink-0">
           <img src="/images/avatar.png" alt="Teacher profile avatar" className="w-full h-full object-contain" />
@@ -167,44 +151,6 @@ export const ProfilePage: React.FC = () => {
         {/* ─── Right Column: 10 Avatar Selection & Contact Form ─── */}
         <div className="lg:col-span-8 space-y-6">
           
-          {/* Avatar Selector Grid */}
-          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 space-y-4 shadow-sm">
-            <div>
-              <h3 className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-[#8CC63F]" />
-                <span>Choose Your Faculty Avatar (10 Available)</span>
-              </h3>
-               <p className="text-xs text-slate-500 mt-1">Choose an avatar, then save your profile. It will appear in the dashboard welcome banner and teacher badge.</p>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-2">
-              {AVATARS.map((av) => {
-                const isSelected = selectedAvatar === av.url;
-                return (
-                  <button
-                    key={av.id}
-                    onClick={() => setSelectedAvatar(av.url)}
-                    className={`relative rounded-2xl p-2 text-center transition-all border ${
-                      isSelected
-                        ? 'border-[#005BAC] dark:border-[#8CC63F] bg-blue-50/50 dark:bg-blue-950/30 ring-2 ring-[#005BAC]/30'
-                        : 'border-slate-200 dark:border-slate-800 hover:border-slate-400'
-                    }`}
-                  >
-                    <div className="w-14 h-14 mx-auto rounded-xl overflow-hidden mb-1.5">
-                      <img src={av.url} alt={av.name} className="w-full h-full object-contain" />
-                    </div>
-                    <span className="text-[10px] font-bold text-slate-800 dark:text-slate-200 block truncate">{av.name}</span>
-                    {isSelected && (
-                      <span className="absolute top-1 right-1 p-0.5 bg-[#005BAC] dark:bg-[#8CC63F] text-white dark:text-slate-950 rounded-full">
-                        <Check className="w-3 h-3" />
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
           {/* Contact Details & Specialization Form */}
           <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 space-y-4 shadow-sm">
             <h3 className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
