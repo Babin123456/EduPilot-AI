@@ -190,9 +190,11 @@ export const AIPage: React.FC = () => {
   };
 
   return (
-    <div className="flex h-[calc(100vh-6rem)] bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden -my-2">
-      {/* ─── Left Sidebar: ChatGPT Conversation History ─── */}
-      <div className="w-60 bg-slate-50 dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 p-3 hidden md:flex flex-col justify-between flex-shrink-0">
+    <div className="max-w-5xl mx-auto w-full">
+      <div className="flex h-[calc(100vh-8.5rem)] bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-md overflow-hidden">
+        {/* ─── Left Sidebar: Conversation History ─── */}
+        <div className="w-52 bg-slate-50 dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 p-2.5 hidden md:flex flex-col justify-between flex-shrink-0">
+
 
         <div className="space-y-3 overflow-y-auto">
           <button
@@ -489,4 +491,8 @@ export const AIPage: React.FC = () => {
     </div>
   );
 };
+
+
+
+
 
