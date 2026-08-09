@@ -492,26 +492,17 @@ export const AssessmentsPage: React.FC = () => {
                 <button onClick={() => setShowGenModal(false)}><X className="w-5 h-5 text-slate-400" /></button>
               </div>
 
-              {/* Subject Specification Selection */}
+              {/* Fixed Active Course Subject Specification */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
-                  Select Subject Specification *
+                  Subject Specification *
                 </label>
-                <select
-                  value={selectedSubject}
-                  onChange={(e) => {
-                    const newSub = e.target.value;
-                    setSelectedSubject(newSub);
-                    const subTopics = subjectCatalog[newSub] || [];
-                    if (subTopics.length > 0) setTopic(subTopics[0]);
-                  }}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-bold text-[#005BAC] dark:text-[#8CC63F] focus:outline-none cursor-pointer"
-                >
-                  {Object.keys(subjectCatalog).map((subKey) => (
-                    <option key={subKey} value={subKey}>{subKey}</option>
-                  ))}
-                </select>
+                <div className="p-3 bg-blue-50 dark:bg-blue-950/40 rounded-xl border border-blue-200 dark:border-blue-800 text-xs font-black text-[#005BAC] dark:text-[#8CC63F] flex items-center justify-between">
+                  <span>{activeClass?.course_name || 'Course Subject'} ({activeClass?.course_code})</span>
+                  <span className="text-[10px] px-2 py-0.5 bg-white dark:bg-slate-900 rounded font-semibold uppercase">{activeClass?.year_label} Sec {activeClass?.section_name}</span>
+                </div>
               </div>
+
 
               {/* 20 Sub-Topics Picker */}
               <div>
