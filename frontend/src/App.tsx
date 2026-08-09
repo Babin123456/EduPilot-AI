@@ -21,6 +21,7 @@ import { AssessmentsPage } from './pages/AssessmentsPage';
 import { DailyNotesPage } from './pages/DailyNotesPage';
 import { DocumentStudioPage } from './pages/DocumentStudioPage';
 import { CommunicationsPage } from './pages/CommunicationsPage';
+import { ProfilePage } from './pages/ProfilePage';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { token, isLoading } = useAuth();
@@ -54,6 +55,8 @@ export const App: React.FC = () => {
               <Route path="/daily-notes" element={<ProtectedRoute><DailyNotesPage /></ProtectedRoute>} />
               <Route path="/documents" element={<ProtectedRoute><DocumentStudioPage /></ProtectedRoute>} />
               <Route path="/communications" element={<ProtectedRoute><CommunicationsPage /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+
 
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

@@ -51,16 +51,22 @@ export const DocumentStudioSection: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-          {/* Left: Text & Doc Types */}
-          <div className="lg:col-span-6 space-y-8">
-            {/* Image with parallax */}
-            <div className="doc-image relative rounded-3xl glass-card p-3 overflow-hidden bg-white dark:bg-[#1E293B] mb-8">
-              <img src="/images/document_studio.png" alt="Document Studio Preview" className="w-full h-auto rounded-2xl object-contain bg-white dark:bg-[#1E293B]" loading="lazy" />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          {/* Left Column: Clean Isolated Illustration */}
+          <div className="lg:col-span-6 relative flex justify-center">
+            <div className="doc-image relative w-full flex justify-center">
+              <img
+                src="/images/document_studio.png"
+                alt="Publish & Distribute Class Materials Effortlessly Visual"
+                className="w-full h-auto max-h-[440px] object-contain drop-shadow-[0_20px_45px_rgba(0,91,172,0.3)]"
+                loading="lazy"
+              />
             </div>
+          </div>
 
-            {/* Document Types */}
-            <div className="doc-list space-y-3">
+          {/* Right Column: Studio Document Features & Actions */}
+          <div className="doc-preview lg:col-span-6 space-y-6">
+            <div className="doc-list space-y-4">
               {[
                 { icon: FileText, color: 'text-red-500 bg-red-500/10', title: 'PDF Question Papers & Quiz Bundles', desc: 'Auto-formatted with Adamas University headers & marking schemes', ext: '.PDF' },
                 { icon: Presentation, color: 'text-amber-500 bg-amber-500/10', title: 'PPTX Lecture Slide Outlines', desc: 'Editable slide decks with structured topic breakdowns', ext: '.PPTX' },
@@ -70,70 +76,28 @@ export const DocumentStudioSection: React.FC = () => {
                 return (
                   <div key={doc.title} className="doc-list-item group glass-card-hover rounded-2xl p-4 flex items-center justify-between cursor-default">
                     <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-xl ${doc.color} flex items-center justify-center group-hover:scale-105 transition-transform duration-300`}>
+                      <div className={`w-11 h-11 rounded-xl ${doc.color} flex items-center justify-center group-hover:scale-105 transition-transform duration-300`}>
                         <Icon className="w-5 h-5" />
                       </div>
                       <div>
-                        <h4 className="text-xs font-bold text-slate-900 dark:text-white">{doc.title}</h4>
-                        <p className="text-[10px] text-slate-500">{doc.desc}</p>
+                        <h4 className="text-sm font-bold text-slate-900 dark:text-white">{doc.title}</h4>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{doc.desc}</p>
                       </div>
                     </div>
-                    <span className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">{doc.ext}</span>
+                    <span className="text-xs font-bold px-3 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">{doc.ext}</span>
                   </div>
                 );
               })}
             </div>
 
             {/* Distribution Channels */}
-            <div className="flex items-center gap-6 text-xs font-semibold text-slate-600 dark:text-slate-400 pt-2">
-              <span className="flex items-center gap-2"><Mail className="w-4 h-4 text-[#005BAC]" /> Direct Institutional Email</span>
-              <span className="flex items-center gap-2"><MessageSquare className="w-4 h-4 text-[#8CC63F]" /> Parent WhatsApp Alerts</span>
-            </div>
-          </div>
-
-          {/* Right: Studio Mockup */}
-          <div className="doc-preview lg:col-span-6">
-            <div className="glass-card rounded-3xl p-6 sm:p-8 space-y-6">
-              {/* Toolbar */}
-              <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-[#8CC63F]" />
-                  <span className="text-xs font-bold text-slate-900 dark:text-white">Document Studio Workspace</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button className="btn-magnetic p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-bold flex items-center gap-1">
-                    <Download className="w-3.5 h-3.5" /> Export
-                  </button>
-                  <button className="btn-magnetic p-2 rounded-xl bg-[#005BAC] text-white text-[10px] font-bold flex items-center gap-1">
-                    <Share2 className="w-3.5 h-3.5" /> Share
-                  </button>
-                </div>
-              </div>
-
-              {/* Document Preview */}
-              <div className="bg-slate-50 dark:bg-slate-900/80 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4 font-mono text-xs text-slate-700 dark:text-slate-300">
-                <div className="border-b border-slate-200 dark:border-slate-800 pb-3 flex justify-between items-center">
-                  <div>
-                    <p className="font-bold text-[#005BAC] dark:text-[#8CC63F]">ADAMAS UNIVERSITY — SCHOOL OF ENGINEERING</p>
-                    <p className="text-[10px] text-slate-400">Department of Computer Science & Engineering</p>
-                  </div>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 flex items-center gap-1">
-                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>
-                    VERIFIED
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  <p className="font-bold text-slate-900 dark:text-white text-sm">Course: Operating Systems (CS-301) — Quiz 2</p>
-                  <p className="text-slate-500 text-[11px]">Time Allowed: 30 Mins | Total Marks: 20</p>
-                </div>
-                <div className="space-y-2 text-[11px] pt-2">
-                  <p className="font-bold text-slate-800 dark:text-slate-200">Q1. Explain the process state transition lifecycle in Linux kernels. (5 Marks)</p>
-                  <p className="text-slate-500 pl-3">a) Running - Waiting - Ready queue states...</p>
-                  <p className="font-bold text-slate-800 dark:text-slate-200">Q2. Differentiate between preemptive vs non-preemptive CPU scheduling. (5 Marks)</p>
-                  <p className="text-slate-500 pl-3">b) Context switching overhead, priority inversion...</p>
-                  <p className="font-bold text-slate-800 dark:text-slate-200">Q3. Describe the Banker's Algorithm for deadlock avoidance. (5 Marks)</p>
-                </div>
-              </div>
+            <div className="p-5 rounded-2xl bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-4">
+              <span className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200">
+                <Mail className="w-4 h-4 text-[#005BAC]" /> Direct Institutional Email
+              </span>
+              <span className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200">
+                <MessageSquare className="w-4 h-4 text-[#8CC63F]" /> Parent WhatsApp Alerts
+              </span>
             </div>
           </div>
         </div>
@@ -141,3 +105,4 @@ export const DocumentStudioSection: React.FC = () => {
     </section>
   );
 };
+

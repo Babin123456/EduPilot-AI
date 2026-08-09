@@ -131,10 +131,11 @@ export const AnalyticsSection: React.FC = () => {
 
           {/* Right: Value Props + Image */}
           <div className="lg:col-span-5 space-y-8">
-            {/* Parallax Image */}
-            <div className="analytics-image relative rounded-3xl glass-card p-3 overflow-hidden bg-white dark:bg-[#1E293B]">
-              <img src="/images/analytics_dashboard.png" alt="Analytics Dashboard Preview" className="w-full h-auto rounded-2xl object-contain bg-white dark:bg-[#1E293B]" loading="lazy" />
+            {/* Parallax Image - Clean isolated object without container box */}
+            <div className="analytics-image relative p-2 flex justify-center">
+              <img src="/images/analytics_dashboard.png" alt="Analytics Dashboard Preview" className="w-full h-auto object-contain drop-shadow-[0_15px_35px_rgba(0,0,0,0.25)]" loading="lazy" />
             </div>
+
 
             {/* Value Props */}
             <div className="analytics-props space-y-5">

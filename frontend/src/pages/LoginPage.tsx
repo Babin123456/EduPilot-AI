@@ -106,14 +106,14 @@ export const LoginPage: React.FC = () => {
           </div>
 
           {/* Center Isolated Product Showcase Graphic */}
-          <div className="relative z-10 my-8 rounded-2xl overflow-hidden border border-white/20 shadow-2xl bg-slate-950/80 p-2">
+          <div className="relative z-10 my-6 flex justify-center">
             <img
               src="/images/login_hero_illustration.png"
               alt="EduPilot Academic OS Visual"
-              className="w-full h-auto rounded-xl object-contain max-h-60 mx-auto bg-slate-950"
+              className="w-full h-auto object-contain max-h-64 drop-shadow-[0_15px_35px_rgba(0,0,0,0.35)]"
             />
-
           </div>
+
 
           {/* Bottom Trust Badges */}
           <div className="relative z-10 pt-2 flex flex-wrap items-center gap-4 text-[11px] font-semibold text-slate-200">

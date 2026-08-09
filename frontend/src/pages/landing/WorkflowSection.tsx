@@ -96,14 +96,15 @@ export const WorkflowSection: React.FC = () => {
           <div className="lg:col-span-5 relative">
             <div className="workflow-image relative">
               <div className="absolute -inset-2 rounded-3xl bg-gradient-to-br from-[#005BAC]/20 to-[#8CC63F]/20 blur-xl animate-glow" />
-              <div className="relative rounded-3xl glass-card p-3 overflow-hidden bg-white dark:bg-[#1E293B]">
+              <div className="relative p-2 flex justify-center">
                 <img
                   src="/images/workflow_diagram.png"
                   alt="EduPilot AI Workflow Architecture"
-                  className="w-full h-auto rounded-2xl object-contain bg-white dark:bg-[#1E293B]"
+                  className="w-full h-auto object-contain drop-shadow-[0_15px_35px_rgba(0,0,0,0.25)]"
                   loading="lazy"
                 />
               </div>
+
             </div>
           </div>
 

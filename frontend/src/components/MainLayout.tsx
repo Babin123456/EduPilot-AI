@@ -21,9 +21,11 @@ import {
   X,
   Bell,
   Notebook,
+  User,
   PanelLeftClose,
   PanelLeftOpen,
 } from 'lucide-react';
+
 
 export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, activeClass, setActiveClass, logout, classesByYear, classChangeKey } = useAuth();
@@ -58,7 +60,9 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
     { label: 'Daily Notes', path: '/daily-notes', icon: Notebook },
     { label: 'Document Studio', path: '/documents', icon: Folder },
     { label: 'Communications', path: '/communications', icon: Mail },
+    { label: 'Faculty Profile', path: '/profile', icon: User },
   ];
+
 
   const yearOrder = ['1st Year', '2nd Year', '3rd Year', '4th Year'];
 
@@ -120,17 +124,22 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
           {/* Footer User Profile */}
           <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 overflow-hidden">
-                <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center font-bold text-slate-700 dark:text-slate-200 text-xs flex-shrink-0">
-                  {user?.first_name?.[0]}{user?.last_name?.[0]}
+              <Link to="/profile" className="flex items-center gap-3 overflow-hidden group">
+                <div className="w-8 h-8 rounded-full bg-[#005BAC]/10 text-[#005BAC] dark:bg-[#8CC63F]/20 dark:text-[#8CC63F] flex items-center justify-center font-bold text-xs flex-shrink-0 group-hover:scale-105 transition-transform">
+                  {user?.avatar_url ? (
+                    <img src={user.avatar_url} alt={user.full_name} className="w-full h-full rounded-full object-cover" />
+                  ) : (
+                    `${user?.first_name?.[0] || ''}${user?.last_name?.[0] || ''}`
+                  )}
                 </div>
                 {!sidebarCollapsed && (
                   <div className="truncate">
-                    <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{user?.full_name}</p>
+                    <p className="text-xs font-bold text-slate-900 dark:text-white truncate group-hover:text-[#005BAC] dark:group-hover:text-[#8CC63F] transition-colors">{user?.full_name}</p>
                     <p className="text-[10px] text-slate-500 truncate">{user?.designation}</p>
                   </div>
                 )}
-              </div>
+              </Link>
+
               {!sidebarCollapsed && (
                 <button
                   onClick={logout}
