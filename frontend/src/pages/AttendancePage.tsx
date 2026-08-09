@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../api/client';
-import { Check, X, AlertCircle } from 'lucide-react';
+import { Check, X, AlertCircle, CheckCircle2, XCircle, Send } from 'lucide-react';
+
 
 export const AttendancePage: React.FC = () => {
   const { activeClass } = useAuth();
@@ -86,24 +87,28 @@ export const AttendancePage: React.FC = () => {
         <div className="flex flex-wrap items-center gap-2.5 relative z-10">
           <button
             onClick={() => handleBulkMark('present')}
-            className="px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500/35 backdrop-blur-xl border border-emerald-300/40 text-white text-xs font-extrabold rounded-xl transition-all shadow-md active:scale-95"
+            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black rounded-xl transition-all shadow-md active:scale-95 flex items-center gap-1.5 border border-emerald-400/50"
           >
+            <CheckCircle2 className="w-4 h-4 text-emerald-200" />
             Mark All Present
           </button>
           <button
             onClick={() => handleBulkMark('absent')}
-            className="px-4 py-2 bg-rose-500/20 hover:bg-rose-500/35 backdrop-blur-xl border border-rose-300/40 text-white text-xs font-extrabold rounded-xl transition-all shadow-md active:scale-95"
+            className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-black rounded-xl transition-all shadow-md active:scale-95 flex items-center gap-1.5 border border-rose-400/50"
           >
+            <XCircle className="w-4 h-4 text-rose-200" />
             Mark All Absent
           </button>
           <button
             onClick={handleSubmit}
             disabled={saving}
-            className="px-5 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-xl border border-white/40 text-white text-xs font-black rounded-xl transition-all shadow-lg active:scale-95 disabled:opacity-50"
+            className="px-5 py-2 bg-slate-950 hover:bg-slate-900 text-white text-xs font-black rounded-xl transition-all shadow-lg active:scale-95 disabled:opacity-50 flex items-center gap-1.5 border border-slate-700"
           >
+            <Send className="w-4 h-4 text-[#8CC63F]" />
             {saving ? 'Saving...' : 'Submit Attendance'}
           </button>
         </div>
+
 
 
         <div className="w-36 h-24 flex items-center justify-center hidden sm:flex flex-shrink-0 relative z-10">

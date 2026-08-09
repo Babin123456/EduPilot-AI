@@ -114,12 +114,13 @@ export const DailyNotesPage: React.FC = () => {
         <div className="flex items-center gap-3 relative z-10">
           <button
             onClick={() => setShowForm(!showForm)}
-            className="px-5 py-2.5 bg-white/20 hover:bg-white/30 backdrop-blur-xl border border-white/40 text-white text-xs font-black rounded-xl transition-all shadow-lg active:scale-95 flex items-center gap-2"
+            className="px-5 py-2.5 bg-slate-950 hover:bg-slate-900 text-white text-xs font-black rounded-xl transition-all shadow-lg active:scale-95 flex items-center gap-2 border border-slate-700"
           >
             <Sparkles className="w-4 h-4 text-[#8CC63F]" />
-            {showForm ? 'Cancel Form' : "Generate Today's Notes"}
+            <span>{showForm ? 'Cancel Form' : "Generate Today's Notes"}</span>
           </button>
         </div>
+
 
 
         <div className="w-36 h-24 flex items-center justify-center hidden sm:flex flex-shrink-0 relative z-10">
