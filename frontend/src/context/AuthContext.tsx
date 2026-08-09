@@ -38,11 +38,13 @@ interface AuthContextType {
   activeClass: ClassItem | null;
   classChangeKey: number;
   setActiveClass: (cls: ClassItem) => void;
+  updateUser: (updatedData: Partial<UserProfile>) => void;
   login: (token: string, user: any) => void;
   logout: () => void;
   isLoading: boolean;
   classesByYear: Record<string, ClassItem[]>;
 }
+
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -79,6 +81,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('active_class_id', cls.id);
   }, []);
 
+  const updateUser = useCallback((updatedData: Partial<UserProfile>) => {
+    setUser((prev) => (prev ? { ...prev, ...updatedData } : null));
+  }, []);
+
   const login = (newToken: string, userData: any) => {
     localStorage.setItem('access_token', newToken);
     setToken(newToken);
@@ -107,10 +113,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [user?.classes]);
 
   return (
-    <AuthContext.Provider value={{ user, token, activeClass, classChangeKey, setActiveClass, login, logout, isLoading, classesByYear }}>
+    <AuthContext.Provider value={{ user, token, activeClass, classChangeKey, setActiveClass, updateUser, login, logout, isLoading, classesByYear }}>
       {children}
     </AuthContext.Provider>
   );
+
 };
 
 export const useAuth = () => {
