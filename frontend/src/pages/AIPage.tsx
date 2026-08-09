@@ -252,10 +252,11 @@ export const AIPage: React.FC = () => {
         <div className="bg-gradient-to-r from-[#005BAC] via-[#0A6FD8] to-[#8CC63F] p-3.5 sm:p-4 text-white shadow-md flex items-center justify-between gap-4 relative overflow-hidden flex-shrink-0">
           <div className="space-y-0.5 relative z-10">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-extrabold text-white">
-              <Bot className="w-3 h-3 text-[#8CC63F]" /> ChatGPT Copilot Workspace
+              <Bot className="w-3 h-3 text-[#8CC63F]" /> EduPilot AI Intelligence Engine
             </div>
             <h1 className="text-base sm:text-lg font-black">EduPilot AI Copilot</h1>
           </div>
+
 
           {/* Model Switcher & Export Controls */}
           <div className="flex items-center gap-2 relative z-10">
