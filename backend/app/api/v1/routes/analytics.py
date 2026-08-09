@@ -113,6 +113,22 @@ def get_class_analytics(
         else:
             score_distribution["F"] += 1
 
+    # Demo and newly created classes may not have saved assessment results yet.
+    # Use the student snapshots so every assigned class still has meaningful data.
+    if not results:
+        for student in students:
+            pct = student.average_score or 0
+            if pct >= 90:
+                score_distribution["A"] += 1
+            elif pct >= 75:
+                score_distribution["B"] += 1
+            elif pct >= 60:
+                score_distribution["C"] += 1
+            elif pct >= 40:
+                score_distribution["D"] += 1
+            else:
+                score_distribution["F"] += 1
+
     # ── Risk distribution ──
     risk_dist = {"normal": 0, "low": 0, "medium": 0, "high": 0}
     for s in students:

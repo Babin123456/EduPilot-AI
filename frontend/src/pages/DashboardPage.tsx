@@ -275,7 +275,7 @@ export const DashboardPage: React.FC = () => {
                 <div className="space-y-1">
                   <span className="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">Average Class Attendance</span>
                   <p className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400">
-                    {analyticsData.average_attendance || 82.4}%
+                     {analyticsData.average_attendance ?? 0}%
                   </p>
                   <span className="inline-block px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
                     Healthy
@@ -288,8 +288,8 @@ export const DashboardPage: React.FC = () => {
                     <PieChart>
                       <Pie
                         data={[
-                          { name: 'Present', value: analyticsData.average_attendance || 82.4 },
-                          { name: 'Absent', value: 100 - (analyticsData.average_attendance || 82.4) }
+                           { name: 'Present', value: analyticsData.average_attendance ?? 0 },
+                           { name: 'Absent', value: 100 - (analyticsData.average_attendance ?? 0) }
                         ]}
                         cx="50%"
                         cy="50%"
@@ -310,7 +310,7 @@ export const DashboardPage: React.FC = () => {
                 <div className="space-y-1">
                   <span className="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">Average Assessment Score</span>
                   <p className="text-2xl sm:text-3xl font-black text-[#005BAC] dark:text-[#8CC63F]">
-                    {analyticsData.average_score || 67.6} / 100
+                     {analyticsData.average_score ?? 0} / 100
                   </p>
                   <span className="inline-block px-2 py-0.5 rounded text-[10px] font-extrabold bg-[#005BAC]/20 text-[#005BAC] dark:bg-[#8CC63F]/20 dark:text-[#8CC63F]">
                     Score
@@ -323,8 +323,8 @@ export const DashboardPage: React.FC = () => {
                     <PieChart>
                       <Pie
                         data={[
-                          { name: 'Achieved', value: analyticsData.average_score || 67.6 },
-                          { name: 'Remaining', value: 100 - (analyticsData.average_score || 67.6) }
+                           { name: 'Achieved', value: analyticsData.average_score ?? 0 },
+                           { name: 'Remaining', value: 100 - (analyticsData.average_score ?? 0) }
                         ]}
                         cx="50%"
                         cy="50%"
