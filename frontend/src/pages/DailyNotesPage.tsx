@@ -119,6 +119,9 @@ export const DailyNotesPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3 relative z-10">
+          <div className="w-36 h-24 flex items-center justify-center hidden sm:flex flex-shrink-0">
+          <img src="/images/daily_notes_banner.png" alt="Daily Notes Banner" className="w-full h-auto max-h-24 object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.4)]" />
+          </div>
           <button
             onClick={() => setShowForm(!showForm)}
             className="px-5 py-2.5 bg-slate-950 hover:bg-slate-900 text-white text-xs font-black rounded-xl transition-all shadow-lg active:scale-95 flex items-center gap-2 border border-slate-700"
@@ -126,10 +129,6 @@ export const DailyNotesPage: React.FC = () => {
             <Sparkles className="w-4 h-4 text-[#8CC63F]" />
             <span>{showForm ? 'Cancel Form' : "Generate Note"}</span>
           </button>
-        </div>
-
-        <div className="w-36 h-24 flex items-center justify-center hidden sm:flex flex-shrink-0 relative z-10">
-          <img src="/images/daily_notes_banner.png" alt="Daily Notes Banner" className="w-full h-auto max-h-24 object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.4)]" />
         </div>
       </div>
 

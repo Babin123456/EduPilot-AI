@@ -350,15 +350,8 @@ export const AssignmentsPage: React.FC = () => {
             </div>
             <h2 className="mt-4 text-base font-black text-slate-900 dark:text-white">No assignments yet</h2>
             <p className="mt-1 max-w-md mx-auto text-xs leading-relaxed text-slate-500">
-              There are no assignments for {activeClass?.course_name || 'this class'} yet. Generate an AI assignment to get started.
+              There are no assignments for {activeClass?.course_name || 'this class'} yet.
             </p>
-            <button
-              onClick={() => setShowGenModal(true)}
-              className="mt-5 px-4 py-2.5 bg-[#005BAC] hover:bg-[#0A6FD8] text-white text-xs font-black rounded-xl inline-flex items-center gap-2 transition-colors"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-[#8CC63F]" />
-              Generate Assignment
-            </button>
           </div>
         ) : assignments.map((a) => (
           <div key={a.id} className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
