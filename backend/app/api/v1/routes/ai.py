@@ -221,7 +221,16 @@ def chat(
 
             students = db.query(Student).filter(Student.section_id == tca.section_id, Student.is_active == True).all()
             at_risk = [s for s in students if s.attendance_percentage < 75]
-            student_summary_str = f"Total Students: {len(students)} | At-Risk (<75% attendance): {len(at_risk)}"
+            
+            student_details_list = [
+                f"{s.full_name} (Roll: {s.roll_number}, Attendance: {s.attendance_percentage}%, Risk: {s.risk_level})"
+                for s in students
+            ]
+            student_summary_str = (
+                f"Total Students: {len(students)} | At-Risk (<75% attendance): {len(at_risk)}\n"
+                f"Full Class Student Roster with Exact Database Attendance Records:\n"
+                + "\n".join(student_details_list)
+            )
 
     # Retrieve conversation history
     conversation = None
@@ -241,7 +250,16 @@ def chat(
         db.add(conversation)
         db.flush()
 
-    # Save user message
+    # Retrieve previous message history for chat memory
+    past_messages = (
+        db.query(AIMessage)
+        .filter(AIMessage.conversation_id == conversation.id)
+        .order_by(AIMessage.created_at.asc())
+        .limit(10)
+        .all()
+    )
+
+    # Save current user message
     user_msg = AIMessage(
         id=str(uuid.uuid4()),
         conversation_id=conversation.id,
@@ -255,22 +273,26 @@ def chat(
         f"You are EduPilot AI, the intelligent academic copilot for Adamas University, Kolkata.\n"
         f"You are assisting Professor {teacher.full_name} ({teacher.designation}, {teacher.specialization or 'CSE'}).\n"
         f"Current Academic Context: {class_context_str or 'General Academic Workspace'}\n"
-        f"Class Summary: {student_summary_str or 'N/A'}\n\n"
+        f"Live Database Information:\n{student_summary_str or 'N/A'}\n\n"
         f"Instructions:\n"
-        f"1. You assist the teacher with portal queries (attendance, timetable, students, assignments, quizzes, analytics).\n"
-        f"2. You ALSO answer general academic and study-related questions in depth (computer networks, algorithms, operating systems, mathematics, web dev, etc.).\n"
-        f"3. Be polite, professional, concise, structured, and use Markdown formatting where helpful.\n"
-        f"4. If a file context is attached, explain and analyze the uploaded file thoroughly."
+        f"1. Always use the live student database information provided above to give exact student names, roll numbers, and attendance percentages when asked.\n"
+        f"2. Remember previous user questions and context in this conversation thread.\n"
+        f"3. Be concise, structured, professional, and use Markdown formatting without decorative text emojis."
     )
 
     full_user_input = body.message
     if body.file_context:
         full_user_input += f"\n\n[Attached File Content for Analysis]:\n{body.file_context}"
 
-    llm_messages = [
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": full_user_input},
-    ]
+    llm_messages = [{"role": "system", "content": system_prompt}]
+    
+    # Append past conversation memory
+    for pm in past_messages:
+        llm_messages.append({"role": pm.role, "content": pm.content})
+    
+    # Append current question
+    llm_messages.append({"role": "user", "content": full_user_input})
+
 
     # Attempt Groq LLM primary API call
     model_used = "Groq Llama-3.3-70B"
