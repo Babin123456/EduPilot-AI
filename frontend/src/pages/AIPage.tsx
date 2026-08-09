@@ -159,9 +159,10 @@ export const AIPage: React.FC = () => {
   };
 
   return (
-    <div className="flex h-[calc(100vh-7rem)] bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+    <div className="flex h-[calc(100vh-6rem)] bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden -my-2">
       {/* ─── Left Sidebar: ChatGPT Conversation History ─── */}
-      <div className="w-64 bg-slate-50 dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 p-3 hidden md:flex flex-col justify-between flex-shrink-0">
+      <div className="w-60 bg-slate-50 dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 p-3 hidden md:flex flex-col justify-between flex-shrink-0">
+
         <div className="space-y-3 overflow-y-auto">
           <button
             onClick={handleNewChat}
