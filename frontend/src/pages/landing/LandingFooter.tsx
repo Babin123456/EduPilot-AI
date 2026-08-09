@@ -103,116 +103,76 @@ export const LandingFooter: React.FC<LandingFooterProps> = ({ onNavigate }) => {
           </p>
         </div>
 
-        {/* ─── MIDDLE CONTENT GRID: Proper SaaS Platform Columns with Hover Colors & Next-To-Text Icons ─── */}
-        <div className="footer-content-reveal grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 text-xs">
+        {/* ─── MIDDLE CONTENT GRID: Landing Page Sections + Documentation & Legal Links ─── */}
+        <div className="footer-content-reveal grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 text-xs">
           
-          {/* Column 1: Core Platform */}
+          {/* Column 1: Landing Page Navigation Sections */}
           <div className="space-y-3">
             <h4 className="font-extrabold text-slate-900 dark:text-white uppercase tracking-wider text-[11px] flex items-center gap-1.5">
-              <CheckSquare className="w-3.5 h-3.5 text-[#005BAC] dark:text-[#8CC63F]" />
-              <span>Core Platform</span>
+              <Sparkles className="w-3.5 h-3.5 text-[#005BAC] dark:text-[#8CC63F]" />
+              <span>Platform Sections</span>
             </h4>
             <ul className="space-y-2 text-slate-600 dark:text-slate-400">
               <li>
-                <button onClick={() => navigate('/ai')} className="hover:text-[#005BAC] dark:hover:text-[#8CC63F] transition-colors flex items-center gap-2 group">
-                  <Bot className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#005BAC] dark:group-hover:text-[#8CC63F] transition-colors" />
-                  <span>EduPilot AI Copilot</span>
-                </button>
-              </li>
-              <li>
                 <button onClick={() => onNavigate('features')} className="hover:text-[#005BAC] dark:hover:text-[#8CC63F] transition-colors flex items-center gap-2 group">
                   <FileText className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#005BAC] dark:group-hover:text-[#8CC63F] transition-colors" />
-                  <span>Lesson Planner Engine</span>
+                  <span>Capabilities & Features</span>
                 </button>
               </li>
               <li>
-                <button onClick={() => onNavigate('features')} className="hover:text-[#005BAC] dark:hover:text-[#8CC63F] transition-colors flex items-center gap-2 group">
+                <button onClick={() => onNavigate('workflow')} className="hover:text-[#005BAC] dark:hover:text-[#8CC63F] transition-colors flex items-center gap-2 group">
                   <CheckSquare className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#005BAC] dark:group-hover:text-[#8CC63F] transition-colors" />
-                  <span>Batch Attendance & Risk Alerts</span>
+                  <span>AI Orchestration Pipeline</span>
                 </button>
               </li>
               <li>
                 <button onClick={() => onNavigate('analytics')} className="hover:text-[#005BAC] dark:hover:text-[#8CC63F] transition-colors flex items-center gap-2 group">
                   <BarChart3 className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#005BAC] dark:group-hover:text-[#8CC63F] transition-colors" />
-                  <span>Classroom Velocity Analytics</span>
+                  <span>Institutional Analytics</span>
                 </button>
               </li>
-            </ul>
-          </div>
-
-          {/* Column 2: Document & Content Studio */}
-          <div className="space-y-3">
-            <h4 className="font-extrabold text-slate-900 dark:text-white uppercase tracking-wider text-[11px] flex items-center gap-1.5">
-              <Folder className="w-3.5 h-3.5 text-[#005BAC] dark:text-[#8CC63F]" />
-              <span>Studio & Assets</span>
-            </h4>
-            <ul className="space-y-2 text-slate-600 dark:text-slate-400">
               <li>
                 <button onClick={() => onNavigate('documents')} className="hover:text-[#005BAC] dark:hover:text-[#8CC63F] transition-colors flex items-center gap-2 group">
                   <Folder className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#005BAC] dark:group-hover:text-[#8CC63F] transition-colors" />
-                  <span>Document Studio</span>
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onNavigate('documents')} className="hover:text-[#005BAC] dark:hover:text-[#8CC63F] transition-colors flex items-center gap-2 group">
-                  <Notebook className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#005BAC] dark:group-hover:text-[#8CC63F] transition-colors" />
-                  <span>Daily Lecture Notes</span>
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onNavigate('features')} className="hover:text-[#005BAC] dark:hover:text-[#8CC63F] transition-colors flex items-center gap-2 group">
-                  <FileText className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#005BAC] dark:group-hover:text-[#8CC63F] transition-colors" />
-                  <span>Question Bank Generator</span>
+                  <span>Document Studio & Export</span>
                 </button>
               </li>
             </ul>
           </div>
 
-          {/* Column 3: Documentation & Help */}
+          {/* Column 2: Documentation & Help Pages */}
           <div className="space-y-3">
             <h4 className="font-extrabold text-slate-900 dark:text-white uppercase tracking-wider text-[11px] flex items-center gap-1.5">
               <BookOpen className="w-3.5 h-3.5 text-[#005BAC] dark:text-[#8CC63F]" />
-              <span>Resources & Help</span>
+              <span>Documentation & Guides</span>
             </h4>
             <ul className="space-y-2 text-slate-600 dark:text-slate-400">
               <li>
                 <Link to="/docs" className="hover:text-[#005BAC] dark:hover:text-[#8CC63F] transition-colors flex items-center gap-2 group">
                   <BookOpen className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#005BAC] dark:group-hover:text-[#8CC63F] transition-colors" />
-                  <span>Documentation</span>
+                  <span>System Documentation</span>
                 </Link>
               </li>
               <li>
                 <Link to="/faq" className="hover:text-[#005BAC] dark:hover:text-[#8CC63F] transition-colors flex items-center gap-2 group">
                   <HelpCircle className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#005BAC] dark:group-hover:text-[#8CC63F] transition-colors" />
-                  <span>FAQs (15+ Q&A)</span>
+                  <span>Frequently Asked Questions (FAQs)</span>
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Column 4: Institutional Contact & Legal */}
+          {/* Column 3: Institutional & Legal Links */}
           <div className="space-y-3">
             <h4 className="font-extrabold text-slate-900 dark:text-white uppercase tracking-wider text-[11px] flex items-center gap-1.5">
-              <Globe className="w-3.5 h-3.5 text-[#005BAC] dark:text-[#8CC63F]" />
-              <span>Institution & Legal</span>
+              <Shield className="w-3.5 h-3.5 text-[#005BAC] dark:text-[#8CC63F]" />
+              <span>Legal & Policies</span>
             </h4>
             <ul className="space-y-2 text-slate-600 dark:text-slate-400">
               <li>
-                <a href="https://adamasuniversity.ac.in" target="_blank" rel="noopener noreferrer" className="hover:text-[#005BAC] dark:hover:text-[#8CC63F] transition-colors flex items-center gap-2 group">
-                  <Globe className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#005BAC] dark:group-hover:text-[#8CC63F] transition-colors" />
-                  <span>adamasuniversity.ac.in</span>
-                </a>
-              </li>
-              <li>
-                <a href="mailto:support@adamasuniversity.ac.in" className="hover:text-[#005BAC] dark:hover:text-[#8CC63F] transition-colors flex items-center gap-2 group">
-                  <Mail className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#005BAC] dark:group-hover:text-[#8CC63F] transition-colors" />
-                  <span>support@adamasuniversity.ac.in</span>
-                </a>
-              </li>
-              <li>
                 <Link to="/terms" className="hover:text-[#005BAC] dark:hover:text-[#8CC63F] transition-colors flex items-center gap-2 group">
                   <Scale className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#005BAC] dark:group-hover:text-[#8CC63F] transition-colors" />
-                  <span>Terms & Service</span>
+                  <span>Terms of Service</span>
                 </Link>
               </li>
               <li>
@@ -221,10 +181,17 @@ export const LandingFooter: React.FC<LandingFooterProps> = ({ onNavigate }) => {
                   <span>Privacy Policy</span>
                 </Link>
               </li>
+              <li>
+                <a href="https://adamasuniversity.ac.in" target="_blank" rel="noopener noreferrer" className="hover:text-[#005BAC] dark:hover:text-[#8CC63F] transition-colors flex items-center gap-2 group">
+                  <Globe className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#005BAC] dark:group-hover:text-[#8CC63F] transition-colors" />
+                  <span>adamasuniversity.ac.in</span>
+                </a>
+              </li>
             </ul>
           </div>
 
         </div>
+
 
         {/* ─── BOTTOM LAYER: GIANT ANIMATED OUTLINE TYPOGRAPHY AT VERY BOTTOM ─── */}
         <div className="footer-svg-typography relative flex flex-col justify-center items-center pt-2 select-none overflow-hidden border-t border-slate-200 dark:border-slate-800/60">
