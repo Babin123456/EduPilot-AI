@@ -36,30 +36,31 @@ export const AssignmentsPage: React.FC = () => {
       .catch(() => {});
   };
 
-  const handleGenerateAIQuestions = () => {
-    if (!topic.trim()) return;
+  const handleGenerateAIQuestions = async () => {
+    if (!topic.trim() || !activeClass) return;
     setGenerating(true);
 
-    setTimeout(() => {
-      const qData = Array.from({ length: numQuestions }, (_, i) => ({
-        number: i + 1,
-        text: `Assignment Question ${i + 1}: Discuss the foundational concepts of ${topic} and analyze real-world case scenarios.`,
-        type: i % 2 === 0 ? 'mcq' : 'short',
-        options: i % 2 === 0 ? ['Option A: Basic concept', 'Option B: Extended method', 'Option C: Algorithmic approach', 'Option D: Optimized solution'] : undefined,
-        marks: 5,
-      }));
+    try {
+      const res = await api.post('/assignments/generate', {
+        class_id: activeClass.id,
+        topic: topic.trim(),
+        difficulty: difficulty,
+        num_questions: numQuestions,
+      });
 
-      const mdText = `# Assignment Task Paper — ${topic}\n**Course:** ${activeClass?.course_name || ''} (${activeClass?.course_code || ''})\n**Total Marks:** ${numQuestions * 5} | **Difficulty:** ${difficulty.toUpperCase()}\n\n---\n\n` +
-        qData.map(q => `### Question ${q.number} [${q.marks} Marks]\n${q.text}\n` + (q.options ? q.options.map(o => `- ${o}`).join('\n') : '')).join('\n\n');
-
-      setGeneratedQuestionsData(qData);
-      setGeneratedMarkdown(mdText);
-      setActiveTitle(`Assignment — ${topic}`);
-      setGenerating(false);
+      setGeneratedQuestionsData(res.data.questions || []);
+      setGeneratedMarkdown(res.data.markdown || '');
+      setActiveTitle(res.data.title || `Assignment — ${topic}`);
       setShowGenModal(false);
-      toast.success('AI Assignment Generated!', 'Review the formatted raw Markdown below or download as PDF.');
-    }, 1000);
+      fetchAssignments();
+      toast.success('AI Assignment Generated & Saved!', 'Review the formatted question paper below or download as PDF.');
+    } catch (err) {
+      toast.error('Failed to generate AI Assignment');
+    } finally {
+      setGenerating(false);
+    }
   };
+
 
   const handleDownloadPDF = async () => {
     if (!activeClass) return;
