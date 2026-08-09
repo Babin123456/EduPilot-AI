@@ -14,8 +14,21 @@ export const AssignmentsPage: React.FC = () => {
   const toast = useToast();
   const [assignments, setAssignments] = useState<any[]>([]);
 
+  // AI Generator Modal State
+  const [showGenModal, setShowGenModal] = useState(false);
+  const [topic, setTopic] = useState('');
+  const [numQuestions, setNumQuestions] = useState(5);
+  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
+  const [generating, setGenerating] = useState(false);
+
+  // Markdown Preview State
+  const [generatedMarkdown, setGeneratedMarkdown] = useState<string | null>(null);
+  const [generatedQuestionsData, setGeneratedQuestionsData] = useState<any[]>([]);
+  const [activeTitle, setActiveTitle] = useState('');
+
   // Subject & Sub-Topic Catalog State
   const [selectedSubject, setSelectedSubject] = useState<string>('');
+
 
   const subjectCatalog: Record<string, string[]> = {
     'Database Management Systems (DBMS)': [
