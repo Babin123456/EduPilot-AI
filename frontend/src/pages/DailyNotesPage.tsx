@@ -100,13 +100,13 @@ export const DailyNotesPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-[#005BAC] via-[#0A6FD8] to-slate-900 p-6 sm:p-8 rounded-3xl text-white shadow-xl relative overflow-hidden">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-[#005BAC] via-[#0A6FD8] to-[#8CC63F] p-6 sm:p-8 rounded-3xl text-white shadow-xl relative overflow-hidden">
         <div className="space-y-2 relative z-10">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-xs font-extrabold text-[#8CC63F]">
-            <Notebook className="w-3.5 h-3.5" /> Classroom Discussion Log
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-extrabold text-white">
+            <Notebook className="w-3.5 h-3.5 text-[#8CC63F]" /> Classroom Discussion Log
           </div>
           <h1 className="text-2xl font-black">Daily Topic Discussion Notes</h1>
-          <p className="text-xs text-slate-200">
+          <p className="text-xs text-slate-100 font-medium">
             {activeClass ? `${activeClass.course_name} (${activeClass.course_code}) • ${activeClass.year_label} Sec ${activeClass.section_name}` : 'AI Lecture Summarizer & Student Notes Dispatch'}
           </p>
         </div>
@@ -114,17 +114,18 @@ export const DailyNotesPage: React.FC = () => {
         <div className="flex items-center gap-3 relative z-10">
           <button
             onClick={() => setShowForm(!showForm)}
-            className="px-4 py-2.5 bg-[#8CC63F] text-slate-950 text-xs font-extrabold rounded-xl shadow-md hover:bg-[#6FAF2E] transition-all flex items-center gap-2"
+            className="px-4 py-2.5 bg-slate-900 text-white text-xs font-extrabold rounded-xl shadow-md hover:bg-slate-800 transition-all flex items-center gap-2"
           >
             <Sparkles className="w-4 h-4" />
             {showForm ? 'Cancel Form' : "Generate Today's Notes"}
           </button>
         </div>
 
-        <div className="w-32 h-20 rounded-xl overflow-hidden border border-white/20 bg-slate-950/80 p-1 hidden sm:block flex-shrink-0 relative z-10">
-          <img src="/images/daily_notes_banner.png" alt="Daily Notes Banner" className="w-full h-full object-contain bg-slate-950 rounded-lg" />
+        <div className="w-36 h-24 flex items-center justify-center hidden sm:flex flex-shrink-0 relative z-10">
+          <img src="/images/daily_notes_banner.png" alt="Daily Notes Banner" className="w-full h-auto max-h-24 object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.4)]" />
         </div>
       </div>
+
 
 
       {/* Generate Form */}

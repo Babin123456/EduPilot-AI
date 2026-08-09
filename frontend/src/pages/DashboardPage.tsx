@@ -91,7 +91,8 @@ export const DashboardPage: React.FC = () => {
         initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="relative rounded-3xl overflow-hidden glass-card border border-slate-200/80 dark:border-slate-800 shadow-2xl bg-gradient-to-r from-[#005BAC] via-[#0A6FD8] to-[#071426] text-white p-6 sm:p-8 lg:p-10"
+        className="relative rounded-3xl overflow-hidden glass-card border border-slate-200/80 dark:border-slate-800 shadow-2xl bg-gradient-to-r from-[#005BAC] via-[#0A6FD8] to-[#8CC63F] text-white p-6 sm:p-8 lg:p-10"
+
       >
         {/* Glow Orbs */}
         <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-[#8CC63F]/20 blur-3xl pointer-events-none" />

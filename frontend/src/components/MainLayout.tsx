@@ -225,11 +225,8 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
             >
               {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5 text-amber-400" />}
             </button>
-            <button className="p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors relative">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
           </div>
+
         </header>
 
         {/* Dynamic Page Workspace with smooth transitions */}

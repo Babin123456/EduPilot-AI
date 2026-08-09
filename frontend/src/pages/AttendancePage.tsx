@@ -72,13 +72,13 @@ export const AttendancePage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-[#005BAC] via-[#0A6FD8] to-slate-900 p-6 sm:p-8 rounded-3xl text-white shadow-xl relative overflow-hidden">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-[#005BAC] via-[#0A6FD8] to-[#8CC63F] p-6 sm:p-8 rounded-3xl text-white shadow-xl relative overflow-hidden">
         <div className="space-y-2 relative z-10">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-xs font-extrabold text-[#8CC63F]">
-            <Check className="w-3.5 h-3.5" /> Live Attendance Register
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-extrabold text-white">
+            <Check className="w-3.5 h-3.5 text-[#8CC63F]" /> Live Attendance Register
           </div>
           <h1 className="text-2xl font-black">Take Batch Attendance</h1>
-          <p className="text-xs text-slate-200">
+          <p className="text-xs text-slate-100 font-medium">
             {activeClass.course_name} ({activeClass.course_code}) • {activeClass.year_label} Sec {activeClass.section_name}
           </p>
         </div>
@@ -86,23 +86,24 @@ export const AttendancePage: React.FC = () => {
         <div className="flex items-center gap-2 relative z-10">
           <button
             onClick={() => handleBulkMark('present')}
-            className="px-3.5 py-2 bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-bold rounded-xl hover:bg-white/20 transition-colors"
+            className="px-3.5 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 text-white text-xs font-bold rounded-xl transition-colors shadow-sm"
           >
             Mark All Present
           </button>
           <button
             onClick={handleSubmit}
             disabled={saving}
-            className="px-4 py-2 bg-[#8CC63F] text-slate-950 text-xs font-extrabold rounded-xl shadow-md hover:bg-[#6FAF2E] transition-colors disabled:opacity-50"
+            className="px-4 py-2 bg-slate-900 text-white text-xs font-extrabold rounded-xl shadow-md hover:bg-slate-800 transition-colors disabled:opacity-50"
           >
             {saving ? 'Saving...' : 'Submit Attendance'}
           </button>
         </div>
 
-        <div className="w-32 h-20 rounded-xl overflow-hidden border border-white/20 bg-slate-950/80 p-1 hidden sm:block flex-shrink-0 relative z-10">
-          <img src="/images/attendance_tracking.png" alt="Attendance Tracking Banner" className="w-full h-full object-contain bg-slate-950 rounded-lg" />
+        <div className="w-36 h-24 flex items-center justify-center hidden sm:flex flex-shrink-0 relative z-10">
+          <img src="/images/attendance_tracking.png" alt="Attendance Tracking Banner" className="w-full h-auto max-h-24 object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.4)]" />
         </div>
       </div>
+
 
 
       {message && (

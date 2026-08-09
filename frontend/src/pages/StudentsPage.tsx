@@ -59,13 +59,13 @@ export const StudentsPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-[#005BAC] via-[#0A6FD8] to-slate-900 p-6 sm:p-8 rounded-3xl text-white shadow-xl relative overflow-hidden">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-[#005BAC] via-[#0A6FD8] to-[#8CC63F] p-6 sm:p-8 rounded-3xl text-white shadow-xl relative overflow-hidden">
         <div className="space-y-2 relative z-10">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-xs font-extrabold text-[#8CC63F]">
-            <Users className="w-3.5 h-3.5" /> Institutional Roster
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-extrabold text-white">
+            <Users className="w-3.5 h-3.5 text-[#8CC63F]" /> Institutional Roster
           </div>
           <h1 className="text-2xl font-black">Student Directory & Performance Roster</h1>
-          <p className="text-xs text-slate-200">
+          <p className="text-xs text-slate-100 font-medium">
             360-Degree Academic Track {!loading && `(${total} Active Students)`}
           </p>
         </div>
@@ -78,21 +78,22 @@ export const StudentsPage: React.FC = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name, roll, email..."
-              className="pl-9 pr-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-xs text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-[#8CC63F] w-64"
+              className="pl-9 pr-4 py-2 bg-white/20 backdrop-blur-md border border-white/30 rounded-xl text-xs text-white placeholder-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 w-64"
             />
           </div>
           <button
             onClick={handleDownloadReport}
-            className="px-4 py-2 bg-[#8CC63F] text-slate-950 text-xs font-extrabold rounded-xl flex items-center gap-1.5 hover:bg-[#6FAF2E] transition-colors shadow-md"
+            className="px-4 py-2 bg-slate-900 text-white text-xs font-extrabold rounded-xl flex items-center gap-1.5 hover:bg-slate-800 transition-colors shadow-md"
           >
             <Download className="w-4 h-4" /> PDF Report
           </button>
         </div>
 
-        <div className="w-32 h-20 rounded-xl overflow-hidden border border-white/20 bg-slate-950/80 p-1 hidden sm:block flex-shrink-0 relative z-10">
-          <img src="/images/analytics_dashboard.png" alt="Students Banner" className="w-full h-full object-contain bg-slate-950 rounded-lg" />
+        <div className="w-36 h-24 flex items-center justify-center hidden sm:flex flex-shrink-0 relative z-10">
+          <img src="/images/analytics_dashboard.png" alt="Students Banner" className="w-full h-auto max-h-24 object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.4)]" />
         </div>
       </div>
+
 
 
       <motion.div

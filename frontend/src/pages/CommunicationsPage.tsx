@@ -122,20 +122,21 @@ export const CommunicationsPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-[#005BAC] via-[#0A6FD8] to-slate-900 p-6 sm:p-8 rounded-3xl text-white shadow-xl flex items-center justify-between gap-6 relative overflow-hidden">
+      <div className="bg-gradient-to-r from-[#005BAC] via-[#0A6FD8] to-[#8CC63F] p-6 sm:p-8 rounded-3xl text-white shadow-xl flex items-center justify-between gap-6 relative overflow-hidden">
         <div className="space-y-2 relative z-10">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-xs font-extrabold text-[#8CC63F]">
-            <Mail className="w-3.5 h-3.5" /> Institutional Email Dispatcher
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-extrabold text-white">
+            <Mail className="w-3.5 h-3.5 text-[#8CC63F]" /> Institutional Email Dispatcher
           </div>
           <h1 className="text-2xl font-black">Student Mail & Communications Hub</h1>
-          <p className="text-xs text-slate-200">
+          <p className="text-xs text-slate-100 font-medium">
             {activeClass ? `${activeClass.course_name} (${activeClass.course_code}) • ${activeClass.year_label} Sec ${activeClass.section_name}` : 'Send official announcements, warning alerts, and course materials.'}
           </p>
         </div>
-        <div className="w-32 h-20 rounded-xl overflow-hidden border border-white/20 bg-slate-950/80 p-1 hidden sm:block flex-shrink-0 relative z-10">
-          <img src="/images/cta_background.png" alt="Communications Banner" className="w-full h-full object-contain bg-slate-950 rounded-lg" />
+        <div className="w-36 h-24 flex items-center justify-center hidden sm:flex flex-shrink-0 relative z-10">
+          <img src="/images/cta_background.png" alt="Communications Banner" className="w-full h-auto max-h-24 object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.4)]" />
         </div>
       </div>
+
 
 
       {/* Main 2-Column Grid */}

@@ -109,20 +109,21 @@ export const AIPage: React.FC = () => {
   return (
     <div className="flex flex-col h-[calc(100vh-7rem)] bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
       {/* Header Banner */}
-      <div className="bg-gradient-to-r from-[#005BAC] via-[#0A6FD8] to-slate-900 p-5 sm:p-6 rounded-t-2xl text-white shadow-md flex items-center justify-between gap-6 relative overflow-hidden flex-shrink-0">
+      <div className="bg-gradient-to-r from-[#005BAC] via-[#0A6FD8] to-[#8CC63F] p-5 sm:p-6 rounded-t-2xl text-white shadow-md flex items-center justify-between gap-6 relative overflow-hidden flex-shrink-0">
         <div className="space-y-1 relative z-10">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-xs font-extrabold text-[#8CC63F]">
-            <Bot className="w-3.5 h-3.5" /> Classroom RAG Intelligence Engine
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-extrabold text-white">
+            <Bot className="w-3.5 h-3.5 text-[#8CC63F]" /> Classroom RAG Intelligence Engine
           </div>
           <h1 className="text-xl sm:text-2xl font-black">EduPilot AI Copilot Workspace</h1>
-          <p className="text-xs text-slate-200">
+          <p className="text-xs text-slate-100 font-medium">
             Academic Operations • Multi-file Analysis (PDF, PPT, Excel, Images) • RAG Context Query
           </p>
         </div>
-        <div className="w-28 h-16 rounded-xl overflow-hidden border border-white/20 bg-slate-950/80 p-1 hidden sm:block flex-shrink-0 relative z-10">
-          <img src="/images/login_hero_illustration.png" alt="EduPilot AI Copilot Banner" className="w-full h-full object-contain bg-slate-950 rounded-lg" />
+        <div className="w-32 h-20 flex items-center justify-center hidden sm:flex flex-shrink-0 relative z-10">
+          <img src="/images/login_hero_illustration.png" alt="EduPilot AI Copilot Banner" className="w-full h-auto max-h-20 object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.4)]" />
         </div>
       </div>
+
 
 
       {/* Messages Window */}
