@@ -285,10 +285,7 @@ export const AssignmentsPage: React.FC = () => {
           </div>
           <h1 className="text-2xl font-black">Assignments & Coursework Manager</h1>
           <p className="text-xs text-slate-100 font-medium">Generate AI assignment questions in raw Markdown, export styled PDFs, and email them to students in 1-Click.</p>
-        <div className="flex items-center gap-4 relative z-10 flex-shrink-0">
-          <div className="w-36 h-24 flex items-center justify-center hidden md:flex">
-            <img src="/images/hero_illustration.png" alt="Assignment Studio Illustration" className="w-full h-auto max-h-24 object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.4)]" />
-          </div>
+        <div className="flex items-center gap-3 relative z-10 flex-shrink-0">
           <button
             onClick={() => setShowGenModal(true)}
             className="px-5 py-3 bg-slate-950 hover:bg-slate-900 text-white text-xs font-black rounded-2xl border border-slate-700 flex items-center gap-2 shadow-xl transition-all"
@@ -296,8 +293,12 @@ export const AssignmentsPage: React.FC = () => {
             <Sparkles className="w-4 h-4 text-[#8CC63F]" />
             <span>Generate AI Assignment</span>
           </button>
+          <div className="w-36 h-24 flex items-center justify-center hidden md:flex flex-shrink-0">
+            <img src="/images/hero_illustration.png" alt="Assignment Studio Illustration" className="w-full h-auto max-h-24 object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.4)]" />
+          </div>
         </div>
       </div>
+
 
 
       {/* Generated Raw Markdown & Actions Panel */}

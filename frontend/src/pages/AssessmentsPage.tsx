@@ -295,10 +295,7 @@ export const AssessmentsPage: React.FC = () => {
           <h1 className="text-2xl font-black">Quizzes & Exam Studio</h1>
           <p className="text-xs text-slate-100 font-medium">Generate AI quiz question papers, evaluation rubrics, and automated score distribution reports.</p>
         </div>
-        <div className="flex items-center gap-4 relative z-10 flex-shrink-0">
-          <div className="w-36 h-24 flex items-center justify-center hidden sm:flex">
-            <img src="/images/features_ai_planning.png" alt="Quiz Studio Illustration" className="w-full h-auto max-h-24 object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.4)]" />
-          </div>
+        <div className="flex items-center gap-3 relative z-10 flex-shrink-0">
           <button
             onClick={() => setShowGenModal(true)}
             className="px-5 py-2.5 bg-white text-[#005BAC] hover:bg-slate-100 text-xs font-black rounded-2xl shadow-lg flex items-center gap-2 transition-all"
@@ -306,8 +303,12 @@ export const AssessmentsPage: React.FC = () => {
             <Sparkles className="w-4 h-4 text-[#8CC63F]" />
             <span>Generate MCQ Quiz (10-20 Qs)</span>
           </button>
+          <div className="w-36 h-24 flex items-center justify-center hidden sm:flex flex-shrink-0">
+            <img src="/images/features_ai_planning.png" alt="Quiz Studio Illustration" className="w-full h-auto max-h-24 object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.4)]" />
+          </div>
         </div>
       </div>
+
 
 
 
