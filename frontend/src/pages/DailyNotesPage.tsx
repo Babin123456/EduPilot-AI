@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { api } from '../api/client';
@@ -8,6 +10,7 @@ import {
   Calendar, Clock, BookOpen, CheckCircle2, Loader2, Mail
 } from 'lucide-react';
 import { generateDailyNotePDF } from '../utils/pdfGenerator';
+
 
 export const DailyNotesPage: React.FC = () => {
   const { activeClass, user } = useAuth();
@@ -275,22 +278,44 @@ export const DailyNotesPage: React.FC = () => {
 
                 {/* Content Preview / Details */}
                 <div className="p-5 border-t border-slate-100 dark:border-slate-800 space-y-4">
-                  <div className="text-xs font-medium text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
-                    {note.content}
+                  <div className="text-xs text-slate-800 dark:text-slate-200 leading-relaxed font-normal">
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        h1: ({ node, ...props }) => <h1 className="text-sm font-extrabold text-slate-900 dark:text-white mb-2 mt-3" {...props} />,
+                        h2: ({ node, ...props }) => <h2 className="text-xs font-bold text-slate-900 dark:text-white mb-1.5 mt-2" {...props} />,
+                        h3: ({ node, ...props }) => <h3 className="text-xs font-bold text-[#005BAC] dark:text-[#8CC63F] mb-1 mt-2" {...props} />,
+                        p: ({ node, ...props }) => <p className="mb-2 last:mb-0 leading-relaxed" {...props} />,
+                        ul: ({ node, ...props }) => <ul className="list-disc pl-4 mb-2 space-y-1" {...props} />,
+                        ol: ({ node, ...props }) => <ol className="list-decimal pl-4 mb-2 space-y-1" {...props} />,
+                        li: ({ node, ...props }) => <li className="" {...props} />,
+                        strong: ({ node, ...props }) => <strong className="font-bold text-slate-900 dark:text-white" {...props} />,
+                      }}
+                    >
+                      {note.content}
+                    </ReactMarkdown>
                   </div>
 
                   {isExpanded && (
                     <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
                       className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-4"
                     >
+                      {note.summary && (
+                        <div className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                          <h4 className="text-xs font-extrabold text-[#005BAC] dark:text-[#8CC63F] uppercase tracking-wider mb-1">Executive Summary</h4>
+                          <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">{note.summary}</p>
+                        </div>
+                      )}
+
                       {note.key_concepts && note.key_concepts.length > 0 && (
                         <div>
-                          <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-2">Key Concepts</h4>
+                          <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-2">Key Concepts Covered</h4>
                           <div className="flex flex-wrap gap-2">
                             {note.key_concepts.map((kc: string, i: number) => (
-                              <span key={i} className="text-xs px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold rounded-md border border-slate-200 dark:border-slate-700">
+                              <span key={i} className="text-xs px-2.5 py-1 bg-blue-50 dark:bg-blue-950/60 text-[#005BAC] dark:text-blue-300 font-bold rounded-lg border border-blue-200 dark:border-blue-800">
                                 {kc}
                               </span>
                             ))}
@@ -311,7 +336,7 @@ export const DailyNotesPage: React.FC = () => {
 
                       {note.practice_questions && note.practice_questions.length > 0 && (
                         <div>
-                          <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-2">Practice Questions</h4>
+                          <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-2">Practice & Revision Questions</h4>
                           <ol className="list-decimal list-inside space-y-1 text-xs text-slate-600 dark:text-slate-400">
                             {note.practice_questions.map((pq: string, i: number) => (
                               <li key={i}>{pq}</li>
@@ -323,6 +348,7 @@ export const DailyNotesPage: React.FC = () => {
                   )}
                 </div>
               </motion.div>
+
             );
           })
         )}

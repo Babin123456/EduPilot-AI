@@ -52,8 +52,9 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
     { label: 'Attendance', path: '/attendance', icon: CheckSquare },
     { label: 'Students', path: '/students', icon: Users },
     { label: 'Assignments', path: '/assignments', icon: FileText },
-    { label: 'Assessments', path: '/assessments', icon: HelpCircle },
+    { label: 'Quizzes & Exams', path: '/assessments', icon: HelpCircle },
     { label: 'EduPilot AI', path: '/ai', icon: Bot },
+
     { label: 'Daily Notes', path: '/daily-notes', icon: Notebook },
     { label: 'Document Studio', path: '/documents', icon: Folder },
     { label: 'Communications', path: '/communications', icon: Mail },

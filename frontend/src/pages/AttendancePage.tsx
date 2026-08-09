@@ -27,11 +27,17 @@ export const AttendancePage: React.FC = () => {
       .finally(() => setLoading(false));
   }, [activeClass]);
 
+  // Weekend portal closure check (Saturday = 6, Sunday = 0)
+  const todayDay = new Date().getDay();
+  const isWeekendClosed = todayDay === 6 || todayDay === 0;
+
   const handleStatusChange = (studentId: string, status: string) => {
+    if (isWeekendClosed) return;
     setRecords((prev) => ({ ...prev, [studentId]: status }));
   };
 
   const handleBulkMark = (status: string) => {
+    if (isWeekendClosed) return;
     const updated: Record<string, string> = {};
     students.forEach((s) => {
       updated[s.id] = status;
@@ -40,8 +46,9 @@ export const AttendancePage: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    if (!activeClass) return;
+    if (!activeClass || isWeekendClosed) return;
     setSaving(true);
+
     setMessage('');
     try {
       const formattedRecords = Object.entries(records).map(([student_id, status]) => ({
@@ -118,11 +125,22 @@ export const AttendancePage: React.FC = () => {
 
 
 
+      {isWeekendClosed && (
+        <div className="p-4 bg-amber-50 dark:bg-amber-950/80 border border-amber-300 dark:border-amber-700 rounded-2xl flex items-center gap-3 text-amber-800 dark:text-amber-200">
+          <AlertCircle className="w-5 h-5 flex-shrink-0 text-amber-500" />
+          <div>
+            <h4 className="font-extrabold text-xs">Attendance Portal Closed (Weekend Shift)</h4>
+            <p className="text-[11px] opacity-90">The attendance portal is closed every weekend from Saturday 12:00 AM to Sunday 11:59 PM. Submissions will reopen on Monday morning.</p>
+          </div>
+        </div>
+      )}
+
       {message && (
         <div className="p-3 bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 text-xs font-bold rounded-lg border border-emerald-200 dark:border-emerald-800">
           {message}
         </div>
       )}
+
 
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">

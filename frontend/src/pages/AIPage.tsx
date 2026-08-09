@@ -190,10 +190,11 @@ export const AIPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto w-full">
-      <div className="flex h-[calc(100vh-8.5rem)] bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-md overflow-hidden">
+    <div className="max-w-7xl mx-auto w-full">
+      <div className="flex h-[calc(100vh-7.5rem)] bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-md overflow-hidden">
         {/* ─── Left Sidebar: Conversation History ─── */}
-        <div className="w-52 bg-slate-50 dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 p-2.5 hidden md:flex flex-col justify-between flex-shrink-0">
+        <div className="w-64 bg-slate-50 dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 p-3 hidden md:flex flex-col justify-between flex-shrink-0">
+
 
 
         <div className="space-y-3 overflow-y-auto">
@@ -325,7 +326,8 @@ export const AIPage: React.FC = () => {
                   </div>
                 )}
 
-                <div className="space-y-1 max-w-xl group">
+                <div className="space-y-1 max-w-3xl group">
+
                   <div
                     className={`p-3.5 rounded-2xl text-xs font-medium whitespace-pre-wrap leading-relaxed shadow-sm relative ${
                       msg.role === 'user'

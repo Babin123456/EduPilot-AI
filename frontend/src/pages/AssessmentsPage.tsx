@@ -91,15 +91,16 @@ export const AssessmentsPage: React.FC = () => {
       <div className="bg-gradient-to-r from-[#005BAC] via-[#0A6FD8] to-[#8CC63F] p-6 sm:p-8 rounded-3xl text-white shadow-xl flex items-center justify-between gap-6 relative overflow-hidden">
         <div className="space-y-2 relative z-10">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-extrabold text-white">
-            <HelpCircle className="w-3.5 h-3.5 text-[#8CC63F]" /> Quiz & Exam Studio
+            <HelpCircle className="w-3.5 h-3.5 text-[#8CC63F]" /> Quiz & Examination Studio
           </div>
-          <h1 className="text-2xl font-black">Assessments & Quizzes Studio</h1>
-          <p className="text-xs text-slate-100 font-medium">Generate AI question papers, evaluation rubrics, and automated score distribution reports.</p>
+          <h1 className="text-2xl font-black">Quizzes & Exam Studio</h1>
+          <p className="text-xs text-slate-100 font-medium">Generate AI quiz question papers, evaluation rubrics, and automated score distribution reports.</p>
         </div>
         <div className="w-36 h-24 flex items-center justify-center hidden sm:flex flex-shrink-0 relative z-10">
-          <img src="/images/features_ai_planning.png" alt="Assessments Banner" className="w-full h-auto max-h-24 object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.4)]" />
+          <img src="/images/features_ai_planning.png" alt="Quiz Banner" className="w-full h-auto max-h-24 object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.4)]" />
         </div>
       </div>
+
 
 
 
