@@ -72,22 +72,23 @@ export const StudentsPage: React.FC = () => {
 
         <div className="flex items-center gap-3 relative z-10">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/70" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name, roll, email..."
-              className="pl-9 pr-4 py-2 bg-white/20 backdrop-blur-md border border-white/30 rounded-xl text-xs text-white placeholder-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 w-64"
+              className="pl-9 pr-4 py-2 bg-white/15 hover:bg-white/25 backdrop-blur-xl border border-white/30 rounded-xl text-xs text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 w-64 transition-all"
             />
           </div>
           <button
             onClick={handleDownloadReport}
-            className="px-4 py-2 bg-slate-900 text-white text-xs font-extrabold rounded-xl flex items-center gap-1.5 hover:bg-slate-800 transition-colors shadow-md"
+            className="px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-xl border border-white/40 text-white text-xs font-black rounded-xl flex items-center gap-1.5 transition-all shadow-lg active:scale-95"
           >
-            <Download className="w-4 h-4" /> PDF Report
+            <Download className="w-4 h-4 text-[#8CC63F]" /> PDF Report
           </button>
         </div>
+
 
         <div className="w-36 h-24 flex items-center justify-center hidden sm:flex flex-shrink-0 relative z-10">
           <img src="/images/analytics_dashboard.png" alt="Students Banner" className="w-full h-auto max-h-24 object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.4)]" />

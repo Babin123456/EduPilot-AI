@@ -83,27 +83,28 @@ export const AttendancePage: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 relative z-10">
+        <div className="flex flex-wrap items-center gap-2.5 relative z-10">
           <button
             onClick={() => handleBulkMark('present')}
-            className="px-3.5 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 text-white text-xs font-bold rounded-xl transition-colors shadow-sm"
+            className="px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500/35 backdrop-blur-xl border border-emerald-300/40 text-white text-xs font-extrabold rounded-xl transition-all shadow-md active:scale-95"
           >
             Mark All Present
           </button>
           <button
             onClick={() => handleBulkMark('absent')}
-            className="px-3.5 py-2 bg-red-500/30 hover:bg-red-500/40 backdrop-blur-md border border-red-300/40 text-white text-xs font-bold rounded-xl transition-colors shadow-sm"
+            className="px-4 py-2 bg-rose-500/20 hover:bg-rose-500/35 backdrop-blur-xl border border-rose-300/40 text-white text-xs font-extrabold rounded-xl transition-all shadow-md active:scale-95"
           >
             Mark All Absent
           </button>
           <button
             onClick={handleSubmit}
             disabled={saving}
-            className="px-4 py-2 bg-slate-900 text-white text-xs font-extrabold rounded-xl shadow-md hover:bg-slate-800 transition-colors disabled:opacity-50"
+            className="px-5 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-xl border border-white/40 text-white text-xs font-black rounded-xl transition-all shadow-lg active:scale-95 disabled:opacity-50"
           >
             {saving ? 'Saving...' : 'Submit Attendance'}
           </button>
         </div>
+
 
         <div className="w-36 h-24 flex items-center justify-center hidden sm:flex flex-shrink-0 relative z-10">
           <img src="/images/attendance_tracking.png" alt="Attendance Tracking Banner" className="w-full h-auto max-h-24 object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.4)]" />
