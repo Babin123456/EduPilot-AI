@@ -191,9 +191,10 @@ export const AIPage: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto w-full">
-      <div className="flex h-[calc(100vh-7.5rem)] bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-md overflow-hidden">
+      <div className="flex h-[calc(100vh-6.5rem)] bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-md overflow-hidden -my-3">
         {/* ─── Left Sidebar: Conversation History ─── */}
         <div className="w-64 bg-slate-50 dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 p-3 hidden md:flex flex-col justify-between flex-shrink-0">
+
 
 
 

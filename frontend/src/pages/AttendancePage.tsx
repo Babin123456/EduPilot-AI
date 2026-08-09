@@ -94,27 +94,30 @@ export const AttendancePage: React.FC = () => {
         <div className="flex flex-wrap items-center gap-2.5 relative z-10">
           <button
             onClick={() => handleBulkMark('present')}
-            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black rounded-xl transition-all shadow-md active:scale-95 flex items-center gap-1.5 border border-emerald-400/50"
+            disabled={isWeekendClosed}
+            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black rounded-xl transition-all shadow-md active:scale-95 flex items-center gap-1.5 border border-emerald-400/50 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <CheckCircle2 className="w-4 h-4 text-emerald-200" />
             Mark All Present
           </button>
           <button
             onClick={() => handleBulkMark('absent')}
-            className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-black rounded-xl transition-all shadow-md active:scale-95 flex items-center gap-1.5 border border-rose-400/50"
+            disabled={isWeekendClosed}
+            className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-black rounded-xl transition-all shadow-md active:scale-95 flex items-center gap-1.5 border border-rose-400/50 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <XCircle className="w-4 h-4 text-rose-200" />
             Mark All Absent
           </button>
           <button
             onClick={handleSubmit}
-            disabled={saving}
-            className="px-5 py-2 bg-slate-950 hover:bg-slate-900 text-white text-xs font-black rounded-xl transition-all shadow-lg active:scale-95 disabled:opacity-50 flex items-center gap-1.5 border border-slate-700"
+            disabled={saving || isWeekendClosed}
+            className="px-5 py-2 bg-slate-950 hover:bg-slate-900 text-white text-xs font-black rounded-xl transition-all shadow-lg active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5 border border-slate-700"
           >
             <Send className="w-4 h-4 text-[#8CC63F]" />
             {saving ? 'Saving...' : 'Submit Attendance'}
           </button>
         </div>
+
 
 
 

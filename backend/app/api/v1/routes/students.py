@@ -39,8 +39,9 @@ def list_students(
     search: str | None = Query(None),
     risk: str | None = Query(None),
     page: int = Query(1, ge=1),
-    limit: int = Query(50, ge=1, le=100),
+    limit: int = Query(100, ge=1, le=200),
     teacher: Teacher = Depends(get_current_teacher),
+
     db: Session = Depends(get_db),
 ):
     """List students with filtering, search, and pagination."""

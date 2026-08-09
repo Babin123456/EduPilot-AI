@@ -29,13 +29,13 @@ function addHeader(doc: jsPDF, title: string, subtitle: string) {
 
   // University name
   doc.setFontSize(18);
-  doc.setFont('helvetica', 'bold');
+  doc.setFont('times', 'bold');
   doc.setTextColor(...COLORS.primary);
   doc.text('ADAMAS UNIVERSITY', pageWidth / 2, 22, { align: 'center' });
 
   // Subtitle line
   doc.setFontSize(8);
-  doc.setFont('helvetica', 'normal');
+  doc.setFont('times', 'normal');
   doc.setTextColor(...COLORS.gray);
   doc.text('School of Engineering & Technology • Computer Science & Engineering', pageWidth / 2, 28, { align: 'center' });
 
@@ -46,17 +46,18 @@ function addHeader(doc: jsPDF, title: string, subtitle: string) {
 
   // Document title
   doc.setFontSize(14);
-  doc.setFont('helvetica', 'bold');
+  doc.setFont('times', 'bold');
   doc.setTextColor(...COLORS.dark);
   doc.text(title, pageWidth / 2, 42, { align: 'center' });
 
   // Document subtitle
   if (subtitle) {
     doc.setFontSize(9);
-    doc.setFont('helvetica', 'normal');
+    doc.setFont('times', 'normal');
     doc.setTextColor(...COLORS.gray);
     doc.text(subtitle, pageWidth / 2, 48, { align: 'center' });
   }
+
 
   return 54; // Y position after header
 }

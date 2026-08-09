@@ -202,25 +202,31 @@ export const CommunicationsPage: React.FC = () => {
               return (
                 <div
                   key={student.id}
-                  onClick={() => sendMode === 'selected' && handleToggleStudent(student.id)}
-                  className={`p-3 rounded-xl flex items-center justify-between transition-colors ${
-                    sendMode === 'selected' ? 'cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50' : ''
-                  } ${isSelected ? 'bg-blue-50/50 dark:bg-blue-950/30' : ''}`}
+                  onClick={() => {
+                    if (sendMode !== 'selected') setSendMode('selected');
+                    handleToggleStudent(student.id);
+                  }}
+                  className={`p-3 rounded-xl flex items-center justify-between transition-colors cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 ${
+                    isSelected ? 'bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800' : ''
+                  }`}
                 >
                   <div className="space-y-0.5">
                     <p className="text-xs font-bold text-slate-900 dark:text-white">{student.name || student.full_name}</p>
                     <p className="text-[10px] text-slate-500">{student.roll_number}</p>
-                    <p className="text-[10px] text-adamas-blue font-mono">{student.email}</p>
+                    <p className="text-[10px] text-[#005BAC] dark:text-[#8CC63F] font-mono">{student.email}</p>
                   </div>
-                  {sendMode === 'selected' && (
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={() => handleToggleStudent(student.id)}
-                      className="w-4 h-4 rounded text-adamas-blue focus:ring-adamas-blue"
-                    />
-                  )}
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      if (sendMode !== 'selected') setSendMode('selected');
+                      handleToggleStudent(student.id);
+                    }}
+                    className="w-4 h-4 rounded text-[#005BAC] focus:ring-[#005BAC] cursor-pointer"
+                  />
                 </div>
+
               );
             })}
           </div>

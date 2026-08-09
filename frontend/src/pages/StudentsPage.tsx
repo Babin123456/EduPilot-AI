@@ -33,15 +33,16 @@ export const StudentsPage: React.FC = () => {
     api.get('/students', {
       params: {
         class_id: activeClass?.id,
-        search: search || undefined
+        search: search || undefined,
+        limit: 100,
       }
     })
       .then(res => {
         const raw = res.data.students || [];
-        // Mock phone numbers if missing
+        // Clean mobile numbers (10 digits without +91 sign)
         const enriched = raw.map((s: any, idx: number) => ({
           ...s,
-          phone: s.phone || `+91 9830${Math.floor(100000 + idx * 12345)}`,
+          phone: s.phone ? String(s.phone).replace(/^\+91\s*/, '').trim() : `9830${Math.floor(100000 + idx * 12345)}`,
         }));
         setStudents(enriched);
         setTotal(res.data.total || 0);
@@ -59,7 +60,7 @@ export const StudentsPage: React.FC = () => {
 
   const handleExportExcel = () => {
     if (!students.length || !activeClass) return;
-    const headers = ['Roll Number', 'Student Name', 'University Email', 'Phone Number', 'Year / Section', 'Attendance %', 'Average Score', 'CGPA', 'Risk Level'];
+    const headers = ['Roll Number', 'Student Name', 'University Email', 'Mobile Number', 'Year / Section', 'Attendance %', 'Average Score', 'CGPA', 'Risk Level'];
     const rows = sortedStudents.map(s => [
       s.roll_number,
       s.full_name,
@@ -74,6 +75,7 @@ export const StudentsPage: React.FC = () => {
     downloadExcelSheet(`${activeClass.course_code}_Student_Roster`, headers, rows);
     toast.success('Downloaded Excel CSV Roster', `Exported data for ${sortedStudents.length} students.`);
   };
+
 
   const handleDownloadReport = () => {
     if (!students.length || !activeClass) return;
