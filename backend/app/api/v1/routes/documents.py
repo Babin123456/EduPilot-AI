@@ -40,3 +40,45 @@ def list_documents(
         }
         for d in docs
     ]
+
+
+from pydantic import BaseModel
+import uuid
+
+class CreateDocumentRequest(BaseModel):
+    title: str
+    document_type: str  # quiz, assignment, assessment, report, notes
+    format: str = "pdf"  # pdf, excel, ppt
+    class_id: str | None = None
+    content: str | None = None
+
+@router.post("")
+def create_document(
+    req: CreateDocumentRequest,
+    teacher: Teacher = Depends(get_current_teacher),
+    db: Session = Depends(get_db),
+):
+    """Save a newly generated document record."""
+    new_doc = Document(
+        id=str(uuid.uuid4()),
+        teacher_id=teacher.id,
+        teacher_course_assignment_id=req.class_id,
+        title=req.title,
+        document_type=req.document_type,
+        format=req.format,
+        content=req.content,
+        generation_status="completed",
+        version=1,
+    )
+    db.add(new_doc)
+    db.commit()
+    db.refresh(new_doc)
+    return {
+        "id": new_doc.id,
+        "title": new_doc.title,
+        "document_type": new_doc.document_type,
+        "format": new_doc.format,
+        "generation_status": new_doc.generation_status,
+        "created_at": new_doc.created_at.isoformat() if new_doc.created_at else None,
+    }
+

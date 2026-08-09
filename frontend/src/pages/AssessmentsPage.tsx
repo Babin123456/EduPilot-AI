@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { api } from '../api/client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { HelpCircle, Download, ChevronDown, ChevronUp, Award, Clock, Target } from 'lucide-react';
+import { HelpCircle, Download, ChevronDown, ChevronUp, Award, Clock, Target, Send } from 'lucide-react';
 import { generateQuizPDF, generateAssessmentReportPDF } from '../utils/pdfGenerator';
 
 export const AssessmentsPage: React.FC = () => {
   const { activeClass, user } = useAuth();
+  const toast = useToast();
+
   const [assessments, setAssessments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -157,9 +160,28 @@ export const AssessmentsPage: React.FC = () => {
                   <div className="flex items-center gap-2 ml-4">
                     <button
                       onClick={() => handleDownloadQuizPDF(a)}
-                      className="px-3 py-1.5 bg-adamas-blue text-white text-xs font-bold rounded-lg flex items-center gap-1 hover:bg-adamas-blue-dark transition-colors"
+                      className="px-3 py-1.5 bg-[#005BAC] text-white text-xs font-bold rounded-lg flex items-center gap-1 hover:bg-[#0A6FD8] transition-colors"
                     >
-                      <Download className="w-3.5 h-3.5" /> Quiz PDF
+                      <Download className="w-3.5 h-3.5 text-[#8CC63F]" /> Quiz PDF
+                    </button>
+                    <button
+                      onClick={async () => {
+                        try {
+                          await api.post('/communications/send-email', {
+                            class_id: activeClass?.id,
+                            subject: `[Assessment Announcement] ${a.title} (${activeClass?.course_code})`,
+                            body: `Dear Students,\n\nAn assessment titled "${a.title}" has been published for ${activeClass?.course_name}.\n\nDetails:\nTopic: ${a.topic || 'General'}\nTotal Marks: ${a.total_marks}\nDuration: ${a.duration_minutes || 30} Minutes\n\nPlease check Document Studio for the complete PDF question paper.\n\nBest regards,\n${user?.full_name || 'Faculty'}, Adamas University.`,
+                            recipient_type: 'all',
+                          });
+                          toast.success('Sent Assessment to All Students via Email', `Dispatched notification for "${a.title}".`);
+                        } catch (err) {
+                          toast.error('Failed to send email to students');
+                        }
+                      }}
+                      className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg flex items-center gap-1 transition-colors"
+                      title="Send this assessment question paper notice to all students in 1-Click"
+                    >
+                      <Send className="w-3.5 h-3.5" /> Send to Students
                     </button>
                     <button
                       onClick={() => toggleResults(a.id)}
@@ -171,6 +193,7 @@ export const AssessmentsPage: React.FC = () => {
                   </div>
                 </div>
               </div>
+
 
               <AnimatePresence>
                 {expandedId === a.id && (

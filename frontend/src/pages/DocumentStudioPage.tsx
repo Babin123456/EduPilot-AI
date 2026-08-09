@@ -105,6 +105,18 @@ export const DocumentStudioPage: React.FC = () => {
         toast.success('Downloaded Class Excel Roster', `Exported student analytics for ${activeClass.course_code}.`);
       }
 
+      // Save document to backend database
+      await api.post('/documents', {
+        title: `${modalType?.toUpperCase()} — ${topic}`,
+        document_type: modalType || 'general',
+        format: format,
+        class_id: activeClass.id,
+      }).catch(() => {});
+
+      // Refresh list
+      const updatedDocs = await api.get('/documents', { params: { class_id: activeClass.id } });
+      setDocuments(updatedDocs.data || []);
+
       setModalType(null);
     } catch (err) {
       toast.error('Failed to generate document');
@@ -112,6 +124,22 @@ export const DocumentStudioPage: React.FC = () => {
       setGenerating(null);
     }
   };
+
+  const handleSendDocumentToStudents = async (doc: any) => {
+    if (!activeClass) return;
+    try {
+      await api.post('/communications/send-email', {
+        class_id: activeClass.id,
+        subject: `[Adamas University] ${doc.title} (${activeClass.course_code})`,
+        body: `Dear Students,\n\nPlease find attached the official academic document for your course: "${doc.title}".\n\nBest regards,\n${user?.full_name || 'Faculty'}, Adamas University.`,
+        recipient_type: 'all',
+      });
+      toast.success('Dispatched to All Students via Email', `Sent notification for "${doc.title}" to active class enrollment.`);
+    } catch (err) {
+      toast.error('Failed to dispatch email to students');
+    }
+  };
+
 
   const generateClassReport = async () => {
     if (!activeClass) return;
@@ -270,51 +298,58 @@ export const DocumentStudioPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Instant 1-Click Institutional Export Cards */}
-      <div className="pt-2">
-        <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Institutional PDF Export Presets</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950 text-[#005BAC] flex items-center justify-center">
-                <Users className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="font-bold text-slate-900 dark:text-white text-xs">Official Class Roster & CGPA Report PDF</h4>
-                <p className="text-[11px] text-slate-400">Includes student roll numbers, attendance %, and risk level badges</p>
-              </div>
+      {/* Recent Documents & 1-Click Dispatch */}
+      <div>
+        <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Saved Documents & 1-Click Mail Dispatch</h2>
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+          {documents.length === 0 ? (
+            <div className="p-12 text-center">
+              <File className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+              <p className="text-xs text-slate-500">No documents generated yet. Use the cards above to generate AI question papers or rosters.</p>
             </div>
-            <button
-              onClick={generateClassReport}
-              disabled={generating === 'report'}
-              className="px-4 py-2 bg-slate-900 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 hover:bg-slate-800 disabled:opacity-50 transition-colors flex-shrink-0"
-            >
-              {generating === 'report' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4 text-[#8CC63F]" />}
-              <span>PDF Report</span>
-            </button>
-          </div>
+          ) : (
+            <div className="divide-y divide-slate-100 dark:divide-slate-800">
+              {documents.map((doc, i) => (
+                <motion.div
+                  key={doc.id}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: i * 0.04 }}
+                  className="p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                      <FileText className="w-4 h-4 text-[#005BAC]" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-slate-900 dark:text-white">{doc.title}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded uppercase">{doc.document_type} • {doc.format || 'pdf'}</span>
+                        <span className="text-[10px] text-slate-400 flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {doc.created_at ? new Date(doc.created_at).toLocaleDateString('en-IN') : ''}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
 
-          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950 text-emerald-600 flex items-center justify-center">
-                <BookOpen className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="font-bold text-slate-900 dark:text-white text-xs">Latest Discussion Lecture Notes PDF</h4>
-                <p className="text-[11px] text-slate-400">Export formatted lecture summaries with practice review questions</p>
-              </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleSendDocumentToStudents(doc)}
+                      className="px-3 py-1.5 bg-[#005BAC] hover:bg-[#0A6FD8] text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm transition-all"
+                      title="Send this generated document to all enrolled students via official email"
+                    >
+                      <Send className="w-3.5 h-3.5 text-[#8CC63F]" />
+                      <span>Send to All Students (1-Click)</span>
+                    </button>
+                  </div>
+                </motion.div>
+              ))}
             </div>
-            <button
-              onClick={generateNotes}
-              disabled={generating === 'notes'}
-              className="px-4 py-2 bg-slate-900 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 hover:bg-slate-800 disabled:opacity-50 transition-colors flex-shrink-0"
-            >
-              {generating === 'notes' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4 text-[#8CC63F]" />}
-              <span>PDF Notes</span>
-            </button>
-          </div>
+          )}
         </div>
       </div>
+
 
       {/* ─── AI Custom Generator Modal Form ─── */}
       <AnimatePresence>
