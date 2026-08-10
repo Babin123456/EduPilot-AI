@@ -1,65 +1,76 @@
-"""Assignment and submission models."""
+"""Assignment and submission document helpers for MongoDB."""
 
 from __future__ import annotations
 
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import String, Text, Integer, Float, DateTime, ForeignKey, Boolean
-from sqlalchemy.orm import Mapped, mapped_column
-
-from app.core.database import Base
-
 
 def _utcnow():
     return datetime.now(timezone.utc)
 
 
-class Assignment(Base):
-    __tablename__ = "assignments"
-
-    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    teacher_course_assignment_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("teacher_course_assignments.id"), nullable=False
-    )
-    teacher_id: Mapped[str] = mapped_column(String(36), ForeignKey("teachers.id"), nullable=False)
-    title: Mapped[str] = mapped_column(String(300), nullable=False)
-    description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    instructions: Mapped[str | None] = mapped_column(Text, nullable=True)
-    topic: Mapped[str | None] = mapped_column(String(200), nullable=True)
-    difficulty: Mapped[str] = mapped_column(String(20), default="medium")  # easy, medium, hard
-    total_marks: Mapped[int] = mapped_column(Integer, default=100)
-    deadline: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    learning_objectives: Mapped[str | None] = mapped_column(Text, nullable=True)  # JSON array
-    rubric: Mapped[str | None] = mapped_column(Text, nullable=True)  # JSON
-    answer_key: Mapped[str | None] = mapped_column(Text, nullable=True)
-    bloom_taxonomy: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    is_ai_generated: Mapped[bool] = mapped_column(Boolean, default=False)
-    is_published: Mapped[bool] = mapped_column(Boolean, default=False)
-    attachment_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    status: Mapped[str] = mapped_column(String(20), default="draft")  # draft, published, closed
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, onupdate=_utcnow)
+def _uid():
+    return str(uuid.uuid4())
 
 
-class AssignmentSubmission(Base):
-    __tablename__ = "assignment_submissions"
+ASSIGNMENTS = "assignments"
+ASSIGNMENT_SUBMISSIONS = "assignment_submissions"
 
-    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    assignment_id: Mapped[str] = mapped_column(String(36), ForeignKey("assignments.id"), nullable=False)
-    student_id: Mapped[str] = mapped_column(String(36), ForeignKey("students.id"), nullable=False)
-    file_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    content: Mapped[str | None] = mapped_column(Text, nullable=True)
-    submitted_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    is_late: Mapped[bool] = mapped_column(Boolean, default=False)
-    score: Mapped[float | None] = mapped_column(Float, nullable=True)
-    max_score: Mapped[float | None] = mapped_column(Float, nullable=True)
-    feedback: Mapped[str | None] = mapped_column(Text, nullable=True)
-    ai_evaluation: Mapped[str | None] = mapped_column(Text, nullable=True)  # JSON
-    ai_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
-    is_graded: Mapped[bool] = mapped_column(Boolean, default=False)
-    graded_by: Mapped[str | None] = mapped_column(String(36), nullable=True)  # teacher_id
-    graded_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    status: Mapped[str] = mapped_column(String(20), default="pending")  # pending, submitted, graded
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, onupdate=_utcnow)
+
+def new_assignment(*, teacher_course_assignment_id, teacher_id, title,
+                   description=None, instructions=None, topic=None,
+                   difficulty="medium", total_marks=100, deadline=None,
+                   learning_objectives=None, rubric=None, answer_key=None,
+                   bloom_taxonomy=None, is_ai_generated=False, is_published=False,
+                   attachment_url=None, status="draft", id=None):
+    return {
+        "id": id or _uid(),
+        "teacher_course_assignment_id": teacher_course_assignment_id,
+        "teacher_id": teacher_id,
+        "title": title,
+        "description": description,
+        "instructions": instructions,
+        "topic": topic,
+        "difficulty": difficulty,
+        "total_marks": total_marks,
+        "deadline": deadline,
+        "learning_objectives": learning_objectives,
+        "rubric": rubric,
+        "answer_key": answer_key,
+        "bloom_taxonomy": bloom_taxonomy,
+        "is_ai_generated": is_ai_generated,
+        "is_published": is_published,
+        "attachment_url": attachment_url,
+        "status": status,
+        "created_at": _utcnow(),
+        "updated_at": _utcnow(),
+    }
+
+
+def new_assignment_submission(*, assignment_id, student_id, file_url=None,
+                              content=None, submitted_at=None, is_late=False,
+                              score=None, max_score=None, feedback=None,
+                              ai_evaluation=None, ai_confidence=None,
+                              is_graded=False, graded_by=None, graded_at=None,
+                              status="pending", id=None):
+    return {
+        "id": id or _uid(),
+        "assignment_id": assignment_id,
+        "student_id": student_id,
+        "file_url": file_url,
+        "content": content,
+        "submitted_at": submitted_at,
+        "is_late": is_late,
+        "score": score,
+        "max_score": max_score,
+        "feedback": feedback,
+        "ai_evaluation": ai_evaluation,
+        "ai_confidence": ai_confidence,
+        "is_graded": is_graded,
+        "graded_by": graded_by,
+        "graded_at": graded_at,
+        "status": status,
+        "created_at": _utcnow(),
+        "updated_at": _utcnow(),
+    }

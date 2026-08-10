@@ -11,19 +11,15 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, File, UploadFile, Form
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
+from pymongo.database import Database
 import httpx
 
 from app.core.database import get_db
 from app.core.config import get_settings
 from app.api.deps import get_current_teacher
 from app.core.exceptions import http_400, http_404
-from app.models.teacher import Teacher
-from app.models.student import Student
-from app.models.academic import Year, Section, Course
-from app.models.enrollment import TeacherCourseAssignment
-from app.models.timetable import TimetableEntry
-from app.models.ai_models import AIConversation, AIMessage
+from app.models.student import student_full_name
+from app.models.ai_models import new_ai_conversation, new_ai_message
 
 router = APIRouter()
 
@@ -46,7 +42,6 @@ def parse_uploaded_file(file_bytes: bytes, filename: str, content_type: str) -> 
     file_type = "document"
 
     try:
-        # 1. PPTX Parsing
         if ext in [".pptx", ".ppt"]:
             file_type = "presentation"
             try:
@@ -64,7 +59,6 @@ def parse_uploaded_file(file_bytes: bytes, filename: str, content_type: str) -> 
             except Exception:
                 text_content = f"PPT Presentation: {filename} ({len(file_bytes)} bytes). Contains slide topics & outlines."
 
-        # 2. Excel / CSV Parsing
         elif ext in [".xlsx", ".xls", ".csv"]:
             file_type = "spreadsheet"
             if ext == ".csv":
@@ -91,7 +85,6 @@ def parse_uploaded_file(file_bytes: bytes, filename: str, content_type: str) -> 
                 except Exception:
                     text_content = f"Excel Spreadsheet: {filename} ({len(file_bytes)} bytes)."
 
-        # 3. PDF Parsing
         elif ext == ".pdf":
             file_type = "pdf"
             raw_str = file_bytes.decode("latin1", errors="ignore")
@@ -101,7 +94,6 @@ def parse_uploaded_file(file_bytes: bytes, filename: str, content_type: str) -> 
             else:
                 text_content = f"PDF Document: {filename} ({len(file_bytes)} bytes). Contains course material & reading sections."
 
-        # 4. Image Parsing (PNG, JPG, JPEG, WEBP)
         elif ext in [".png", ".jpg", ".jpeg", ".webp", ".gif"]:
             file_type = "image"
             try:
@@ -185,7 +177,7 @@ def _call_gemini_llm(prompt: str, api_key: str, model: str) -> str | None:
 @router.post("/upload-file")
 async def upload_file_for_ai(
     file: UploadFile = File(...),
-    teacher: Teacher = Depends(get_current_teacher),
+    teacher: dict = Depends(get_current_teacher),
 ):
     """Upload Image, PDF, Excel, or PPT file for AI analysis and explanation."""
     file_bytes = await file.read()
@@ -203,8 +195,8 @@ async def upload_file_for_ai(
 @router.post("/chat")
 def chat(
     body: ChatRequest,
-    teacher: Teacher = Depends(get_current_teacher),
-    db: Session = Depends(get_db),
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
 ):
     """Send a message to EduPilot AI with rich portal context and real LLM capabilities."""
     settings = get_settings()
@@ -213,19 +205,19 @@ def chat(
     class_context_str = ""
     student_summary_str = ""
     if body.class_id:
-        tca = db.query(TeacherCourseAssignment).filter(TeacherCourseAssignment.id == body.class_id).first()
+        tca = db.teacher_course_assignments.find_one({"id": body.class_id})
         if tca:
-            course = db.query(Course).filter(Course.id == tca.course_id).first()
-            year = db.query(Year).filter(Year.id == tca.year_id).first()
-            section = db.query(Section).filter(Section.id == tca.section_id).first()
+            course = db.courses.find_one({"id": tca["course_id"]})
+            year = db.years.find_one({"id": tca["year_id"]})
+            section = db.sections.find_one({"id": tca["section_id"]})
 
-            class_context_str = f"Active Class: {course.name} ({course.code}) • {year.label} Section {section.name} • Room: {tca.room}"
+            class_context_str = f"Active Class: {course['name']} ({course['code']}) • {year['label']} Section {section['name']} • Room: {tca.get('room')}"
 
-            students = db.query(Student).filter(Student.section_id == tca.section_id, Student.is_active == True).all()
-            at_risk = [s for s in students if s.attendance_percentage < 75]
-            
+            students = list(db.students.find({"section_id": tca["section_id"], "is_active": True}))
+            at_risk = [s for s in students if s.get("attendance_percentage", 100) < 75]
+
             student_details_list = [
-                f"{s.full_name} (Roll: {s.roll_number}, Attendance: {s.attendance_percentage}%, Risk: {s.risk_level})"
+                f"{student_full_name(s)} (Roll: {s['roll_number']}, Attendance: {s.get('attendance_percentage', 0)}%, Risk: {s.get('risk_level', 'normal')})"
                 for s in students
             ]
             student_summary_str = (
@@ -234,46 +226,40 @@ def chat(
                 + "\n".join(student_details_list)
             )
 
-    # Retrieve conversation history
+    # Retrieve conversation
     conversation = None
     if body.conversation_id:
-        conversation = db.query(AIConversation).filter(
-            AIConversation.id == body.conversation_id,
-            AIConversation.teacher_id == teacher.id,
-        ).first()
+        conversation = db.ai_conversations.find_one({
+            "id": body.conversation_id, "teacher_id": teacher["id"],
+        })
 
     if not conversation:
-        conversation = AIConversation(
-            id=str(uuid.uuid4()),
-            teacher_id=teacher.id,
+        conversation = new_ai_conversation(
+            teacher_id=teacher["id"],
             teacher_course_assignment_id=body.class_id,
             title=body.message[:100],
         )
-        db.add(conversation)
-        db.flush()
+        db.ai_conversations.insert_one(conversation)
 
-    # Retrieve previous message history for chat memory
-    past_messages = (
-        db.query(AIMessage)
-        .filter(AIMessage.conversation_id == conversation.id)
-        .order_by(AIMessage.created_at.asc())
+    # Retrieve previous message history
+    past_messages = list(
+        db.ai_messages.find({"conversation_id": conversation["id"]})
+        .sort("created_at", 1)
         .limit(10)
-        .all()
     )
 
     # Save current user message
-    user_msg = AIMessage(
-        id=str(uuid.uuid4()),
-        conversation_id=conversation.id,
+    user_msg = new_ai_message(
+        conversation_id=conversation["id"],
         role="user",
         content=body.message,
     )
-    db.add(user_msg)
+    db.ai_messages.insert_one(user_msg)
 
     # Build System Context Prompt
     system_prompt = (
         f"You are EduPilot AI, the intelligent academic copilot for Adamas University, Kolkata.\n"
-        f"You are assisting Professor {teacher.full_name} ({teacher.designation}, {teacher.specialization or 'CSE'}).\n"
+        f"You are assisting Professor {teacher['full_name']} ({teacher.get('designation', '')}, {teacher.get('specialization', 'CSE')}).\n"
         f"Current Academic Context: {class_context_str or 'General Academic Workspace'}\n"
         f"Live Database Information:\n{student_summary_str or 'N/A'}\n\n"
         f"Instructions:\n"
@@ -287,64 +273,59 @@ def chat(
         full_user_input += f"\n\n[Attached File Content for Analysis]:\n{body.file_context}"
 
     llm_messages = [{"role": "system", "content": system_prompt}]
-    
-    # Append past conversation memory
     for pm in past_messages:
-        llm_messages.append({"role": pm.role, "content": pm.content})
-    
-    # Append current question
+        llm_messages.append({"role": pm["role"], "content": pm["content"]})
     llm_messages.append({"role": "user", "content": full_user_input})
 
-
-    # Attempt Groq LLM primary API call
+    # Attempt Groq LLM
     model_used = "Groq Llama-3.3-70B"
     ai_response = _call_groq_llm(llm_messages, settings.groq_api_key_1, settings.groq_model)
     if not ai_response:
         ai_response = _call_groq_llm(llm_messages, settings.groq_api_key_2, settings.groq_model)
 
-    # Attempt Gemini LLM fallback API call
+    # Attempt Gemini fallback
     if not ai_response:
         model_used = "Gemini 1.5 Flash"
         gemini_prompt = f"{system_prompt}\n\nUser Question: {full_user_input}"
         ai_response = _call_gemini_llm(gemini_prompt, settings.gemini_api_key, settings.gemini_model)
 
-    # Fallback to Smart Contextual Response Generator if LLM keys are unconfigured
+    # Fallback to Smart Contextual Response Generator
     if not ai_response:
         model_used = "EduPilot Smart Engine"
         ai_response = _generate_contextual_response(body.message, teacher, db, body.class_id, body.file_context)
 
     # Save assistant message
-    assistant_msg = AIMessage(
-        id=str(uuid.uuid4()),
-        conversation_id=conversation.id,
+    assistant_msg = new_ai_message(
+        conversation_id=conversation["id"],
         role="assistant",
         content=ai_response,
         model_used=model_used,
     )
-    db.add(assistant_msg)
+    db.ai_messages.insert_one(assistant_msg)
 
-    conversation.message_count += 2
-    db.commit()
+    db.ai_conversations.update_one(
+        {"id": conversation["id"]},
+        {"$inc": {"message_count": 2}, "$set": {"updated_at": datetime.now(timezone.utc)}},
+    )
 
     return {
-        "conversation_id": conversation.id,
+        "conversation_id": conversation["id"],
         "message": {
-            "id": assistant_msg.id,
+            "id": assistant_msg["id"],
             "role": "assistant",
             "content": ai_response,
             "model_used": model_used,
-            "created_at": assistant_msg.created_at.isoformat() if assistant_msg.created_at else None,
+            "created_at": assistant_msg["created_at"].isoformat() if hasattr(assistant_msg.get("created_at"), 'isoformat') else assistant_msg.get("created_at"),
         },
     }
 
 
 def _generate_contextual_response(
-    message: str, teacher: Teacher, db: Session, class_id: str | None, file_context: str | None
+    message: str, teacher: dict, db: Database, class_id: str | None, file_context: str | None
 ) -> str:
     """Smart contextual answer engine when external LLM API keys are unconfigured."""
     msg_lower = message.lower()
 
-    # File analysis handling
     if file_context:
         return (
             f"📄 **Analysis of Uploaded File:**\n\n"
@@ -356,53 +337,47 @@ def _generate_contextual_response(
             f"- You can export discussion notes or generate a quiz based on this document from the **Daily Notes** or **Document Studio** modules."
         )
 
-    # Attendance below 75% query
     if "attendance" in msg_lower and ("below" in msg_lower or "risk" in msg_lower or "<" in msg_lower or "75" in msg_lower):
         students = []
         if class_id:
-            tca = db.query(TeacherCourseAssignment).filter(TeacherCourseAssignment.id == class_id).first()
+            tca = db.teacher_course_assignments.find_one({"id": class_id})
             if tca:
-                students = (
-                    db.query(Student)
-                    .filter(
-                        Student.section_id == tca.section_id,
-                        Student.attendance_percentage < 75,
-                        Student.is_active == True,
-                    )
-                    .order_by(Student.attendance_percentage)
-                    .all()
+                students = list(
+                    db.students.find({
+                        "section_id": tca["section_id"],
+                        "attendance_percentage": {"$lt": 75},
+                        "is_active": True,
+                    }).sort("attendance_percentage", 1)
                 )
         if students:
             lines = ["**Students with Attendance Below 75% Threshold:**\n"]
             for i, s in enumerate(students, 1):
-                lines.append(f"{i}. **{s.full_name}** (`{s.roll_number}`) — **{s.attendance_percentage}%** attendance | Email: `{s.email}`")
+                lines.append(f"{i}. **{student_full_name(s)}** (`{s['roll_number']}`) — **{s.get('attendance_percentage', 0)}%** attendance | Email: `{s['email']}`")
             lines.append(f"\n**Total At-Risk:** {len(students)} students require attendance warning emails.")
             lines.append(f"\n*Note: Go to the **Communications** page to send warning emails in one click.*")
             return "\n".join(lines)
         return "Great news! All students in the active class section have attendance above the 75% threshold."
 
-    # Timetable / Schedule query
     if any(kw in msg_lower for kw in ["schedule", "routine", "timetable", "today", "classes"]):
-        from app.models.timetable import TimetableEntry
-        entries = (
-            db.query(TimetableEntry)
-            .filter(TimetableEntry.teacher_id == teacher.id, TimetableEntry.day_of_week == "Monday")
-            .order_by(TimetableEntry.start_time)
-            .all()
+        tca_ids = [t["id"] for t in db.teacher_course_assignments.find({"teacher_id": teacher["id"]})]
+        entries = list(
+            db.timetable_entries.find({
+                "teacher_course_assignment_id": {"$in": tca_ids},
+                "day_of_week": 0,
+            }).sort("start_time", 1)
         )
         if entries:
             lines = ["**Your Schedule for Today (Monday):**\n"]
             for e in entries:
-                tca = db.query(TeacherCourseAssignment).filter(TeacherCourseAssignment.id == e.teacher_course_assignment_id).first()
-                course = db.query(Course).filter(Course.id == tca.course_id).first() if tca else None
-                year = db.query(Year).filter(Year.id == tca.year_id).first() if tca else None
-                sec = db.query(Section).filter(Section.id == tca.section_id).first() if tca else None
-                lines.append(f"- **{e.start_time} - {e.end_time}**: {course.name if course else 'Course'} (`{course.code if course else ''}`) — {year.label if year else ''} Sec {sec.name if sec else ''} (Room {e.room or '101'})")
+                tca = db.teacher_course_assignments.find_one({"id": e["teacher_course_assignment_id"]})
+                course = db.courses.find_one({"id": tca["course_id"]}) if tca else None
+                year = db.years.find_one({"id": tca["year_id"]}) if tca else None
+                sec = db.sections.find_one({"id": tca["section_id"]}) if tca else None
+                lines.append(f"- **{e['start_time']} - {e['end_time']}**: {course['name'] if course else 'Course'} (`{course['code'] if course else ''}`) — {year['label'] if year else ''} Sec {sec['name'] if sec else ''} (Room {e.get('room', '101')})")
             lines.append("\nView full weekly grid under the **Timetable** section.")
             return "\n".join(lines)
         return "You have no classes scheduled for today. Check the **Timetable** module for full weekly routine."
 
-    # General Study / Subject queries
     if any(kw in msg_lower for kw in ["what is", "explain", "how does", "difference", "algorithm", "network", "operating system", "data structure", "protocol"]):
         return (
             f"**Academic Topic Breakdown: {message.title()}**\n\n"
@@ -420,9 +395,8 @@ def _generate_contextual_response(
             f"*Recommendation: Use **Daily Notes** to generate discussion summaries or **Document Studio** to export a PDF quiz on this topic.*"
         )
 
-    # Default friendly greeting / help response
     return (
-        f"Welcome Professor {teacher.last_name}. I am **EduPilot AI**, your institutional copilot.\n\n"
+        f"Welcome Professor {teacher.get('last_name', '')}. I am **EduPilot AI**, your institutional copilot.\n\n"
         f"### How I Can Assist You:\n"
         f"- **Class Metrics**: Ask *'Show students with attendance under 75%'*\n"
         f"- **Schedule & Routine**: Ask *'What classes do I have today?'*\n"
@@ -435,24 +409,22 @@ def _generate_contextual_response(
 
 @router.get("/conversations")
 def list_conversations(
-    teacher: Teacher = Depends(get_current_teacher),
-    db: Session = Depends(get_db),
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
 ):
     """List teacher's AI conversations."""
-    convos = (
-        db.query(AIConversation)
-        .filter(AIConversation.teacher_id == teacher.id)
-        .order_by(AIConversation.updated_at.desc())
+    convos = list(
+        db.ai_conversations.find({"teacher_id": teacher["id"]})
+        .sort("updated_at", -1)
         .limit(20)
-        .all()
     )
     return [
         {
-            "id": c.id,
-            "title": c.title,
-            "message_count": c.message_count,
-            "created_at": c.created_at.isoformat() if c.created_at else None,
-            "updated_at": c.updated_at.isoformat() if c.updated_at else None,
+            "id": c["id"],
+            "title": c.get("title", "New Conversation"),
+            "message_count": c.get("message_count", 0),
+            "created_at": c["created_at"].isoformat() if hasattr(c.get("created_at"), 'isoformat') else c.get("created_at"),
+            "updated_at": c["updated_at"].isoformat() if hasattr(c.get("updated_at"), 'isoformat') else c.get("updated_at"),
         }
         for c in convos
     ]
@@ -461,34 +433,32 @@ def list_conversations(
 @router.get("/conversations/{conversation_id}")
 def get_conversation(
     conversation_id: str,
-    teacher: Teacher = Depends(get_current_teacher),
-    db: Session = Depends(get_db),
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
 ):
     """Get full conversation with messages."""
-    convo = db.query(AIConversation).filter(AIConversation.id == conversation_id).first()
+    convo = db.ai_conversations.find_one({"id": conversation_id})
     if not convo:
         raise http_404("Conversation not found")
-    if convo.teacher_id != teacher.id:
+    if convo["teacher_id"] != teacher["id"]:
         raise http_400("Not authorized")
 
-    messages = (
-        db.query(AIMessage)
-        .filter(AIMessage.conversation_id == conversation_id)
-        .order_by(AIMessage.created_at)
-        .all()
+    messages = list(
+        db.ai_messages.find({"conversation_id": conversation_id})
+        .sort("created_at", 1)
     )
 
     return {
-        "id": convo.id,
-        "title": convo.title,
+        "id": convo["id"],
+        "title": convo.get("title", "New Conversation"),
         "messages": [
             {
-                "id": m.id,
-                "role": m.role,
-                "content": m.content,
-                "content_type": m.content_type,
-                "model_used": m.model_used,
-                "created_at": m.created_at.isoformat() if m.created_at else None,
+                "id": m["id"],
+                "role": m["role"],
+                "content": m["content"],
+                "content_type": m.get("content_type", "text"),
+                "model_used": m.get("model_used"),
+                "created_at": m["created_at"].isoformat() if hasattr(m.get("created_at"), 'isoformat') else m.get("created_at"),
             }
             for m in messages
         ],
@@ -498,19 +468,16 @@ def get_conversation(
 @router.delete("/conversations/{conversation_id}")
 def delete_conversation(
     conversation_id: str,
-    teacher: Teacher = Depends(get_current_teacher),
-    db: Session = Depends(get_db),
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
 ):
     """Delete a conversation and its messages."""
-    convo = db.query(AIConversation).filter(
-        AIConversation.id == conversation_id,
-        AIConversation.teacher_id == teacher.id,
-    ).first()
+    convo = db.ai_conversations.find_one({
+        "id": conversation_id, "teacher_id": teacher["id"],
+    })
     if not convo:
         raise http_404("Conversation not found")
 
-    db.query(AIMessage).filter(AIMessage.conversation_id == conversation_id).delete()
-    db.delete(convo)
-    db.commit()
+    db.ai_messages.delete_many({"conversation_id": conversation_id})
+    db.ai_conversations.delete_one({"id": conversation_id})
     return {"success": True, "message": "Conversation deleted successfully"}
-

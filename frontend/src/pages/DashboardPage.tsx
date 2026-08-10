@@ -244,7 +244,7 @@ export const DashboardPage: React.FC = () => {
           <div className="p-8 text-center text-slate-500 text-xs bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700">
              Select a class from the top menu to view its performance overview.
            </div>
-        ) : !analyticsData.has_performance_data ? (
+        ) : !analyticsData?.has_performance_data ? (
           <div className="p-8 text-center text-slate-500 text-xs bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700">
             No performance data available for this class yet. Attendance and assessment records will appear here after they are submitted.
           </div>

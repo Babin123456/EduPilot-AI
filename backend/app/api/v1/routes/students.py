@@ -1,34 +1,26 @@
 """Students routes — directory, profile, filtering."""
 
 from __future__ import annotations
+import re
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import func, or_
-from sqlalchemy.orm import Session
+from pymongo.database import Database
 
 from app.core.database import get_db
 from app.api.deps import get_current_teacher
 from app.core.exceptions import http_404, http_403
-from app.models.teacher import Teacher
-from app.models.student import Student
-from app.models.enrollment import TeacherCourseAssignment
-from app.models.academic import Year, Section, Semester
-from app.models.attendance import AttendanceSession, AttendanceRecord
-from app.models.assignment import Assignment, AssignmentSubmission
-from app.models.assessment import Assessment, AssessmentResult
+from app.models.student import student_full_name
 
 router = APIRouter()
 
 
-def _get_authorized_section_ids(db: Session, teacher: Teacher) -> list[str]:
+def _get_authorized_section_ids(db: Database, teacher: dict) -> list[str]:
     """Get section IDs the teacher is authorized to view."""
-    tcas = (
-        db.query(TeacherCourseAssignment.section_id)
-        .filter(TeacherCourseAssignment.teacher_id == teacher.id, TeacherCourseAssignment.is_active == True)
-        .distinct()
-        .all()
+    tcas = db.teacher_course_assignments.find(
+        {"teacher_id": teacher["id"], "is_active": True},
+        {"section_id": 1},
     )
-    return [t[0] for t in tcas]
+    return list(set(t["section_id"] for t in tcas))
 
 
 @router.get("")
@@ -40,89 +32,80 @@ def list_students(
     risk: str | None = Query(None),
     page: int = Query(1, ge=1),
     limit: int = Query(100, ge=1, le=200),
-    teacher: Teacher = Depends(get_current_teacher),
-
-    db: Session = Depends(get_db),
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
 ):
     """List students with filtering, search, and pagination."""
     authorized_sections = _get_authorized_section_ids(db, teacher)
     if not authorized_sections:
         return {"students": [], "total": 0, "page": page, "limit": limit}
 
-    query = db.query(Student).filter(
-        Student.is_active == True,
-        Student.section_id.in_(authorized_sections),
-    )
+    query_filter: dict = {
+        "is_active": True,
+        "section_id": {"$in": authorized_sections},
+    }
 
-    # Filter by specific class assignment
     if class_id:
-        tca = db.query(TeacherCourseAssignment).filter(
-            TeacherCourseAssignment.id == class_id,
-            TeacherCourseAssignment.teacher_id == teacher.id,
-        ).first()
+        tca = db.teacher_course_assignments.find_one({
+            "id": class_id, "teacher_id": teacher["id"],
+        })
         if tca:
-            query = query.filter(Student.section_id == tca.section_id)
+            query_filter["section_id"] = tca["section_id"]
         else:
             return {"students": [], "total": 0, "page": page, "limit": limit}
 
     if section_id:
         if section_id in authorized_sections:
-            query = query.filter(Student.section_id == section_id)
+            query_filter["section_id"] = section_id
         else:
             return {"students": [], "total": 0, "page": page, "limit": limit}
 
     if year_id:
-        query = query.filter(Student.year_id == year_id)
+        query_filter["year_id"] = year_id
 
     if risk:
-        query = query.filter(Student.risk_level == risk)
+        query_filter["risk_level"] = risk
 
     if search:
-        search_term = f"%{search}%"
-        query = query.filter(
-            or_(
-                Student.first_name.ilike(search_term),
-                Student.last_name.ilike(search_term),
-                Student.roll_number.ilike(search_term),
-                Student.registration_number.ilike(search_term),
-                Student.email.ilike(search_term),
-            )
-        )
+        escaped = re.escape(search)
+        query_filter["$or"] = [
+            {"first_name": {"$regex": escaped, "$options": "i"}},
+            {"last_name": {"$regex": escaped, "$options": "i"}},
+            {"roll_number": {"$regex": escaped, "$options": "i"}},
+            {"registration_number": {"$regex": escaped, "$options": "i"}},
+            {"email": {"$regex": escaped, "$options": "i"}},
+        ]
 
-    total = query.count()
-    students = (
-        query
-        .join(Year, Student.year_id == Year.id)
-        .join(Section, Student.section_id == Section.id)
-        .order_by(Student.roll_number)
-        .offset((page - 1) * limit)
+    total = db.students.count_documents(query_filter)
+    students = list(
+        db.students.find(query_filter)
+        .sort("roll_number", 1)
+        .skip((page - 1) * limit)
         .limit(limit)
-        .all()
     )
 
-    # Fetch year/section info
     result = []
     for s in students:
-        year = db.query(Year).filter(Year.id == s.year_id).first()
-        section = db.query(Section).filter(Section.id == s.section_id).first()
+        year = db.years.find_one({"id": s["year_id"]})
+        section = db.sections.find_one({"id": s["section_id"]})
         result.append({
-            "id": s.id,
-            "student_uid": s.student_uid,
-            "registration_number": s.registration_number,
-            "roll_number": s.roll_number,
-            "first_name": s.first_name,
-            "last_name": s.last_name,
-            "full_name": s.full_name,
-            "email": s.email,
-            "phone": s.phone,
-            "year_label": year.label if year else "",
-            "year_number": year.year_number if year else 0,
-            "section_name": section.name if section else "",
-            "attendance_percentage": s.attendance_percentage,
-            "average_score": s.average_score,
-            "cgpa": s.cgpa,
-            "risk_level": s.risk_level,
-            "avatar_url": s.avatar_url,
+            "id": s["id"],
+            "student_uid": s["student_uid"],
+            "registration_number": s["registration_number"],
+            "roll_number": s["roll_number"],
+            "first_name": s["first_name"],
+            "last_name": s["last_name"],
+            "full_name": student_full_name(s),
+            "email": s["email"],
+            "phone": s.get("phone"),
+            "year_label": year["label"] if year else "",
+            "year_number": year["year_number"] if year else 0,
+            "section_name": section["name"] if section else "",
+            "attendance_percentage": s.get("attendance_percentage", 0),
+            "average_score": s.get("average_score", 0),
+            "cgpa": s.get("cgpa"),
+            "risk_level": s.get("risk_level", "normal"),
+            "avatar_url": s.get("avatar_url"),
         })
 
     return {"students": result, "total": total, "page": page, "limit": limit}
@@ -131,98 +114,106 @@ def list_students(
 @router.get("/{student_id}")
 def get_student_profile(
     student_id: str,
-    teacher: Teacher = Depends(get_current_teacher),
-    db: Session = Depends(get_db),
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
 ):
     """Get full 360-degree student profile."""
-    student = db.query(Student).filter(Student.id == student_id).first()
+    student = db.students.find_one({"id": student_id})
     if not student:
         raise http_404("Student not found")
 
-    # Authorization check
     authorized_sections = _get_authorized_section_ids(db, teacher)
-    if student.section_id not in authorized_sections:
+    if student["section_id"] not in authorized_sections:
         raise http_403("Not authorized to view this student")
 
-    year = db.query(Year).filter(Year.id == student.year_id).first()
-    section = db.query(Section).filter(Section.id == student.section_id).first()
-    semester = db.query(Semester).filter(Semester.id == student.semester_id).first()
+    year = db.years.find_one({"id": student["year_id"]})
+    section = db.sections.find_one({"id": student["section_id"]})
+    semester = db.semesters.find_one({"id": student["semester_id"]})
 
     # Recent attendance
-    recent_attendance = (
-        db.query(AttendanceRecord.status, AttendanceSession.date)
-        .join(AttendanceSession, AttendanceRecord.session_id == AttendanceSession.id)
-        .filter(AttendanceRecord.student_id == student_id)
-        .order_by(AttendanceSession.date.desc())
-        .limit(20)
-        .all()
+    att_records = list(
+        db.attendance_records.find({"student_id": student_id})
     )
+    session_ids = [r["session_id"] for r in att_records]
+    att_sessions = {
+        s["id"]: s for s in db.attendance_sessions.find({"id": {"$in": session_ids}})
+    } if session_ids else {}
+
+    recent_attendance = []
+    for r in att_records:
+        sess = att_sessions.get(r["session_id"])
+        if sess:
+            recent_attendance.append((r["status"], sess.get("date", "")))
+
+    # Sort by date descending, take last 20
+    recent_attendance.sort(key=lambda x: x[1], reverse=True)
+    recent_attendance = recent_attendance[:20]
 
     # Assignment submissions
-    submissions = (
-        db.query(AssignmentSubmission, Assignment)
-        .join(Assignment, AssignmentSubmission.assignment_id == Assignment.id)
-        .filter(AssignmentSubmission.student_id == student_id)
-        .order_by(AssignmentSubmission.submitted_at.desc())
+    submissions_raw = list(
+        db.assignment_submissions.find({"student_id": student_id})
+        .sort("submitted_at", -1)
         .limit(10)
-        .all()
     )
+    submissions = []
+    for s in submissions_raw:
+        a = db.assignments.find_one({"id": s["assignment_id"]})
+        if a:
+            submitted_at = s.get("submitted_at")
+            submissions.append({
+                "assignment_title": a["title"],
+                "score": s.get("score"),
+                "max_score": s.get("max_score"),
+                "status": s.get("status"),
+                "is_late": s.get("is_late", False),
+                "submitted_at": submitted_at.isoformat() if hasattr(submitted_at, 'isoformat') else submitted_at,
+            })
 
     # Assessment results
-    results = (
-        db.query(AssessmentResult, Assessment)
-        .join(Assessment, AssessmentResult.assessment_id == Assessment.id)
-        .filter(AssessmentResult.student_id == student_id)
-        .order_by(AssessmentResult.created_at.desc())
+    results_raw = list(
+        db.assessment_results.find({"student_id": student_id})
+        .sort("created_at", -1)
         .limit(10)
-        .all()
     )
+    assessment_results = []
+    for r in results_raw:
+        a = db.assessments.find_one({"id": r["assessment_id"]})
+        if a:
+            assessment_results.append({
+                "assessment_title": a["title"],
+                "score": r.get("score"),
+                "max_score": r.get("max_score"),
+                "percentage": r.get("percentage"),
+                "grade": r.get("grade"),
+            })
 
     return {
-        "id": student.id,
-        "student_uid": student.student_uid,
-        "registration_number": student.registration_number,
-        "roll_number": student.roll_number,
-        "first_name": student.first_name,
-        "last_name": student.last_name,
-        "full_name": student.full_name,
-        "email": student.email,
-        "phone": student.phone,
-        "gender": student.gender,
-        "year_label": year.label if year else "",
-        "year_number": year.year_number if year else 0,
-        "section_name": section.name if section else "",
-        "semester_label": semester.label if semester else "",
-        "attendance_percentage": student.attendance_percentage,
-        "assignments_completed": student.assignments_completed,
-        "assignments_total": student.assignments_total,
-        "average_score": student.average_score,
-        "cgpa": student.cgpa,
-        "risk_level": student.risk_level,
-        "risk_reasons": student.risk_reasons,
-        "avatar_url": student.avatar_url,
+        "id": student["id"],
+        "student_uid": student["student_uid"],
+        "registration_number": student["registration_number"],
+        "roll_number": student["roll_number"],
+        "first_name": student["first_name"],
+        "last_name": student["last_name"],
+        "full_name": student_full_name(student),
+        "email": student["email"],
+        "phone": student.get("phone"),
+        "gender": student.get("gender"),
+        "year_label": year["label"] if year else "",
+        "year_number": year["year_number"] if year else 0,
+        "section_name": section["name"] if section else "",
+        "semester_label": semester["label"] if semester else "",
+        "attendance_percentage": student.get("attendance_percentage", 0),
+        "assignments_completed": student.get("assignments_completed", 0),
+        "assignments_total": student.get("assignments_total", 0),
+        "average_score": student.get("average_score", 0),
+        "cgpa": student.get("cgpa"),
+        "risk_level": student.get("risk_level", "normal"),
+        "risk_reasons": student.get("risk_reasons"),
+        "avatar_url": student.get("avatar_url"),
         "recent_attendance": [
-            {"status": status, "date": d.isoformat()} for status, d in recent_attendance
+            {"status": status, "date": d if isinstance(d, str) else d.isoformat() if hasattr(d, 'isoformat') else str(d)}
+            for status, d in recent_attendance
         ],
-        "submissions": [
-            {
-                "assignment_title": a.title,
-                "score": s.score,
-                "max_score": s.max_score,
-                "status": s.status,
-                "is_late": s.is_late,
-                "submitted_at": s.submitted_at.isoformat() if s.submitted_at else None,
-            }
-            for s, a in submissions
-        ],
-        "assessment_results": [
-            {
-                "assessment_title": a.title,
-                "score": r.score,
-                "max_score": r.max_score,
-                "percentage": r.percentage,
-                "grade": r.grade,
-            }
-            for r, a in results
-        ],
+        "submissions": submissions,
+        "assessment_results": assessment_results,
     }

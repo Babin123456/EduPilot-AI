@@ -1,21 +1,15 @@
 """Analytics routes — class and student analytics."""
 
 from __future__ import annotations
-from datetime import date, timedelta
+from datetime import date
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import func
-from sqlalchemy.orm import Session
+from pymongo.database import Database
 
 from app.core.database import get_db
 from app.api.deps import get_current_teacher
 from app.core.exceptions import http_403
-from app.models.teacher import Teacher
-from app.models.student import Student
-from app.models.enrollment import TeacherCourseAssignment
-from app.models.attendance import AttendanceSession, AttendanceRecord
-from app.models.assignment import Assignment, AssignmentSubmission
-from app.models.assessment import Assessment, AssessmentResult
+from app.models.student import student_full_name
 
 router = APIRouter()
 
@@ -23,70 +17,58 @@ router = APIRouter()
 @router.get("/classes/{class_id}/overview")
 def get_class_analytics(
     class_id: str,
-    teacher: Teacher = Depends(get_current_teacher),
-    db: Session = Depends(get_db),
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
 ):
     """Get comprehensive analytics for a class."""
-    tca = db.query(TeacherCourseAssignment).filter(
-        TeacherCourseAssignment.id == class_id,
-        TeacherCourseAssignment.teacher_id == teacher.id,
-    ).first()
+    tca = db.teacher_course_assignments.find_one({
+        "id": class_id, "teacher_id": teacher["id"],
+    })
     if not tca:
         raise http_403("Not authorized")
 
-    students = (
-        db.query(Student)
-        .filter(Student.section_id == tca.section_id, Student.is_active == True)
-        .all()
+    students = list(
+        db.students.find({"section_id": tca["section_id"], "is_active": True})
     )
 
     # ── Attendance trend (last 10 sessions) ──
-    sessions = (
-        db.query(AttendanceSession)
-        .filter(
-            AttendanceSession.teacher_course_assignment_id == class_id,
-            AttendanceSession.is_submitted == True,
-        )
-        .order_by(AttendanceSession.date.desc())
-        .limit(10)
-        .all()
+    sessions = list(
+        db.attendance_sessions.find({
+            "teacher_course_assignment_id": class_id,
+            "is_submitted": True,
+        }).sort("date", -1).limit(10)
     )
     sessions.reverse()
 
     attendance_trend = []
     for s in sessions:
-        total = s.total_present + s.total_absent + s.total_late + s.total_excused
-        pct = round((s.total_present + s.total_late) / total * 100, 1) if total > 0 else 0
+        total = s.get("total_present", 0) + s.get("total_absent", 0) + s.get("total_late", 0) + s.get("total_excused", 0)
+        pct = round((s.get("total_present", 0) + s.get("total_late", 0)) / total * 100, 1) if total > 0 else 0
+        d = s.get("date", "")
         attendance_trend.append({
-            "date": s.date.isoformat(),
-            "present": s.total_present,
-            "absent": s.total_absent,
-            "late": s.total_late,
+            "date": d if isinstance(d, str) else d.isoformat() if hasattr(d, 'isoformat') else str(d),
+            "present": s.get("total_present", 0),
+            "absent": s.get("total_absent", 0),
+            "late": s.get("total_late", 0),
             "percentage": pct,
         })
 
     # ── Assignment completion ──
-    assignments = (
-        db.query(Assignment)
-        .filter(Assignment.teacher_course_assignment_id == class_id)
-        .all()
+    assignments = list(
+        db.assignments.find({"teacher_course_assignment_id": class_id})
     )
 
     assignment_stats = []
     for a in assignments:
-        submitted = (
-            db.query(func.count(AssignmentSubmission.id))
-            .filter(AssignmentSubmission.assignment_id == a.id, AssignmentSubmission.status != "pending")
-            .scalar()
-        )
-        graded = (
-            db.query(func.count(AssignmentSubmission.id))
-            .filter(AssignmentSubmission.assignment_id == a.id, AssignmentSubmission.is_graded == True)
-            .scalar()
-        )
+        submitted = db.assignment_submissions.count_documents({
+            "assignment_id": a["id"], "status": {"$ne": "pending"},
+        })
+        graded = db.assignment_submissions.count_documents({
+            "assignment_id": a["id"], "is_graded": True,
+        })
         assignment_stats.append({
-            "id": a.id,
-            "title": a.title,
+            "id": a["id"],
+            "title": a["title"],
             "total_students": len(students),
             "submitted": submitted,
             "graded": graded,
@@ -94,14 +76,21 @@ def get_class_analytics(
         })
 
     # ── Score distribution ──
-    results = (
-        db.query(AssessmentResult.percentage)
-        .join(Assessment, AssessmentResult.assessment_id == Assessment.id)
-        .filter(Assessment.teacher_course_assignment_id == class_id)
-        .all()
-    )
+    assessment_ids = [
+        a["id"] for a in db.assessments.find(
+            {"teacher_course_assignment_id": class_id}, {"id": 1}
+        )
+    ]
+    results = list(
+        db.assessment_results.find(
+            {"assessment_id": {"$in": assessment_ids}},
+            {"percentage": 1},
+        )
+    ) if assessment_ids else []
+
     score_distribution = {"A": 0, "B": 0, "C": 0, "D": 0, "F": 0}
-    for (pct,) in results:
+    for r in results:
+        pct = r.get("percentage", 0)
         if pct >= 90:
             score_distribution["A"] += 1
         elif pct >= 75:
@@ -116,28 +105,30 @@ def get_class_analytics(
     # ── Risk distribution ──
     risk_dist = {"normal": 0, "low": 0, "medium": 0, "high": 0}
     for s in students:
-        risk_dist[s.risk_level] = risk_dist.get(s.risk_level, 0) + 1
+        rl = s.get("risk_level", "normal")
+        risk_dist[rl] = risk_dist.get(rl, 0) + 1
 
     # ── At-risk students ──
     at_risk = [
         {
-            "id": s.id,
-            "name": s.full_name,
-            "roll_number": s.roll_number,
-            "attendance_percentage": s.attendance_percentage,
-            "average_score": s.average_score,
-            "risk_level": s.risk_level,
-            "risk_reasons": s.risk_reasons,
+            "id": s["id"],
+            "name": student_full_name(s),
+            "roll_number": s["roll_number"],
+            "attendance_percentage": s.get("attendance_percentage", 0),
+            "average_score": s.get("average_score", 0),
+            "risk_level": s.get("risk_level", "normal"),
+            "risk_reasons": s.get("risk_reasons"),
         }
-        for s in students if s.risk_level in ("medium", "high")
+        for s in students if s.get("risk_level") in ("medium", "high")
     ]
 
     attendance_total = sum(
-        s.total_present + s.total_absent + s.total_late + s.total_excused for s in sessions
+        s.get("total_present", 0) + s.get("total_absent", 0) + s.get("total_late", 0) + s.get("total_excused", 0)
+        for s in sessions
     )
-    attendance_present = sum(s.total_present + s.total_late for s in sessions)
+    attendance_present = sum(s.get("total_present", 0) + s.get("total_late", 0) for s in sessions)
     average_attendance = round(attendance_present / attendance_total * 100, 1) if attendance_total else None
-    average_score = round(sum(pct for (pct,) in results) / len(results), 1) if results else None
+    average_score = round(sum(r.get("percentage", 0) for r in results) / len(results), 1) if results else None
 
     return {
         "class_id": class_id,

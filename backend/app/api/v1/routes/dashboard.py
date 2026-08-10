@@ -1,22 +1,13 @@
-"""Dashboard routes — aggregated teacher metrics filtered by active academic class context."""
+"""Dashboard routes — aggregated teacher metrics."""
 
 from __future__ import annotations
 from datetime import date
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import func
-from sqlalchemy.orm import Session
+from pymongo.database import Database
 
 from app.core.database import get_db
 from app.api.deps import get_current_teacher
-from app.models.teacher import Teacher
-from app.models.enrollment import TeacherCourseAssignment
-from app.models.student import Student
-from app.models.attendance import AttendanceSession
-from app.models.assignment import Assignment, AssignmentSubmission
-from app.models.assessment import Assessment
-from app.models.notification import Notification
-from app.models.timetable import TimetableEntry
 
 router = APIRouter()
 
@@ -24,104 +15,77 @@ router = APIRouter()
 @router.get("/summary")
 def get_dashboard_summary(
     class_id: str | None = Query(None),
-    teacher: Teacher = Depends(get_current_teacher),
-    db: Session = Depends(get_db),
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
 ):
-    """Get aggregated dashboard metrics for the teacher, optionally filtered by active class context."""
-    # Base active class assignments for teacher
-    tca_query = db.query(TeacherCourseAssignment).filter(
-        TeacherCourseAssignment.teacher_id == teacher.id,
-        TeacherCourseAssignment.is_active == True,
-    )
-    
+    """Get aggregated dashboard metrics for the teacher."""
+    tca_filter = {"teacher_id": teacher["id"], "is_active": True}
     if class_id:
-        tca_query = tca_query.filter(TeacherCourseAssignment.id == class_id)
-        
-    tcas = tca_query.all()
-    tca_ids = [t.id for t in tcas]
-    section_ids = list(set(t.section_id for t in tcas))
+        tca_filter["id"] = class_id
 
-    # Total students in active context
-    total_students = (
-        db.query(func.count(func.distinct(Student.id)))
-        .filter(Student.section_id.in_(section_ids), Student.is_active == True)
-        .scalar()
-    ) if section_ids else 0
+    tcas = list(db.teacher_course_assignments.find(tca_filter))
+    tca_ids = [t["id"] for t in tcas]
+    section_ids = list(set(t["section_id"] for t in tcas))
+
+    # Total students
+    total_students = db.students.count_documents({
+        "section_id": {"$in": section_ids}, "is_active": True,
+    }) if section_ids else 0
 
     # Today's classes
     today_dow = date.today().weekday()
-    today_classes = (
-        db.query(TimetableEntry)
-        .filter(
-            TimetableEntry.teacher_course_assignment_id.in_(tca_ids),
-            TimetableEntry.day_of_week == today_dow,
-        )
-        .count()
-    ) if tca_ids else 0
+    today_classes = db.timetable_entries.count_documents({
+        "teacher_course_assignment_id": {"$in": tca_ids},
+        "day_of_week": today_dow,
+    }) if tca_ids else 0
 
-    # Pending attendance for today
-    today_sessions = (
-        db.query(AttendanceSession)
-        .filter(
-            AttendanceSession.teacher_id == teacher.id,
-            AttendanceSession.teacher_course_assignment_id.in_(tca_ids) if tca_ids else False,
-            AttendanceSession.date == date.today(),
-            AttendanceSession.is_submitted == True,
-        )
-        .count()
-    ) if tca_ids else 0
-    
+    # Pending attendance
+    today_str = date.today().isoformat()
+    today_sessions = db.attendance_sessions.count_documents({
+        "teacher_id": teacher["id"],
+        "teacher_course_assignment_id": {"$in": tca_ids},
+        "date": today_str,
+        "is_submitted": True,
+    }) if tca_ids else 0
     pending_attendance = max(0, today_classes - today_sessions)
 
     # Active assignments
-    active_assignments = (
-        db.query(func.count(Assignment.id))
-        .filter(
-            Assignment.teacher_course_assignment_id.in_(tca_ids),
-            Assignment.status == "published",
-        )
-        .scalar()
-    ) if tca_ids else 0
+    active_assignments = db.assignments.count_documents({
+        "teacher_course_assignment_id": {"$in": tca_ids},
+        "status": "published",
+    }) if tca_ids else 0
 
     # Pending grading
-    pending_grading = (
-        db.query(func.count(AssignmentSubmission.id))
-        .join(Assignment, AssignmentSubmission.assignment_id == Assignment.id)
-        .filter(
-            Assignment.teacher_course_assignment_id.in_(tca_ids),
-            AssignmentSubmission.status == "submitted",
-            AssignmentSubmission.is_graded == False,
+    assignment_ids = [
+        a["id"] for a in db.assignments.find(
+            {"teacher_course_assignment_id": {"$in": tca_ids}}, {"id": 1}
         )
-        .scalar()
-    ) if tca_ids else 0
+    ] if tca_ids else []
+    pending_grading = db.assignment_submissions.count_documents({
+        "assignment_id": {"$in": assignment_ids},
+        "status": "submitted",
+        "is_graded": False,
+    }) if assignment_ids else 0
 
     # At-risk students
-    at_risk = (
-        db.query(func.count(Student.id))
-        .filter(
-            Student.section_id.in_(section_ids),
-            Student.is_active == True,
-            Student.risk_level.in_(["medium", "high"]),
-        )
-        .scalar()
-    ) if section_ids else 0
+    at_risk = db.students.count_documents({
+        "section_id": {"$in": section_ids},
+        "is_active": True,
+        "risk_level": {"$in": ["medium", "high"]},
+    }) if section_ids else 0
 
     # Assessments
-    total_assessments = (
-        db.query(func.count(Assessment.id))
-        .filter(Assessment.teacher_course_assignment_id.in_(tca_ids))
-        .scalar()
-    ) if tca_ids else 0
+    total_assessments = db.assessments.count_documents({
+        "teacher_course_assignment_id": {"$in": tca_ids},
+    }) if tca_ids else 0
 
     # Unread notifications
-    unread_notifications = (
-        db.query(func.count(Notification.id))
-        .filter(Notification.teacher_id == teacher.id, Notification.is_read == False)
-        .scalar()
-    )
+    unread_notifications = db.notifications.count_documents({
+        "teacher_id": teacher["id"], "is_read": False,
+    })
 
     return {
-        "teacher_name": teacher.full_name,
+        "teacher_name": teacher["full_name"],
         "today_date": date.today().isoformat(),
         "total_classes": len(tca_ids),
         "today_classes": today_classes,
@@ -137,26 +101,24 @@ def get_dashboard_summary(
 
 @router.get("/alerts")
 def get_dashboard_alerts(
-    teacher: Teacher = Depends(get_current_teacher),
-    db: Session = Depends(get_db),
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
 ):
     """Get recent alerts and notifications."""
-    notifications = (
-        db.query(Notification)
-        .filter(Notification.teacher_id == teacher.id)
-        .order_by(Notification.created_at.desc())
+    notifications = list(
+        db.notifications.find({"teacher_id": teacher["id"]})
+        .sort("created_at", -1)
         .limit(10)
-        .all()
     )
     return [
         {
-            "id": n.id,
-            "title": n.title,
-            "message": n.message,
-            "type": n.notification_type,
-            "is_read": n.is_read,
-            "link": n.link,
-            "created_at": n.created_at.isoformat() if n.created_at else None,
+            "id": n["id"],
+            "title": n["title"],
+            "message": n["message"],
+            "type": n.get("notification_type", "info"),
+            "is_read": n.get("is_read", False),
+            "link": n.get("link"),
+            "created_at": n["created_at"].isoformat() if hasattr(n.get("created_at"), 'isoformat') else n.get("created_at"),
         }
         for n in notifications
     ]

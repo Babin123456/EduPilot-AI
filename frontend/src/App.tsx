@@ -23,6 +23,23 @@ import { DocumentStudioPage } from './pages/DocumentStudioPage';
 import { CommunicationsPage } from './pages/CommunicationsPage';
 import { ProfilePage } from './pages/ProfilePage';
 
+class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean, error: any}> {
+  constructor(props: any) { super(props); this.state = { hasError: false, error: null }; }
+  static getDerivedStateFromError(error: any) { return { hasError: true, error }; }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: 20, color: 'red', backgroundColor: '#fee' }}>
+          <h2>Frontend Crash!</h2>
+          <pre>{this.state.error?.toString()}</pre>
+          <pre>{this.state.error?.stack}</pre>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { token, isLoading } = useAuth();
   if (isLoading) return <div className="p-8 text-center text-xs">Loading...</div>;
@@ -35,32 +52,33 @@ export const App: React.FC = () => {
     <ThemeProvider>
       <ToastProvider>
         <AuthProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/faq" element={<FAQPage />} />
-              <Route path="/terms" element={<TermsPage />} />
-              <Route path="/privacy" element={<PrivacyPage />} />
-              <Route path="/docs" element={<DocumentationPage />} />
+          <ErrorBoundary>
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/faq" element={<FAQPage />} />
+                <Route path="/terms" element={<TermsPage />} />
+                <Route path="/privacy" element={<PrivacyPage />} />
+                <Route path="/docs" element={<DocumentationPage />} />
 
-              <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-              <Route path="/attendance" element={<ProtectedRoute><AttendancePage /></ProtectedRoute>} />
-              <Route path="/ai" element={<ProtectedRoute><AIPage /></ProtectedRoute>} />
-              <Route path="/students" element={<ProtectedRoute><StudentsPage /></ProtectedRoute>} />
-              <Route path="/timetable" element={<ProtectedRoute><TimetablePage /></ProtectedRoute>} />
-              <Route path="/analytics" element={<ProtectedRoute><AnalyticsPage /></ProtectedRoute>} />
-              <Route path="/assignments" element={<ProtectedRoute><AssignmentsPage /></ProtectedRoute>} />
-              <Route path="/assessments" element={<ProtectedRoute><AssessmentsPage /></ProtectedRoute>} />
-              <Route path="/daily-notes" element={<ProtectedRoute><DailyNotesPage /></ProtectedRoute>} />
-              <Route path="/documents" element={<ProtectedRoute><DocumentStudioPage /></ProtectedRoute>} />
-              <Route path="/communications" element={<ProtectedRoute><CommunicationsPage /></ProtectedRoute>} />
-              <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+                <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+                <Route path="/attendance" element={<ProtectedRoute><AttendancePage /></ProtectedRoute>} />
+                <Route path="/ai" element={<ProtectedRoute><AIPage /></ProtectedRoute>} />
+                <Route path="/students" element={<ProtectedRoute><StudentsPage /></ProtectedRoute>} />
+                <Route path="/timetable" element={<ProtectedRoute><TimetablePage /></ProtectedRoute>} />
+                <Route path="/analytics" element={<ProtectedRoute><AnalyticsPage /></ProtectedRoute>} />
+                <Route path="/assignments" element={<ProtectedRoute><AssignmentsPage /></ProtectedRoute>} />
+                <Route path="/assessments" element={<ProtectedRoute><AssessmentsPage /></ProtectedRoute>} />
+                <Route path="/daily-notes" element={<ProtectedRoute><DailyNotesPage /></ProtectedRoute>} />
+                <Route path="/documents" element={<ProtectedRoute><DocumentStudioPage /></ProtectedRoute>} />
+                <Route path="/communications" element={<ProtectedRoute><CommunicationsPage /></ProtectedRoute>} />
+                <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
 
-
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </BrowserRouter>
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </BrowserRouter>
+          </ErrorBoundary>
         </AuthProvider>
       </ToastProvider>
     </ThemeProvider>

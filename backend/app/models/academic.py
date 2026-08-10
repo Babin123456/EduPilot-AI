@@ -1,86 +1,88 @@
-"""Academic structure models: Session, Year, Semester, Section, Course."""
+"""Academic structure document helpers: Session, Year, Semester, Section, Course."""
 
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone, date
-
-from sqlalchemy import String, Text, Integer, DateTime, Date, ForeignKey, Boolean, Float
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-
-from app.core.database import Base
+from datetime import datetime, timezone
 
 
 def _utcnow():
     return datetime.now(timezone.utc)
 
 
-class AcademicSession(Base):
-    __tablename__ = "academic_sessions"
-
-    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    name: Mapped[str] = mapped_column(String(50), nullable=False)  # e.g. "2025-2026"
-    start_date: Mapped[date | None] = mapped_column(Date, nullable=True)
-    end_date: Mapped[date | None] = mapped_column(Date, nullable=True)
-    is_current: Mapped[bool] = mapped_column(Boolean, default=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, onupdate=_utcnow)
+def _uid():
+    return str(uuid.uuid4())
 
 
-class Year(Base):
-    __tablename__ = "years"
-
-    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    program_id: Mapped[str] = mapped_column(String(36), ForeignKey("programs.id"), nullable=False)
-    year_number: Mapped[int] = mapped_column(Integer, nullable=False)  # 1, 2, 3, 4
-    label: Mapped[str] = mapped_column(String(50), nullable=False)  # "1st Year", "2nd Year", etc.
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, onupdate=_utcnow)
-
-    semesters: Mapped[list[Semester]] = relationship(back_populates="year", cascade="all, delete-orphan")
-    sections: Mapped[list[Section]] = relationship(back_populates="year", cascade="all, delete-orphan")
+# ── Collection names ──
+ACADEMIC_SESSIONS = "academic_sessions"
+YEARS = "years"
+SEMESTERS = "semesters"
+SECTIONS = "sections"
+COURSES = "courses"
 
 
-class Semester(Base):
-    __tablename__ = "semesters"
-
-    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    year_id: Mapped[str] = mapped_column(String(36), ForeignKey("years.id"), nullable=False)
-    semester_number: Mapped[int] = mapped_column(Integer, nullable=False)  # 1-8
-    label: Mapped[str] = mapped_column(String(50), nullable=False)  # "Semester 1", etc.
-    is_current: Mapped[bool] = mapped_column(Boolean, default=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, onupdate=_utcnow)
-
-    year: Mapped[Year] = relationship(back_populates="semesters")
+def new_academic_session(*, name, start_date=None, end_date=None, is_current=True, id=None):
+    return {
+        "id": id or _uid(),
+        "name": name,
+        "start_date": start_date,
+        "end_date": end_date,
+        "is_current": is_current,
+        "created_at": _utcnow(),
+        "updated_at": _utcnow(),
+    }
 
 
-class Section(Base):
-    __tablename__ = "sections"
-
-    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    year_id: Mapped[str] = mapped_column(String(36), ForeignKey("years.id"), nullable=False)
-    name: Mapped[str] = mapped_column(String(10), nullable=False)  # "A", "B", "C"
-    max_students: Mapped[int] = mapped_column(Integer, default=60)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, onupdate=_utcnow)
-
-    year: Mapped[Year] = relationship(back_populates="sections")
+def new_year(*, program_id, year_number, label, id=None):
+    return {
+        "id": id or _uid(),
+        "program_id": program_id,
+        "year_number": year_number,
+        "label": label,
+        "created_at": _utcnow(),
+        "updated_at": _utcnow(),
+    }
 
 
-class Course(Base):
-    __tablename__ = "courses"
+def new_semester(*, year_id, semester_number, label, is_current=False, id=None):
+    return {
+        "id": id or _uid(),
+        "year_id": year_id,
+        "semester_number": semester_number,
+        "label": label,
+        "is_current": is_current,
+        "created_at": _utcnow(),
+        "updated_at": _utcnow(),
+    }
 
-    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    department_id: Mapped[str] = mapped_column(String(36), ForeignKey("departments.id"), nullable=False)
-    semester_id: Mapped[str] = mapped_column(String(36), ForeignKey("semesters.id"), nullable=False)
-    code: Mapped[str] = mapped_column(String(20), nullable=False, unique=True)
-    name: Mapped[str] = mapped_column(String(200), nullable=False)
-    short_name: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    credits: Mapped[int] = mapped_column(Integer, default=3)
-    course_type: Mapped[str] = mapped_column(String(30), default="theory")  # theory, lab, project
-    description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    syllabus: Mapped[str | None] = mapped_column(Text, nullable=True)
-    total_units: Mapped[int] = mapped_column(Integer, default=5)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, onupdate=_utcnow)
+
+def new_section(*, year_id, name, max_students=60, id=None):
+    return {
+        "id": id or _uid(),
+        "year_id": year_id,
+        "name": name,
+        "max_students": max_students,
+        "created_at": _utcnow(),
+        "updated_at": _utcnow(),
+    }
+
+
+def new_course(*, department_id, semester_id, code, name, short_name=None,
+               credits=3, course_type="theory", description=None, syllabus=None,
+               total_units=5, id=None):
+    return {
+        "id": id or _uid(),
+        "department_id": department_id,
+        "semester_id": semester_id,
+        "code": code,
+        "name": name,
+        "short_name": short_name,
+        "credits": credits,
+        "course_type": course_type,
+        "description": description,
+        "syllabus": syllabus,
+        "total_units": total_units,
+        "created_at": _utcnow(),
+        "updated_at": _utcnow(),
+    }

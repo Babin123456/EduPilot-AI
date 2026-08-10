@@ -1,47 +1,49 @@
-"""Lesson plan model."""
+"""Lesson plan document helpers for MongoDB."""
 
 from __future__ import annotations
 
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import String, Text, Integer, DateTime, ForeignKey, Boolean
-from sqlalchemy.orm import Mapped, mapped_column
-
-from app.core.database import Base
-
 
 def _utcnow():
     return datetime.now(timezone.utc)
 
 
-class LessonPlan(Base):
-    __tablename__ = "lesson_plans"
+def _uid():
+    return str(uuid.uuid4())
 
-    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    teacher_course_assignment_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("teacher_course_assignments.id"), nullable=False
-    )
-    teacher_id: Mapped[str] = mapped_column(String(36), ForeignKey("teachers.id"), nullable=False)
-    title: Mapped[str] = mapped_column(String(300), nullable=False)
-    topic: Mapped[str] = mapped_column(String(200), nullable=False)
-    unit: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    duration_minutes: Mapped[int] = mapped_column(Integer, default=60)
-    
-    # Structured content stored as JSON
-    prerequisites: Mapped[str | None] = mapped_column(Text, nullable=True)
-    learning_objectives: Mapped[str | None] = mapped_column(Text, nullable=True)
-    introduction: Mapped[str | None] = mapped_column(Text, nullable=True)
-    content: Mapped[str | None] = mapped_column(Text, nullable=True)  # Main lesson content JSON
-    examples: Mapped[str | None] = mapped_column(Text, nullable=True)
-    activities: Mapped[str | None] = mapped_column(Text, nullable=True)
-    assessment_questions: Mapped[str | None] = mapped_column(Text, nullable=True)
-    summary: Mapped[str | None] = mapped_column(Text, nullable=True)
-    homework: Mapped[str | None] = mapped_column(Text, nullable=True)
-    references: Mapped[str | None] = mapped_column(Text, nullable=True)
-    full_content: Mapped[str | None] = mapped_column(Text, nullable=True)  # Full rendered markdown
-    
-    is_ai_generated: Mapped[bool] = mapped_column(Boolean, default=False)
-    status: Mapped[str] = mapped_column(String(20), default="draft")  # draft, published
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, onupdate=_utcnow)
+
+LESSON_PLANS = "lesson_plans"
+
+
+def new_lesson_plan(*, teacher_course_assignment_id, teacher_id, title, topic,
+                    unit=None, duration_minutes=60, prerequisites=None,
+                    learning_objectives=None, introduction=None, content=None,
+                    examples=None, activities=None, assessment_questions=None,
+                    summary=None, homework=None, references=None, full_content=None,
+                    is_ai_generated=False, status="draft", id=None):
+    return {
+        "id": id or _uid(),
+        "teacher_course_assignment_id": teacher_course_assignment_id,
+        "teacher_id": teacher_id,
+        "title": title,
+        "topic": topic,
+        "unit": unit,
+        "duration_minutes": duration_minutes,
+        "prerequisites": prerequisites,
+        "learning_objectives": learning_objectives,
+        "introduction": introduction,
+        "content": content,
+        "examples": examples,
+        "activities": activities,
+        "assessment_questions": assessment_questions,
+        "summary": summary,
+        "homework": homework,
+        "references": references,
+        "full_content": full_content,
+        "is_ai_generated": is_ai_generated,
+        "status": status,
+        "created_at": _utcnow(),
+        "updated_at": _utcnow(),
+    }

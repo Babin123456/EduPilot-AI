@@ -6,15 +6,14 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
+from pymongo.database import Database
 
 from app.core.database import get_db
 from app.api.deps import get_current_teacher
 from app.core.exceptions import http_403, http_404
-from app.models.teacher import Teacher
-from app.models.enrollment import TeacherCourseAssignment
-from app.models.assignment import Assignment, AssignmentSubmission
-from app.models.student import Student
+from app.models.assignment import new_assignment
+from app.models.document import new_document
+from app.models.student import student_full_name
 
 router = APIRouter()
 
@@ -40,26 +39,23 @@ class GenerateAssignmentRequest(BaseModel):
 @router.post("/generate")
 def generate_ai_assignment(
     body: GenerateAssignmentRequest,
-    teacher: Teacher = Depends(get_current_teacher),
-    db: Session = Depends(get_db),
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
 ):
     """Generate dynamic AI assignment question paper."""
-    tca = db.query(TeacherCourseAssignment).filter(
-        TeacherCourseAssignment.id == body.class_id,
-        TeacherCourseAssignment.teacher_id == teacher.id,
-    ).first()
+    tca = db.teacher_course_assignments.find_one({
+        "id": body.class_id, "teacher_id": teacher["id"],
+    })
     if not tca:
         raise http_403("Not authorized")
 
-    from app.models.academic import Course
-    course = db.query(Course).filter(Course.id == tca.course_id).first()
-    course_name = course.name if course else "Coursework"
-    course_code = course.code if course else ""
+    course = db.courses.find_one({"id": tca["course_id"]})
+    course_name = course["name"] if course else "Coursework"
+    course_code = course["code"] if course else ""
 
     topic = body.topic.strip()
     questions = []
 
-    # Dynamic problem generation tailored to topic and course
     q_templates = [
         f"Analyze the core architectural principles of {topic} in the context of {course_name}. Detail how system throughput and execution efficiency are maintained.",
         f"Compare and contrast key algorithmic paradigms used when implementing {topic}. Provide concrete mathematical or structural trade-offs.",
@@ -80,7 +76,7 @@ def generate_ai_assignment(
                 f"C) Algorithmic decomposition pattern",
                 f"D) Asynchronous execution pipeline",
             ]
-        
+
         questions.append({
             "number": i + 1,
             "text": q_text,
@@ -92,7 +88,7 @@ def generate_ai_assignment(
     md_lines = [
         f"# Assignment Task Paper — {topic}",
         f"**Course:** {course_name} (`{course_code}`) | **Total Marks:** {body.num_questions * 5} | **Difficulty:** {body.difficulty.upper()}",
-        f"**Faculty:** {teacher.first_name} {teacher.last_name} ({teacher.designation or 'Department of CSE'})",
+        f"**Faculty:** {teacher['first_name']} {teacher['last_name']} ({teacher.get('designation', 'Department of CSE')})",
         "\n---\n",
     ]
 
@@ -105,11 +101,10 @@ def generate_ai_assignment(
 
     full_markdown = "\n".join(md_lines)
 
-    # Auto-save assignment record in DB
-    assignment = Assignment(
-        id=str(uuid.uuid4()),
+    # Auto-save assignment record
+    assignment_doc = new_assignment(
         teacher_course_assignment_id=body.class_id,
-        teacher_id=teacher.id,
+        teacher_id=teacher["id"],
         title=f"Assignment — {topic}",
         description=f"AI Generated Assignment Task Paper on {topic}",
         instructions=full_markdown,
@@ -120,26 +115,21 @@ def generate_ai_assignment(
         is_published=True,
         is_ai_generated=True,
     )
-    db.add(assignment)
+    db.assignments.insert_one(assignment_doc)
 
-    # Save to Document Studio Vault for this class
-    from app.models.document import Document
-    doc = Document(
-        id=str(uuid.uuid4()),
+    # Save to Document Studio
+    doc = new_document(
         teacher_course_assignment_id=body.class_id,
-        teacher_id=teacher.id,
+        teacher_id=teacher["id"],
         title=f"Assignment — {topic}",
         document_type="assignment",
         format="pdf",
     )
-    db.add(doc)
-
-    db.commit()
-
+    db.documents.insert_one(doc)
 
     return {
-        "assignment_id": assignment.id,
-        "title": assignment.title,
+        "assignment_id": assignment_doc["id"],
+        "title": assignment_doc["title"],
         "topic": topic,
         "difficulty": body.difficulty,
         "questions": questions,
@@ -147,51 +137,47 @@ def generate_ai_assignment(
     }
 
 
-
 @router.get("")
 def list_assignments(
     class_id: str = Query(...),
-    teacher: Teacher = Depends(get_current_teacher),
-    db: Session = Depends(get_db),
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
 ):
     """List assignments for a class."""
-    tca = db.query(TeacherCourseAssignment).filter(
-        TeacherCourseAssignment.id == class_id,
-        TeacherCourseAssignment.teacher_id == teacher.id,
-    ).first()
+    tca = db.teacher_course_assignments.find_one({
+        "id": class_id, "teacher_id": teacher["id"],
+    })
     if not tca:
         raise http_403("Not authorized")
 
-    assignments = (
-        db.query(Assignment)
-        .filter(Assignment.teacher_course_assignment_id == class_id)
-        .order_by(Assignment.created_at.desc())
-        .all()
+    assignments = list(
+        db.assignments.find({"teacher_course_assignment_id": class_id})
+        .sort("created_at", -1)
     )
 
-    from sqlalchemy import func
     result = []
     for a in assignments:
-        submitted = db.query(func.count(AssignmentSubmission.id)).filter(
-            AssignmentSubmission.assignment_id == a.id,
-            AssignmentSubmission.status != "pending",
-        ).scalar()
-        total = db.query(func.count(Student.id)).filter(
-            Student.section_id == tca.section_id, Student.is_active == True
-        ).scalar()
+        submitted = db.assignment_submissions.count_documents({
+            "assignment_id": a["id"],
+            "status": {"$ne": "pending"},
+        })
+        total = db.students.count_documents({
+            "section_id": tca["section_id"], "is_active": True,
+        })
 
+        created_at = a.get("created_at")
         result.append({
-            "id": a.id,
-            "title": a.title,
-            "topic": a.topic,
-            "difficulty": a.difficulty,
-            "total_marks": a.total_marks,
-            "deadline": a.deadline.isoformat() if a.deadline else None,
-            "status": a.status,
-            "is_ai_generated": a.is_ai_generated,
+            "id": a["id"],
+            "title": a["title"],
+            "topic": a.get("topic"),
+            "difficulty": a.get("difficulty", "medium"),
+            "total_marks": a.get("total_marks", 100),
+            "deadline": a["deadline"].isoformat() if hasattr(a.get("deadline"), 'isoformat') else a.get("deadline"),
+            "status": a.get("status", "draft"),
+            "is_ai_generated": a.get("is_ai_generated", False),
             "submitted_count": submitted,
             "total_students": total,
-            "created_at": a.created_at.isoformat() if a.created_at else None,
+            "created_at": created_at.isoformat() if hasattr(created_at, 'isoformat') else created_at,
         })
 
     return result
@@ -200,21 +186,19 @@ def list_assignments(
 @router.post("")
 def create_assignment(
     body: CreateAssignmentRequest,
-    teacher: Teacher = Depends(get_current_teacher),
-    db: Session = Depends(get_db),
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
 ):
     """Create a new assignment."""
-    tca = db.query(TeacherCourseAssignment).filter(
-        TeacherCourseAssignment.id == body.class_id,
-        TeacherCourseAssignment.teacher_id == teacher.id,
-    ).first()
+    tca = db.teacher_course_assignments.find_one({
+        "id": body.class_id, "teacher_id": teacher["id"],
+    })
     if not tca:
         raise http_403("Not authorized")
 
-    assignment = Assignment(
-        id=str(uuid.uuid4()),
+    assignment_doc = new_assignment(
         teacher_course_assignment_id=body.class_id,
-        teacher_id=teacher.id,
+        teacher_id=teacher["id"],
         title=body.title,
         description=body.description,
         instructions=body.instructions,
@@ -225,50 +209,48 @@ def create_assignment(
         status="published",
         is_published=True,
     )
-    db.add(assignment)
-    db.commit()
+    db.assignments.insert_one(assignment_doc)
 
-    return {"id": assignment.id, "message": "Assignment created successfully"}
+    return {"id": assignment_doc["id"], "message": "Assignment created successfully"}
 
 
 @router.get("/{assignment_id}/submissions")
 def get_submissions(
     assignment_id: str,
-    teacher: Teacher = Depends(get_current_teacher),
-    db: Session = Depends(get_db),
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
 ):
     """Get submissions for an assignment."""
-    assignment = db.query(Assignment).filter(Assignment.id == assignment_id).first()
+    assignment = db.assignments.find_one({"id": assignment_id})
     if not assignment:
         raise http_404("Assignment not found")
 
-    tca = db.query(TeacherCourseAssignment).filter(
-        TeacherCourseAssignment.id == assignment.teacher_course_assignment_id,
-        TeacherCourseAssignment.teacher_id == teacher.id,
-    ).first()
+    tca = db.teacher_course_assignments.find_one({
+        "id": assignment["teacher_course_assignment_id"],
+        "teacher_id": teacher["id"],
+    })
     if not tca:
         raise http_403("Not authorized")
 
-    subs = (
-        db.query(AssignmentSubmission, Student)
-        .join(Student, AssignmentSubmission.student_id == Student.id)
-        .filter(AssignmentSubmission.assignment_id == assignment_id)
-        .order_by(Student.roll_number)
-        .all()
-    )
+    subs = list(db.assignment_submissions.find({"assignment_id": assignment_id}))
 
-    return [
-        {
-            "id": s.id,
-            "student_id": st.id,
-            "student_name": st.full_name,
-            "roll_number": st.roll_number,
-            "status": s.status,
-            "score": s.score,
-            "max_score": s.max_score,
-            "is_late": s.is_late,
-            "is_graded": s.is_graded,
-            "submitted_at": s.submitted_at.isoformat() if s.submitted_at else None,
-        }
-        for s, st in subs
-    ]
+    result = []
+    for s in subs:
+        st = db.students.find_one({"id": s["student_id"]})
+        if st:
+            submitted_at = s.get("submitted_at")
+            result.append({
+                "id": s["id"],
+                "student_id": st["id"],
+                "student_name": student_full_name(st),
+                "roll_number": st["roll_number"],
+                "status": s.get("status", "pending"),
+                "score": s.get("score"),
+                "max_score": s.get("max_score"),
+                "is_late": s.get("is_late", False),
+                "is_graded": s.get("is_graded", False),
+                "submitted_at": submitted_at.isoformat() if hasattr(submitted_at, 'isoformat') else submitted_at,
+            })
+
+    result.sort(key=lambda x: x["roll_number"])
+    return result

@@ -19,17 +19,14 @@ import random
 import uuid
 from datetime import date, datetime, timedelta, timezone
 
-from sqlalchemy.orm import Session
-
-from app.core.database import SessionLocal, create_tables
+from app.core.database import get_db, ensure_indexes
 from app.core.security import hash_password
 from app.models import (
-    University, School, Department, Program,
-    AcademicSession, Year, Semester, Section, Course,
-    Teacher, Student, Enrollment, TeacherCourseAssignment,
-    TimetableEntry, AttendanceSession, AttendanceRecord,
-    Assignment, AssignmentSubmission, Assessment, Question, AssessmentResult,
-    LessonPlan, Document, Notification,
+    new_university, new_school, new_department, new_program,
+    new_academic_session, new_year, new_semester, new_section, new_course,
+    new_teacher, new_student, new_enrollment, new_teacher_course_assignment,
+    new_timetable_entry, new_attendance_session, new_attendance_record,
+    new_notification,
 )
 from app.seed.names import STUDENT_NAMES
 
@@ -217,114 +214,116 @@ def _uid() -> str:
 def run_seed():
     """Execute the full database seed."""
     rng = random.Random(RANDOM_SEED)
-    create_tables()
-    db = SessionLocal()
+    ensure_indexes()
+    db = get_db()
 
     try:
-        if db.query(University).first():
+        if db.universities.count_documents({}) > 0:
             print("[Seed] Database already seeded. Skipping.")
             return
 
         print("[Seed] Starting database seed...")
 
         # 1. University
-        university = University(
+        university = new_university(
             id=_uid(), name="Adamas University", short_name="AU",
             city="Kolkata", state="West Bengal", country="India",
             website="https://adamasuniversity.ac.in",
             address="Barasat - Barrackpore Road, Barbaria, P.O. Jagannathpur, Kolkata - 700126",
         )
-        db.add(university)
-        db.flush()
+        db.universities.insert_one(university)
 
         # 2. School
-        school = School(
-            id=_uid(), university_id=university.id,
+        school = new_school(
+            id=_uid(), university_id=university["id"],
             name="School of Engineering & Technology", short_name="SOET",
         )
-        db.add(school)
-        db.flush()
+        db.schools.insert_one(school)
 
         # 3. Department
-        department = Department(
-            id=_uid(), school_id=school.id,
+        department = new_department(
+            id=_uid(), school_id=school["id"],
             name="Computer Science & Engineering", short_name="CSE", code="CSE",
         )
-        db.add(department)
-        db.flush()
+        db.departments.insert_one(department)
 
         # 4. Program
-        program = Program(
-            id=_uid(), department_id=department.id,
+        program = new_program(
+            id=_uid(), department_id=department["id"],
             name="Bachelor of Technology in Computer Science & Engineering",
             short_name="B.Tech CSE", degree_type="B.Tech", duration_years=4,
         )
-        db.add(program)
-        db.flush()
+        db.programs.insert_one(program)
 
         # 5. Academic Session
-        session = AcademicSession(
+        session = new_academic_session(
             id=_uid(), name="2025-2026",
-            start_date=date(2025, 7, 1), end_date=date(2026, 6, 30),
+            start_date=date(2025, 7, 1).isoformat(), end_date=date(2026, 6, 30).isoformat(),
             is_current=True,
         )
-        db.add(session)
-        db.flush()
+        db.academic_sessions.insert_one(session)
 
         # 6. Years, Semesters, Sections
-        years: dict[int, Year] = {}
-        semesters: dict[int, Semester] = {}
-        sections: dict[str, Section] = {}
+        years: dict[int, dict] = {}
+        semesters: dict[int, dict] = {}
+        sections: dict[str, dict] = {}
+        
+        years_to_insert = []
+        semesters_to_insert = []
+        sections_to_insert = []
 
         year_labels = {1: "1st Year", 2: "2nd Year", 3: "3rd Year", 4: "4th Year"}
         for yn in range(1, 5):
-            year = Year(
-                id=_uid(), program_id=program.id,
+            year = new_year(
+                id=_uid(), program_id=program["id"],
                 year_number=yn, label=year_labels[yn],
             )
-            db.add(year)
-            db.flush()
+            years_to_insert.append(year)
             years[yn] = year
 
             for sn in range(1, 3):
                 sem_num = (yn - 1) * 2 + sn
-                semester = Semester(
-                    id=_uid(), year_id=year.id,
+                semester = new_semester(
+                    id=_uid(), year_id=year["id"],
                     semester_number=sem_num,
                     label=f"Semester {sem_num}",
                     is_current=(sem_num % 2 == 1),
                 )
-                db.add(semester)
-                db.flush()
+                semesters_to_insert.append(semester)
                 semesters[sem_num] = semester
 
             for sec_name in ["A", "B", "C"]:
-                sec = Section(
-                    id=_uid(), year_id=year.id,
+                sec = new_section(
+                    id=_uid(), year_id=year["id"],
                     name=sec_name, max_students=60,
                 )
-                db.add(sec)
-                db.flush()
+                sections_to_insert.append(sec)
                 sections[f"Y{yn}S{sec_name}"] = sec
 
+        db.years.insert_many(years_to_insert)
+        db.semesters.insert_many(semesters_to_insert)
+        db.sections.insert_many(sections_to_insert)
+
         # 7. Courses
-        courses: dict[str, Course] = {}
+        courses: dict[str, dict] = {}
+        courses_to_insert = []
         for sem_num, course_list in COURSES_BY_SEMESTER.items():
             for code, name, ctype, credits in course_list:
-                course = Course(
-                    id=_uid(), department_id=department.id,
-                    semester_id=semesters[sem_num].id,
+                course = new_course(
+                    id=_uid(), department_id=department["id"],
+                    semester_id=semesters[sem_num]["id"],
                     code=code, name=name, course_type=ctype, credits=credits,
                 )
-                db.add(course)
-                db.flush()
+                courses_to_insert.append(course)
                 courses[code] = course
+        db.courses.insert_many(courses_to_insert)
 
         # 8. Teachers
-        teachers: list[Teacher] = []
+        teachers: list[dict] = []
+        teachers_to_insert = []
         for t_data in DEMO_TEACHERS:
-            teacher = Teacher(
-                id=_uid(), department_id=department.id,
+            teacher = new_teacher(
+                id=_uid(), department_id=department["id"],
                 faculty_id=t_data["faculty_id"],
                 first_name=t_data["first_name"],
                 last_name=t_data["last_name"],
@@ -335,12 +334,13 @@ def run_seed():
                 phone=t_data["phone"],
                 is_demo=True,
             )
-            db.add(teacher)
-            db.flush()
+            teachers_to_insert.append(teacher)
             teachers.append(teacher)
+        db.teachers.insert_many(teachers_to_insert)
 
         # 9. Teacher Course Assignments
-        tca_map: dict[str, TeacherCourseAssignment] = {}
+        tca_map: dict[str, dict] = {}
+        tcas_to_insert = []
 
         for t_idx, assignments in TEACHER_ASSIGNMENTS.items():
             teacher = teachers[t_idx]
@@ -350,25 +350,26 @@ def run_seed():
                 for sec_name in sec_names:
                     sec_key = f"Y{year_num}S{sec_name}"
                     sec = sections[sec_key]
-                    rooms = [f"CSE-{rng.randint(101, 420)}", f"Lab-{rng.randint(1, 8)}" if course.course_type == "lab" else f"Room-{rng.randint(201, 310)}"]
-                    tca = TeacherCourseAssignment(
+                    rooms = [f"CSE-{rng.randint(101, 420)}", f"Lab-{rng.randint(1, 8)}" if course["course_type"] == "lab" else f"Room-{rng.randint(201, 310)}"]
+                    tca = new_teacher_course_assignment(
                         id=_uid(),
-                        teacher_id=teacher.id,
-                        course_id=course.id,
-                        section_id=sec.id,
-                        year_id=years[year_num].id,
-                        semester_id=semesters[sem_num].id,
-                        academic_session_id=session.id,
+                        teacher_id=teacher["id"],
+                        course_id=course["id"],
+                        section_id=sec["id"],
+                        year_id=years[year_num]["id"],
+                        semester_id=semesters[sem_num]["id"],
+                        academic_session_id=session["id"],
                         room=rooms[0],
                         is_active=True,
                     )
-                    db.add(tca)
-                    db.flush()
+                    tcas_to_insert.append(tca)
                     tca_map[f"{course_code}_{sec_name}_{year_num}"] = tca
+        db.teacher_course_assignments.insert_many(tcas_to_insert)
 
         # 10. Students (720)
-        students_by_section: dict[str, list[Student]] = {}
+        students_by_section: dict[str, list[dict]] = {}
         student_index = 0
+        students_to_insert = []
 
         for yn in range(1, 5):
             for sec_name in ["A", "B", "C"]:
@@ -404,9 +405,9 @@ def run_seed():
                         risk = "low"
                         risk_reasons.append(f"Below average score: {avg_score}")
 
-                    student = Student(
+                    student = new_student(
                         id=_uid(),
-                        university_id=university.id,
+                        university_id=university["id"],
                         student_uid=student_uid,
                         registration_number=reg_num,
                         roll_number=roll_num,
@@ -414,11 +415,11 @@ def run_seed():
                         last_name=last_name,
                         email=email,
                         phone=f"+91-{rng.randint(7000000000, 9999999999)}",
-                        program_id=program.id,
-                        year_id=years[yn].id,
-                        semester_id=semesters[current_sem].id,
-                        section_id=sec.id,
-                        academic_session_id=session.id,
+                        program_id=program["id"],
+                        year_id=years[yn]["id"],
+                        semester_id=semesters[current_sem]["id"],
+                        section_id=sec["id"],
+                        academic_session_id=session["id"],
                         attendance_percentage=att_pct,
                         average_score=avg_score,
                         cgpa=cgpa,
@@ -426,32 +427,34 @@ def run_seed():
                         risk_reasons=json.dumps(risk_reasons) if risk_reasons else None,
                         gender=rng.choice(["Male", "Female"]),
                     )
-                    db.add(student)
-                    db.flush()
+                    students_to_insert.append(student)
                     students_in_sec.append(student)
                     student_index += 1
 
                 students_by_section[sec_key] = students_in_sec
+                
+        db.students.insert_many(students_to_insert)
 
         # 11. Enrollments
+        enrollments_to_insert = []
         for yn in range(1, 5):
             current_sem = (yn - 1) * 2 + 1
             sem_courses = [c for code, c in courses.items()
-                          if c.semester_id == semesters[current_sem].id]
+                          if c["semester_id"] == semesters[current_sem]["id"]]
             for sec_name in ["A", "B", "C"]:
                 sec_key = f"Y{yn}S{sec_name}"
                 for student in students_by_section[sec_key]:
                     for course in sem_courses:
-                        enrollment = Enrollment(
+                        enrollment = new_enrollment(
                             id=_uid(),
-                            student_id=student.id,
-                            course_id=course.id,
-                            section_id=sections[sec_key].id,
-                            academic_session_id=session.id,
+                            student_id=student["id"],
+                            course_id=course["id"],
+                            section_id=sections[sec_key]["id"],
+                            academic_session_id=session["id"],
                             status="active",
                         )
-                        db.add(enrollment)
-                        db.flush()
+                        enrollments_to_insert.append(enrollment)
+        db.enrollments.insert_many(enrollments_to_insert)
 
         # 12. Timetable
         time_slots = [
@@ -460,22 +463,23 @@ def run_seed():
             ("16:15", "17:15"),
         ]
 
+        timetable_to_insert = []
         for tca_key, tca in tca_map.items():
             num_slots = rng.randint(2, 3)
             used_days = rng.sample(range(0, 5), num_slots)
             for day in used_days:
                 slot = rng.choice(time_slots)
-                entry = TimetableEntry(
+                entry = new_timetable_entry(
                     id=_uid(),
-                    teacher_course_assignment_id=tca.id,
+                    teacher_course_assignment_id=tca["id"],
                     day_of_week=day,
                     start_time=slot[0],
                     end_time=slot[1],
-                    room=tca.room,
-                    slot_type="lab" if "Lab" in tca.room else "lecture",
+                    room=tca["room"],
+                    slot_type="lab" if "Lab" in tca["room"] else "lecture",
                 )
-                db.add(entry)
-                db.flush()
+                timetable_to_insert.append(entry)
+        db.timetable_entries.insert_many(timetable_to_insert)
 
         # 13. Historical Attendance
         today = date.today()
@@ -486,6 +490,9 @@ def run_seed():
                 attendance_dates.append(d)
             d += timedelta(days=1)
         attendance_dates = attendance_dates[-30:]
+
+        att_sessions_to_insert = []
+        att_records_to_insert = []
 
         for tca_key, tca in tca_map.items():
             parts = tca_key.split("_")
@@ -506,18 +513,16 @@ def run_seed():
                 absent_count = 0
                 late_count = 0
 
-                att_session = AttendanceSession(
+                att_session = new_attendance_session(
                     id=_uid(),
-                    teacher_course_assignment_id=tca.id,
-                    teacher_id=tca.teacher_id,
-                    date=att_date,
+                    teacher_course_assignment_id=tca["id"],
+                    teacher_id=tca["teacher_id"],
+                    date=att_date.isoformat(),
                     start_time="09:00",
                     end_time="10:00",
                     is_submitted=True,
                 )
-                db.add(att_session)
-                db.flush()
-
+                
                 for student in section_students:
                     roll = rng.random()
                     if roll < 0.78:
@@ -530,48 +535,48 @@ def run_seed():
                         status = "late"
                         late_count += 1
 
-                    record = AttendanceRecord(
+                    record = new_attendance_record(
                         id=_uid(),
-                        session_id=att_session.id,
-                        student_id=student.id,
+                        session_id=att_session["id"],
+                        student_id=student["id"],
                         status=status,
                     )
-                    db.add(record)
+                    att_records_to_insert.append(record)
 
-                att_session.total_present = present_count
-                att_session.total_absent = absent_count
-                att_session.total_late = late_count
-                db.flush()
+                att_session["total_present"] = present_count
+                att_session["total_absent"] = absent_count
+                att_session["total_late"] = late_count
+                
+                att_sessions_to_insert.append(att_session)
 
-        # 14. Keep Assignments, Assessments, and Document Studio Vault empty initially.
-        # Materials generated by teachers in Assignment, Quiz, or Daily Notes sections will be dynamically saved.
-
+        db.attendance_sessions.insert_many(att_sessions_to_insert)
+        if att_records_to_insert:
+            db.attendance_records.insert_many(att_records_to_insert)
 
         # 16. Sample Notifications
         teacher_0 = teachers[0]
+        notifs_to_insert = []
         notifs = [
             ("Quiz results ready", "Quiz 1 for 3rd Year Section A has been graded.", "success"),
             ("Low attendance alert", "5 students in CS301 Section B have attendance below 75%.", "warning"),
             ("Assignment deadline approaching", "Assignment 2 for CS101 Section A is due in 2 days.", "info"),
         ]
         for title, msg, ntype in notifs:
-            db.add(Notification(
-                id=_uid(), teacher_id=teacher_0.id,
+            notif = new_notification(
+                id=_uid(), teacher_id=teacher_0["id"],
                 title=title, message=msg, notification_type=ntype,
-            ))
-            db.flush()
+            )
+            notifs_to_insert.append(notif)
+            
+        db.notifications.insert_many(notifs_to_insert)
 
-        db.commit()
         print(f"[Seed] Successfully seeded {student_index} students, {len(teachers)} teachers, "
               f"{len(courses)} courses, {len(tca_map)} class assignments.")
         print("[Seed] Demo login: rajesh.banerjee@adamasuniversity.ac.in / demo@1234")
 
     except Exception as e:
-        db.rollback()
         print(f"[Seed] Error during seeding: {e}")
         raise
-    finally:
-        db.close()
 
 
 if __name__ == "__main__":

@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.core.config import get_settings
-from app.core.database import create_tables
+from app.core.database import ensure_indexes
 from app.seed.seeder import run_seed
 
 
@@ -18,8 +18,8 @@ from app.seed.seeder import run_seed
 async def lifespan(app: FastAPI):
     """Application lifespan: startup and shutdown."""
     settings = get_settings()
-    # Create tables and seed on startup
-    create_tables()
+    # Create indexes and seed on startup
+    ensure_indexes()
     run_seed()
     # Ensure storage directory exists
     settings.storage_path

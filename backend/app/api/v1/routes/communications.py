@@ -7,16 +7,13 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
+from pymongo.database import Database
 
 from app.core.database import get_db
 from app.api.deps import get_current_teacher
 from app.core.exceptions import http_403, http_404
-from app.models.teacher import Teacher
-from app.models.student import Student
-from app.models.enrollment import TeacherCourseAssignment
-from app.models.academic import Year, Section, Course
-from app.models.communication import Communication
+from app.models.student import student_full_name
+from app.models.communication import new_communication
 
 router = APIRouter()
 
@@ -25,54 +22,52 @@ class SendEmailRequest(BaseModel):
     class_id: str
     subject: str
     body: str
-    recipient_type: str = "all"  # "all" or "selected"
+    recipient_type: str = "all"
     student_ids: list[str] | None = None
-    template_type: str = "general"  # general, attendance_warning, assignment_reminder, daily_notes, report
+    template_type: str = "general"
 
 
 @router.get("")
 def list_communications(
     class_id: str | None = Query(None),
-    teacher: Teacher = Depends(get_current_teacher),
-    db: Session = Depends(get_db),
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
 ):
     """List communications sent by the teacher."""
-    query = db.query(Communication).filter(Communication.teacher_id == teacher.id)
-
+    query_filter = {"teacher_id": teacher["id"]}
     if class_id:
-        query = query.filter(Communication.teacher_course_assignment_id == class_id)
+        query_filter["teacher_course_assignment_id"] = class_id
 
-    comms = (
-        query
-        .order_by(Communication.created_at.desc())
-        .limit(30)
-        .all()
+    comms = list(
+        db.communications.find(query_filter).sort("created_at", -1).limit(30)
     )
 
     result = []
     for c in comms:
-        tca = db.query(TeacherCourseAssignment).filter(
-            TeacherCourseAssignment.id == c.teacher_course_assignment_id
-        ).first() if c.teacher_course_assignment_id else None
-        course = db.query(Course).filter(Course.id == tca.course_id).first() if tca else None
-        year = db.query(Year).filter(Year.id == tca.year_id).first() if tca else None
-        section = db.query(Section).filter(Section.id == tca.section_id).first() if tca else None
+        tca = db.teacher_course_assignments.find_one(
+            {"id": c.get("teacher_course_assignment_id")}
+        ) if c.get("teacher_course_assignment_id") else None
+        course = db.courses.find_one({"id": tca["course_id"]}) if tca else None
+        year = db.years.find_one({"id": tca["year_id"]}) if tca else None
+        section = db.sections.find_one({"id": tca["section_id"]}) if tca else None
 
+        sent_at = c.get("sent_at")
+        created_at = c.get("created_at")
         result.append({
-            "id": c.id,
-            "type": c.comm_type,
-            "template_type": c.template_type,
-            "subject": c.subject,
-            "body": c.body,
-            "total_recipients": c.total_recipients,
-            "sent_count": c.sent_count,
-            "status": c.status,
-            "course_name": course.name if course else "",
-            "course_code": course.code if course else "",
-            "year_label": year.label if year else "",
-            "section_name": section.name if section else "",
-            "sent_at": c.sent_at.isoformat() if c.sent_at else None,
-            "created_at": c.created_at.isoformat() if c.created_at else None,
+            "id": c["id"],
+            "type": c.get("comm_type", "email"),
+            "template_type": c.get("template_type"),
+            "subject": c.get("subject"),
+            "body": c.get("body"),
+            "total_recipients": c.get("total_recipients", 0),
+            "sent_count": c.get("sent_count", 0),
+            "status": c.get("status", "draft"),
+            "course_name": course["name"] if course else "",
+            "course_code": course["code"] if course else "",
+            "year_label": year["label"] if year else "",
+            "section_name": section["name"] if section else "",
+            "sent_at": sent_at.isoformat() if hasattr(sent_at, 'isoformat') else sent_at,
+            "created_at": created_at.isoformat() if hasattr(created_at, 'isoformat') else created_at,
         })
 
     return result
@@ -82,54 +77,47 @@ def list_communications(
 def get_student_emails(
     class_id: str = Query(...),
     search: str | None = Query(None),
-    teacher: Teacher = Depends(get_current_teacher),
-    db: Session = Depends(get_db),
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
 ):
     """Get student emails for a specific class."""
-    tca = db.query(TeacherCourseAssignment).filter(
-        TeacherCourseAssignment.id == class_id,
-        TeacherCourseAssignment.teacher_id == teacher.id,
-    ).first()
+    tca = db.teacher_course_assignments.find_one({
+        "id": class_id, "teacher_id": teacher["id"],
+    })
     if not tca:
         raise http_403("Not authorized for this class")
 
-    query = db.query(Student).filter(
-        Student.section_id == tca.section_id,
-        Student.is_active == True,
-    )
-
+    query_filter = {"section_id": tca["section_id"], "is_active": True}
     if search:
-        from sqlalchemy import or_
-        search_term = f"%{search}%"
-        query = query.filter(
-            or_(
-                Student.first_name.ilike(search_term),
-                Student.last_name.ilike(search_term),
-                Student.roll_number.ilike(search_term),
-                Student.email.ilike(search_term),
-            )
-        )
+        import re
+        escaped = re.escape(search)
+        query_filter["$or"] = [
+            {"first_name": {"$regex": escaped, "$options": "i"}},
+            {"last_name": {"$regex": escaped, "$options": "i"}},
+            {"roll_number": {"$regex": escaped, "$options": "i"}},
+            {"email": {"$regex": escaped, "$options": "i"}},
+        ]
 
-    students = query.order_by(Student.roll_number).all()
+    students = list(db.students.find(query_filter).sort("roll_number", 1))
 
-    year = db.query(Year).filter(Year.id == tca.year_id).first()
-    section = db.query(Section).filter(Section.id == tca.section_id).first()
-    course = db.query(Course).filter(Course.id == tca.course_id).first()
+    year = db.years.find_one({"id": tca["year_id"]})
+    section = db.sections.find_one({"id": tca["section_id"]})
+    course = db.courses.find_one({"id": tca["course_id"]})
 
     return {
         "class_info": {
-            "course_name": course.name if course else "",
-            "course_code": course.code if course else "",
-            "year_label": year.label if year else "",
-            "section_name": section.name if section else "",
+            "course_name": course["name"] if course else "",
+            "course_code": course["code"] if course else "",
+            "year_label": year["label"] if year else "",
+            "section_name": section["name"] if section else "",
         },
         "students": [
             {
-                "id": s.id,
-                "roll_number": s.roll_number,
-                "name": s.full_name,
-                "full_name": s.full_name,
-                "email": s.email,
+                "id": s["id"],
+                "roll_number": s["roll_number"],
+                "name": student_full_name(s),
+                "full_name": student_full_name(s),
+                "email": s["email"],
             }
             for s in students
         ],
@@ -139,7 +127,7 @@ def get_student_emails(
 
 @router.get("/templates")
 def get_email_templates(
-    teacher: Teacher = Depends(get_current_teacher),
+    teacher: dict = Depends(get_current_teacher),
 ):
     """Get pre-built email templates."""
     return [
@@ -179,54 +167,44 @@ def get_email_templates(
 @router.post("/send-email")
 def send_email(
     body: SendEmailRequest,
-    teacher: Teacher = Depends(get_current_teacher),
-    db: Session = Depends(get_db),
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
 ):
-    """Send email to students in a class (demo mode — logs without actual SMTP)."""
-    tca = db.query(TeacherCourseAssignment).filter(
-        TeacherCourseAssignment.id == body.class_id,
-        TeacherCourseAssignment.teacher_id == teacher.id,
-    ).first()
+    """Send email to students in a class (demo mode)."""
+    tca = db.teacher_course_assignments.find_one({
+        "id": body.class_id, "teacher_id": teacher["id"],
+    })
     if not tca:
         raise http_403("Not authorized for this class")
 
-    # Get recipients
     if body.recipient_type == "selected" and body.student_ids:
-        students = (
-            db.query(Student)
-            .filter(
-                Student.id.in_(body.student_ids),
-                Student.section_id == tca.section_id,
-                Student.is_active == True,
-            )
-            .all()
-        )
+        students = list(db.students.find({
+            "id": {"$in": body.student_ids},
+            "section_id": tca["section_id"],
+            "is_active": True,
+        }))
     else:
-        students = (
-            db.query(Student)
-            .filter(Student.section_id == tca.section_id, Student.is_active == True)
-            .order_by(Student.roll_number)
-            .all()
+        students = list(
+            db.students.find({"section_id": tca["section_id"], "is_active": True})
+            .sort("roll_number", 1)
         )
 
     if not students:
         return {"success": False, "message": "No students found for this class"}
 
-    # Personalize body
     personalized_body = body.body.replace(
-        "{teacher_name}", f"{teacher.first_name} {teacher.last_name}"
+        "{teacher_name}", f"{teacher['first_name']} {teacher['last_name']}"
     ).replace(
-        "{designation}", teacher.designation or "Faculty"
+        "{designation}", teacher.get("designation", "Faculty")
     )
 
     recipients = [
-        {"student_id": s.id, "email": s.email, "name": s.full_name, "status": "sent"}
+        {"student_id": s["id"], "email": s["email"], "name": student_full_name(s), "status": "sent"}
         for s in students
     ]
 
-    comm = Communication(
-        id=str(uuid.uuid4()),
-        teacher_id=teacher.id,
+    comm = new_communication(
+        teacher_id=teacher["id"],
         teacher_course_assignment_id=body.class_id,
         comm_type="email",
         template_type=body.template_type,
@@ -238,13 +216,12 @@ def send_email(
         status="sent",
         sent_at=datetime.now(timezone.utc),
     )
-    db.add(comm)
-    db.commit()
+    db.communications.insert_one(comm)
 
     return {
         "success": True,
         "message": f"Email sent successfully to {len(students)} students",
-        "communication_id": comm.id,
+        "communication_id": comm["id"],
         "total_recipients": len(students),
-        "student_emails": [s.email for s in students],
+        "student_emails": [s["email"] for s in students],
     }

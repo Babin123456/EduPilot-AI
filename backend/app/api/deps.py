@@ -3,18 +3,18 @@
 from __future__ import annotations
 
 from fastapi import Depends, Header
-from sqlalchemy.orm import Session
+from pymongo.database import Database
 
 from app.core.database import get_db
 from app.core.security import decode_token
 from app.core.exceptions import http_401
-from app.models.teacher import Teacher
+from app.models.teacher import teacher_full_name
 
 
 def get_current_teacher(
     authorization: str = Header(None),
-    db: Session = Depends(get_db),
-) -> Teacher:
+    db: Database = Depends(get_db),
+) -> dict:
     """Extract teacher from Bearer token. Raises 401 if invalid."""
     if not authorization or not authorization.startswith("Bearer "):
         raise http_401("Missing or invalid authorization header")
@@ -28,8 +28,10 @@ def get_current_teacher(
     if not teacher_id:
         raise http_401("Invalid token payload")
 
-    teacher = db.query(Teacher).filter(Teacher.id == teacher_id, Teacher.is_active == True).first()
+    teacher = db.teachers.find_one({"id": teacher_id, "is_active": True})
     if not teacher:
         raise http_401("Teacher not found or inactive")
 
+    # Attach computed property
+    teacher["full_name"] = teacher_full_name(teacher)
     return teacher

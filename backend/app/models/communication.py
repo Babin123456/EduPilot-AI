@@ -1,40 +1,43 @@
-"""Communication log model."""
+"""Communication log document helpers for MongoDB."""
 
 from __future__ import annotations
 
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import String, Text, DateTime, ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column
-
-from app.core.database import Base
-
 
 def _utcnow():
     return datetime.now(timezone.utc)
 
 
-class Communication(Base):
-    __tablename__ = "communications"
+def _uid():
+    return str(uuid.uuid4())
 
-    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    teacher_id: Mapped[str] = mapped_column(String(36), ForeignKey("teachers.id"), nullable=False)
-    teacher_course_assignment_id: Mapped[str | None] = mapped_column(
-        String(36), ForeignKey("teacher_course_assignments.id"), nullable=True
-    )
-    comm_type: Mapped[str] = mapped_column(String(20), nullable=False)  # email, whatsapp
-    template_type: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    # Types: attendance_warning, assignment_reminder, assessment_announcement, report_distribution, general
-    subject: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    body: Mapped[str | None] = mapped_column(Text, nullable=True)
-    recipients: Mapped[str | None] = mapped_column(Text, nullable=True)  # JSON list of {student_id, email, status}
-    total_recipients: Mapped[int] = mapped_column(default=0)
-    sent_count: Mapped[int] = mapped_column(default=0)
-    failed_count: Mapped[int] = mapped_column(default=0)
-    status: Mapped[str] = mapped_column(String(20), default="draft")  # draft, sending, sent, partial, failed
-    attachment_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    related_document_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
-    sent_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, onupdate=_utcnow)
+
+COMMUNICATIONS = "communications"
+
+
+def new_communication(*, teacher_id, comm_type, teacher_course_assignment_id=None,
+                      template_type=None, subject=None, body=None,
+                      recipients=None, total_recipients=0, sent_count=0, failed_count=0,
+                      status="draft", attachment_url=None, related_document_id=None,
+                      sent_at=None, id=None):
+    return {
+        "id": id or _uid(),
+        "teacher_id": teacher_id,
+        "teacher_course_assignment_id": teacher_course_assignment_id,
+        "comm_type": comm_type,
+        "template_type": template_type,
+        "subject": subject,
+        "body": body,
+        "recipients": recipients,
+        "total_recipients": total_recipients,
+        "sent_count": sent_count,
+        "failed_count": failed_count,
+        "status": status,
+        "attachment_url": attachment_url,
+        "related_document_id": related_document_id,
+        "sent_at": sent_at,
+        "created_at": _utcnow(),
+        "updated_at": _utcnow(),
+    }

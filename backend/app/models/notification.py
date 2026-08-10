@@ -1,31 +1,34 @@
-"""Notification model."""
+"""Notification document helpers for MongoDB."""
 
 from __future__ import annotations
 
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import String, Text, DateTime, ForeignKey, Boolean
-from sqlalchemy.orm import Mapped, mapped_column
-
-from app.core.database import Base
-
 
 def _utcnow():
     return datetime.now(timezone.utc)
 
 
-class Notification(Base):
-    __tablename__ = "notifications"
+def _uid():
+    return str(uuid.uuid4())
 
-    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    teacher_id: Mapped[str] = mapped_column(String(36), ForeignKey("teachers.id"), nullable=False)
-    title: Mapped[str] = mapped_column(String(300), nullable=False)
-    message: Mapped[str] = mapped_column(Text, nullable=False)
-    notification_type: Mapped[str] = mapped_column(String(50), default="info")
-    # Types: info, warning, success, error, document_ready, job_complete, attendance_alert, assignment_due
-    link: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    is_read: Mapped[bool] = mapped_column(Boolean, default=False)
-    related_entity_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
-    related_entity_type: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+NOTIFICATIONS = "notifications"
+
+
+def new_notification(*, teacher_id, title, message, notification_type="info",
+                     link=None, is_read=False, related_entity_id=None,
+                     related_entity_type=None, id=None):
+    return {
+        "id": id or _uid(),
+        "teacher_id": teacher_id,
+        "title": title,
+        "message": message,
+        "notification_type": notification_type,
+        "link": link,
+        "is_read": is_read,
+        "related_entity_id": related_entity_id,
+        "related_entity_type": related_entity_type,
+        "created_at": _utcnow(),
+    }

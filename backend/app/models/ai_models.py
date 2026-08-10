@@ -1,46 +1,51 @@
-"""AI conversation and message models."""
+"""AI conversation and message document helpers for MongoDB."""
 
 from __future__ import annotations
 
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import String, Text, Integer, Float, DateTime, ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column
-
-from app.core.database import Base
-
 
 def _utcnow():
     return datetime.now(timezone.utc)
 
 
-class AIConversation(Base):
-    __tablename__ = "ai_conversations"
-
-    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    teacher_id: Mapped[str] = mapped_column(String(36), ForeignKey("teachers.id"), nullable=False)
-    teacher_course_assignment_id: Mapped[str | None] = mapped_column(
-        String(36), ForeignKey("teacher_course_assignments.id"), nullable=True
-    )
-    title: Mapped[str] = mapped_column(String(300), default="New Conversation")
-    context_summary: Mapped[str | None] = mapped_column(Text, nullable=True)
-    message_count: Mapped[int] = mapped_column(Integer, default=0)
-    is_active: Mapped[bool] = mapped_column(default=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, onupdate=_utcnow)
+def _uid():
+    return str(uuid.uuid4())
 
 
-class AIMessage(Base):
-    __tablename__ = "ai_messages"
+AI_CONVERSATIONS = "ai_conversations"
+AI_MESSAGES = "ai_messages"
 
-    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    conversation_id: Mapped[str] = mapped_column(String(36), ForeignKey("ai_conversations.id"), nullable=False)
-    role: Mapped[str] = mapped_column(String(20), nullable=False)  # user, assistant, system, tool
-    content: Mapped[str] = mapped_column(Text, nullable=False)
-    content_type: Mapped[str] = mapped_column(String(30), default="text")  # text, table, chart, action, error
-    metadata_json: Mapped[str | None] = mapped_column(Text, nullable=True)  # JSON for extra data
-    model_used: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    tokens_used: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    latency_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+def new_ai_conversation(*, teacher_id, teacher_course_assignment_id=None,
+                        title="New Conversation", context_summary=None,
+                        message_count=0, is_active=True, id=None):
+    return {
+        "id": id or _uid(),
+        "teacher_id": teacher_id,
+        "teacher_course_assignment_id": teacher_course_assignment_id,
+        "title": title,
+        "context_summary": context_summary,
+        "message_count": message_count,
+        "is_active": is_active,
+        "created_at": _utcnow(),
+        "updated_at": _utcnow(),
+    }
+
+
+def new_ai_message(*, conversation_id, role, content, content_type="text",
+                   metadata_json=None, model_used=None, tokens_used=None,
+                   latency_ms=None, id=None):
+    return {
+        "id": id or _uid(),
+        "conversation_id": conversation_id,
+        "role": role,
+        "content": content,
+        "content_type": content_type,
+        "metadata_json": metadata_json,
+        "model_used": model_used,
+        "tokens_used": tokens_used,
+        "latency_ms": latency_ms,
+        "created_at": _utcnow(),
+    }

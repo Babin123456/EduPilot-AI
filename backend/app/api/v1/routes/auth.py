@@ -6,16 +6,14 @@ from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
 from pathlib import Path
 import uuid
 from pydantic import BaseModel, EmailStr
-from sqlalchemy.orm import Session
+from pymongo.database import Database
 
 from app.core.database import get_db
 from app.core.security import verify_password, create_access_token, create_refresh_token
 from app.core.exceptions import http_401
 from app.api.deps import get_current_teacher
-from app.models.teacher import Teacher
+from app.models.teacher import teacher_full_name
 from app.core.config import get_settings
-from app.models.enrollment import TeacherCourseAssignment
-from app.models.academic import Course, Section, Year, Semester
 
 router = APIRouter()
 
@@ -67,90 +65,88 @@ class DemoTeacherCard(BaseModel):
 # ── Routes ──
 
 @router.post("/login", response_model=TokenResponse)
-def login(body: LoginRequest, db: Session = Depends(get_db)):
+def login(body: LoginRequest, db: Database = Depends(get_db)):
     """Authenticate a teacher and return JWT tokens."""
-    from sqlalchemy import func
     clean_email = str(body.email).strip().lower()
-    teacher = db.query(Teacher).filter(func.lower(Teacher.email) == clean_email).first()
-    if not teacher or not verify_password(body.password, teacher.hashed_password):
+    teacher = db.teachers.find_one({"email": {"$regex": f"^{clean_email}$", "$options": "i"}})
+    if not teacher or not verify_password(body.password, teacher["hashed_password"]):
         raise http_401("Invalid email or password")
-    if not teacher.is_active:
+    if not teacher.get("is_active", True):
         raise http_401("Account is inactive")
 
-    access_token = create_access_token({"sub": teacher.id, "email": teacher.email})
-    refresh_token = create_refresh_token({"sub": teacher.id})
+    full_name = teacher_full_name(teacher)
+    access_token = create_access_token({"sub": teacher["id"], "email": teacher["email"]})
+    refresh_token = create_refresh_token({"sub": teacher["id"]})
 
     return TokenResponse(
         access_token=access_token,
         refresh_token=refresh_token,
         teacher={
-            "id": teacher.id,
-            "faculty_id": teacher.faculty_id,
-            "first_name": teacher.first_name,
-            "last_name": teacher.last_name,
-            "full_name": teacher.full_name,
-            "email": teacher.email,
-            "designation": teacher.designation,
-            "specialization": teacher.specialization,
-            "is_demo": teacher.is_demo,
+            "id": teacher["id"],
+            "faculty_id": teacher["faculty_id"],
+            "first_name": teacher["first_name"],
+            "last_name": teacher["last_name"],
+            "full_name": full_name,
+            "email": teacher["email"],
+            "designation": teacher["designation"],
+            "specialization": teacher.get("specialization"),
+            "is_demo": teacher.get("is_demo", False),
         },
     )
 
 
 @router.post("/logout")
-def logout(teacher: Teacher = Depends(get_current_teacher)):
+def logout(teacher: dict = Depends(get_current_teacher)):
     """Logout — client discards tokens."""
     return {"message": "Logged out successfully"}
 
 
 @router.get("/me")
-def get_me(teacher: Teacher = Depends(get_current_teacher), db: Session = Depends(get_db)):
+def get_me(teacher: dict = Depends(get_current_teacher), db: Database = Depends(get_db)):
     """Get current teacher profile with class assignments."""
-    from app.models.university import Department
-    dept = db.query(Department).filter(Department.id == teacher.department_id).first()
+    dept = db.departments.find_one({"id": teacher["department_id"]})
 
     # Get class assignments
-    assignments = (
-        db.query(TeacherCourseAssignment, Course, Section, Year, Semester)
-        .join(Course, TeacherCourseAssignment.course_id == Course.id)
-        .join(Section, TeacherCourseAssignment.section_id == Section.id)
-        .join(Year, TeacherCourseAssignment.year_id == Year.id)
-        .join(Semester, TeacherCourseAssignment.semester_id == Semester.id)
-        .filter(TeacherCourseAssignment.teacher_id == teacher.id, TeacherCourseAssignment.is_active == True)
-        .all()
-    )
+    tcas = list(db.teacher_course_assignments.find({
+        "teacher_id": teacher["id"], "is_active": True,
+    }))
 
     classes = []
-    for tca, course, section, year, semester in assignments:
-        classes.append({
-            "id": tca.id,
-            "course_id": course.id,
-            "course_code": course.code,
-            "course_name": course.name,
-            "section_id": section.id,
-            "section_name": section.name,
-            "year_id": year.id,
-            "year_label": year.label,
-            "year_number": year.year_number,
-            "semester_id": semester.id,
-            "semester_label": semester.label,
-            "room": tca.room,
-        })
+    for tca in tcas:
+        course = db.courses.find_one({"id": tca["course_id"]})
+        section = db.sections.find_one({"id": tca["section_id"]})
+        year = db.years.find_one({"id": tca["year_id"]})
+        semester = db.semesters.find_one({"id": tca["semester_id"]})
+        if course and section and year and semester:
+            classes.append({
+                "id": tca["id"],
+                "course_id": course["id"],
+                "course_code": course["code"],
+                "course_name": course["name"],
+                "section_id": section["id"],
+                "section_name": section["name"],
+                "year_id": year["id"],
+                "year_label": year["label"],
+                "year_number": year["year_number"],
+                "semester_id": semester["id"],
+                "semester_label": semester["label"],
+                "room": tca.get("room"),
+            })
 
     return {
-        "id": teacher.id,
-        "faculty_id": teacher.faculty_id,
-        "first_name": teacher.first_name,
-        "last_name": teacher.last_name,
-        "full_name": teacher.full_name,
-        "email": teacher.email,
-        "phone": teacher.phone,
-        "designation": teacher.designation,
-        "specialization": teacher.specialization,
-        "department": dept.name if dept else "CSE",
-        "department_short": dept.short_name if dept else "CSE",
-        "is_demo": teacher.is_demo,
-        "avatar_url": teacher.avatar_url,
+        "id": teacher["id"],
+        "faculty_id": teacher["faculty_id"],
+        "first_name": teacher["first_name"],
+        "last_name": teacher["last_name"],
+        "full_name": teacher["full_name"],
+        "email": teacher["email"],
+        "phone": teacher.get("phone"),
+        "designation": teacher["designation"],
+        "specialization": teacher.get("specialization"),
+        "department": dept["name"] if dept else "CSE",
+        "department_short": dept.get("short_name", "CSE") if dept else "CSE",
+        "is_demo": teacher.get("is_demo", False),
+        "avatar_url": teacher.get("avatar_url"),
         "classes": classes,
     }
 
@@ -158,21 +154,26 @@ def get_me(teacher: Teacher = Depends(get_current_teacher), db: Session = Depend
 @router.patch("/me")
 def update_me(
     profile: TeacherProfileUpdate,
-    teacher: Teacher = Depends(get_current_teacher),
-    db: Session = Depends(get_db),
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
 ):
     """Update editable teacher profile preferences."""
-    for field, value in profile.model_dump(exclude_unset=True).items():
-        setattr(teacher, field, value)
-    db.commit()
-    return {"avatar_url": teacher.avatar_url, "phone": teacher.phone, "specialization": teacher.specialization}
+    updates = profile.model_dump(exclude_unset=True)
+    if updates:
+        db.teachers.update_one({"id": teacher["id"]}, {"$set": updates})
+        teacher.update(updates)
+    return {
+        "avatar_url": teacher.get("avatar_url"),
+        "phone": teacher.get("phone"),
+        "specialization": teacher.get("specialization"),
+    }
 
 
 @router.post("/me/avatar")
 async def upload_avatar(
     image: UploadFile = File(...),
-    teacher: Teacher = Depends(get_current_teacher),
-    db: Session = Depends(get_db),
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
 ):
     """Store a teacher-uploaded profile image and make it immediately available."""
     allowed_types = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp"}
@@ -183,27 +184,27 @@ async def upload_avatar(
         raise HTTPException(status_code=400, detail="Image must be smaller than 5 MB.")
 
     settings = get_settings()
-    filename = f"teacher-{teacher.id}-{uuid.uuid4().hex}{allowed_types[image.content_type]}"
+    filename = f"teacher-{teacher['id']}-{uuid.uuid4().hex}{allowed_types[image.content_type]}"
     storage_path = Path(settings.storage_local_path).resolve()
     storage_path.mkdir(parents=True, exist_ok=True)
     (storage_path / filename).write_bytes(content)
-    teacher.avatar_url = f"{settings.backend_url}/media/{filename}"
-    db.commit()
-    return {"avatar_url": teacher.avatar_url}
+    avatar_url = f"{settings.backend_url}/media/{filename}"
+    db.teachers.update_one({"id": teacher["id"]}, {"$set": {"avatar_url": avatar_url}})
+    return {"avatar_url": avatar_url}
 
 
 @router.get("/demo-accounts", response_model=list[DemoTeacherCard])
-def get_demo_accounts(db: Session = Depends(get_db)):
+def get_demo_accounts(db: Database = Depends(get_db)):
     """Return demo teacher accounts for the login page."""
-    teachers = db.query(Teacher).filter(Teacher.is_demo == True, Teacher.is_active == True).all()
+    teachers = list(db.teachers.find({"is_demo": True, "is_active": True}))
     return [
         DemoTeacherCard(
-            faculty_id=t.faculty_id,
-            name=t.full_name,
-            email=t.email,
-            password="demo@1234",  # Demo password shown on login page
-            designation=t.designation,
-            specialization=t.specialization,
+            faculty_id=t["faculty_id"],
+            name=teacher_full_name(t),
+            email=t["email"],
+            password="demo@1234",
+            designation=t["designation"],
+            specialization=t.get("specialization"),
         )
         for t in teachers
     ]

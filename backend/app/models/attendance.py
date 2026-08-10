@@ -1,51 +1,50 @@
-"""Attendance models: session and individual records."""
+"""Attendance session and record document helpers for MongoDB."""
 
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone, date
-
-from sqlalchemy import String, Integer, Float, DateTime, Date, ForeignKey, UniqueConstraint, Boolean
-from sqlalchemy.orm import Mapped, mapped_column
-
-from app.core.database import Base
+from datetime import datetime, timezone
 
 
 def _utcnow():
     return datetime.now(timezone.utc)
 
 
-class AttendanceSession(Base):
-    """One attendance-taking event for a specific class on a date."""
-    __tablename__ = "attendance_sessions"
-
-    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    teacher_course_assignment_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("teacher_course_assignments.id"), nullable=False
-    )
-    teacher_id: Mapped[str] = mapped_column(String(36), ForeignKey("teachers.id"), nullable=False)
-    date: Mapped[date] = mapped_column(Date, nullable=False)
-    start_time: Mapped[str | None] = mapped_column(String(5), nullable=True)
-    end_time: Mapped[str | None] = mapped_column(String(5), nullable=True)
-    total_present: Mapped[int] = mapped_column(Integer, default=0)
-    total_absent: Mapped[int] = mapped_column(Integer, default=0)
-    total_late: Mapped[int] = mapped_column(Integer, default=0)
-    total_excused: Mapped[int] = mapped_column(Integer, default=0)
-    is_submitted: Mapped[bool] = mapped_column(Boolean, default=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, onupdate=_utcnow)
+def _uid():
+    return str(uuid.uuid4())
 
 
-class AttendanceRecord(Base):
-    """Individual student attendance in a session."""
-    __tablename__ = "attendance_records"
-    __table_args__ = (
-        UniqueConstraint("session_id", "student_id", name="uq_session_student"),
-    )
+ATTENDANCE_SESSIONS = "attendance_sessions"
+ATTENDANCE_RECORDS = "attendance_records"
 
-    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    session_id: Mapped[str] = mapped_column(String(36), ForeignKey("attendance_sessions.id"), nullable=False)
-    student_id: Mapped[str] = mapped_column(String(36), ForeignKey("students.id"), nullable=False)
-    status: Mapped[str] = mapped_column(String(10), nullable=False)  # present, absent, late, excused
-    remarks: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+def new_attendance_session(*, teacher_course_assignment_id, teacher_id, date,
+                           start_time=None, end_time=None,
+                           total_present=0, total_absent=0, total_late=0, total_excused=0,
+                           is_submitted=False, id=None):
+    return {
+        "id": id or _uid(),
+        "teacher_course_assignment_id": teacher_course_assignment_id,
+        "teacher_id": teacher_id,
+        "date": date,
+        "start_time": start_time,
+        "end_time": end_time,
+        "total_present": total_present,
+        "total_absent": total_absent,
+        "total_late": total_late,
+        "total_excused": total_excused,
+        "is_submitted": is_submitted,
+        "created_at": _utcnow(),
+        "updated_at": _utcnow(),
+    }
+
+
+def new_attendance_record(*, session_id, student_id, status, remarks=None, id=None):
+    return {
+        "id": id or _uid(),
+        "session_id": session_id,
+        "student_id": student_id,
+        "status": status,
+        "remarks": remarks,
+        "created_at": _utcnow(),
+    }

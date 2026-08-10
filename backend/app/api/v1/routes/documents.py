@@ -1,11 +1,13 @@
 """Documents routes."""
 from __future__ import annotations
+import uuid
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy.orm import Session
+from pydantic import BaseModel
+from pymongo.database import Database
+
 from app.core.database import get_db
 from app.api.deps import get_current_teacher
-from app.models.teacher import Teacher
-from app.models.document import Document
+from app.models.document import new_document
 
 router = APIRouter()
 
@@ -14,71 +16,67 @@ router = APIRouter()
 def list_documents(
     doc_type: str | None = Query(None),
     class_id: str | None = Query(None),
-    teacher: Teacher = Depends(get_current_teacher),
-    db: Session = Depends(get_db),
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
 ):
     """List generated documents."""
-    query = db.query(Document).filter(
-        Document.teacher_id == teacher.id,
-        Document.is_archived == False,
-    )
+    query_filter = {
+        "teacher_id": teacher["id"],
+        "is_archived": False,
+    }
     if doc_type:
-        query = query.filter(Document.document_type == doc_type)
+        query_filter["document_type"] = doc_type
     if class_id:
-        query = query.filter(Document.teacher_course_assignment_id == class_id)
+        query_filter["teacher_course_assignment_id"] = class_id
 
-    docs = query.order_by(Document.created_at.desc()).limit(50).all()
+    docs = list(
+        db.documents.find(query_filter).sort("created_at", -1).limit(50)
+    )
     return [
         {
-            "id": d.id,
-            "title": d.title,
-            "document_type": d.document_type,
-            "format": d.format,
-            "generation_status": d.generation_status,
-            "version": d.version,
-            "created_at": d.created_at.isoformat() if d.created_at else None,
+            "id": d["id"],
+            "title": d["title"],
+            "document_type": d["document_type"],
+            "format": d.get("format", "pdf"),
+            "generation_status": d.get("generation_status", "completed"),
+            "version": d.get("version", 1),
+            "created_at": d["created_at"].isoformat() if hasattr(d.get("created_at"), 'isoformat') else d.get("created_at"),
         }
         for d in docs
     ]
 
 
-from pydantic import BaseModel
-import uuid
-
 class CreateDocumentRequest(BaseModel):
     title: str
-    document_type: str  # quiz, assignment, assessment, report, notes
-    format: str = "pdf"  # pdf, excel, ppt
+    document_type: str
+    format: str = "pdf"
     class_id: str | None = None
     content: str | None = None
+
 
 @router.post("")
 def create_document(
     req: CreateDocumentRequest,
-    teacher: Teacher = Depends(get_current_teacher),
-    db: Session = Depends(get_db),
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
 ):
     """Save a newly generated document record."""
-    new_doc = Document(
-        id=str(uuid.uuid4()),
-        teacher_id=teacher.id,
+    doc = new_document(
+        teacher_id=teacher["id"],
         teacher_course_assignment_id=req.class_id,
         title=req.title,
         document_type=req.document_type,
         format=req.format,
-        content=req.content,
+        content_json=req.content,
         generation_status="completed",
         version=1,
     )
-    db.add(new_doc)
-    db.commit()
-    db.refresh(new_doc)
+    db.documents.insert_one(doc)
     return {
-        "id": new_doc.id,
-        "title": new_doc.title,
-        "document_type": new_doc.document_type,
-        "format": new_doc.format,
-        "generation_status": new_doc.generation_status,
-        "created_at": new_doc.created_at.isoformat() if new_doc.created_at else None,
+        "id": doc["id"],
+        "title": doc["title"],
+        "document_type": doc["document_type"],
+        "format": doc["format"],
+        "generation_status": doc["generation_status"],
+        "created_at": doc["created_at"].isoformat() if hasattr(doc.get("created_at"), 'isoformat') else doc.get("created_at"),
     }
-

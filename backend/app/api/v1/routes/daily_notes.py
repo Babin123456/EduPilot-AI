@@ -8,17 +8,15 @@ from datetime import date, datetime, timezone
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
+from pymongo.database import Database
 
 from app.core.database import get_db
 from app.api.deps import get_current_teacher
 from app.core.exceptions import http_403, http_404
-from app.models.teacher import Teacher
-from app.models.student import Student
-from app.models.enrollment import TeacherCourseAssignment
-from app.models.academic import Year, Section, Course
-from app.models.daily_note import DailyNote
-from app.models.communication import Communication
+from app.models.student import student_full_name
+from app.models.daily_note import new_daily_note
+from app.models.document import new_document
+from app.models.communication import new_communication
 
 router = APIRouter()
 
@@ -36,7 +34,7 @@ class ShareNoteRequest(BaseModel):
 
 
 def _generate_note_content(topic: str, course_name: str, duration: int, context: str | None) -> dict:
-    """Generate structured discussion notes for a topic (template-based, LLM-upgradable)."""
+    """Generate structured discussion notes for a topic."""
     key_concepts = [
         f"Core fundamentals of {topic}",
         f"Key principles and definitions in {topic}",
@@ -163,29 +161,27 @@ Today's discussion on **{topic}** covered the fundamental concepts, principles, 
 @router.post("/generate")
 def generate_note(
     body: GenerateNoteRequest,
-    teacher: Teacher = Depends(get_current_teacher),
-    db: Session = Depends(get_db),
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
 ):
     """Generate a daily topic discussion note for a class."""
-    tca = db.query(TeacherCourseAssignment).filter(
-        TeacherCourseAssignment.id == body.class_id,
-        TeacherCourseAssignment.teacher_id == teacher.id,
-    ).first()
+    tca = db.teacher_course_assignments.find_one({
+        "id": body.class_id, "teacher_id": teacher["id"],
+    })
     if not tca:
         raise http_403("Not authorized for this class")
 
-    course = db.query(Course).filter(Course.id == tca.course_id).first()
-    course_name = course.name if course else "Unknown Course"
+    course = db.courses.find_one({"id": tca["course_id"]})
+    course_name = course["name"] if course else "Unknown Course"
 
     generated = _generate_note_content(
         body.topic, course_name, body.duration_minutes, body.additional_context
     )
 
-    note = DailyNote(
-        id=str(uuid.uuid4()),
+    note = new_daily_note(
         teacher_course_assignment_id=body.class_id,
-        teacher_id=teacher.id,
-        date=date.today(),
+        teacher_id=teacher["id"],
+        date=date.today().isoformat(),
         topic=body.topic,
         content=generated["content"],
         key_concepts=json.dumps(generated["key_concepts"]),
@@ -196,44 +192,38 @@ def generate_note(
         is_ai_generated=True,
         status="published",
     )
-    db.add(note)
+    db.daily_notes.insert_one(note)
 
-    # Save to Document Studio Vault for this class
-    from app.models.document import Document
-    doc = Document(
-        id=str(uuid.uuid4()),
+    # Save to Document Studio
+    doc = new_document(
         teacher_course_assignment_id=body.class_id,
-        teacher_id=teacher.id,
+        teacher_id=teacher["id"],
         title=f"Lecture Notes — {body.topic}",
         document_type="notes",
         format="pdf",
     )
-    db.add(doc)
+    db.documents.insert_one(doc)
 
-    db.commit()
-    db.refresh(note)
-
-
-    year = db.query(Year).filter(Year.id == tca.year_id).first()
-    section = db.query(Section).filter(Section.id == tca.section_id).first()
+    year = db.years.find_one({"id": tca["year_id"]})
+    section = db.sections.find_one({"id": tca["section_id"]})
 
     return {
-        "id": note.id,
-        "topic": note.topic,
-        "content": note.content,
-        "key_concepts": json.loads(note.key_concepts) if note.key_concepts else [],
-        "discussion_points": json.loads(note.discussion_points) if note.discussion_points else [],
-        "summary": note.summary,
-        "practice_questions": json.loads(note.practice_questions) if note.practice_questions else [],
+        "id": note["id"],
+        "topic": note["topic"],
+        "content": note["content"],
+        "key_concepts": json.loads(note["key_concepts"]) if note.get("key_concepts") else [],
+        "discussion_points": json.loads(note["discussion_points"]) if note.get("discussion_points") else [],
+        "summary": note["summary"],
+        "practice_questions": json.loads(note["practice_questions"]) if note.get("practice_questions") else [],
         "course_name": course_name,
-        "course_code": course.code if course else "",
-        "year_label": year.label if year else "",
-        "section_name": section.name if section else "",
-        "date": note.date.isoformat(),
-        "duration_minutes": note.duration_minutes,
-        "is_shared": note.is_shared,
-        "status": note.status,
-        "created_at": note.created_at.isoformat() if note.created_at else None,
+        "course_code": course["code"] if course else "",
+        "year_label": year["label"] if year else "",
+        "section_name": section["name"] if section else "",
+        "date": note["date"],
+        "duration_minutes": note["duration_minutes"],
+        "is_shared": note.get("is_shared", False),
+        "status": note["status"],
+        "created_at": note["created_at"].isoformat() if hasattr(note.get("created_at"), 'isoformat') else note.get("created_at"),
     }
 
 
@@ -241,51 +231,49 @@ def generate_note(
 def list_notes(
     class_id: str | None = Query(None),
     note_date: str | None = Query(None),
-    teacher: Teacher = Depends(get_current_teacher),
-    db: Session = Depends(get_db),
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
 ):
-    """List daily notes for the teacher, optionally filtered by class and date."""
-    query = db.query(DailyNote).filter(DailyNote.teacher_id == teacher.id)
-
+    """List daily notes for the teacher."""
+    query_filter = {"teacher_id": teacher["id"]}
     if class_id:
-        query = query.filter(DailyNote.teacher_course_assignment_id == class_id)
-
+        query_filter["teacher_course_assignment_id"] = class_id
     if note_date:
-        try:
-            d = date.fromisoformat(note_date)
-            query = query.filter(DailyNote.date == d)
-        except ValueError:
-            pass
+        query_filter["date"] = note_date
 
-    notes = query.order_by(DailyNote.created_at.desc()).limit(50).all()
+    notes = list(
+        db.daily_notes.find(query_filter).sort("created_at", -1).limit(50)
+    )
 
     result = []
     for note in notes:
-        tca = db.query(TeacherCourseAssignment).filter(
-            TeacherCourseAssignment.id == note.teacher_course_assignment_id
-        ).first()
-        course = db.query(Course).filter(Course.id == tca.course_id).first() if tca else None
-        year = db.query(Year).filter(Year.id == tca.year_id).first() if tca else None
-        section = db.query(Section).filter(Section.id == tca.section_id).first() if tca else None
+        tca = db.teacher_course_assignments.find_one(
+            {"id": note["teacher_course_assignment_id"]}
+        )
+        course = db.courses.find_one({"id": tca["course_id"]}) if tca else None
+        year = db.years.find_one({"id": tca["year_id"]}) if tca else None
+        section = db.sections.find_one({"id": tca["section_id"]}) if tca else None
 
+        shared_at = note.get("shared_at")
+        created_at = note.get("created_at")
         result.append({
-            "id": note.id,
-            "topic": note.topic,
-            "summary": note.summary,
-            "content": note.content,
-            "key_concepts": json.loads(note.key_concepts) if note.key_concepts else [],
-            "discussion_points": json.loads(note.discussion_points) if note.discussion_points else [],
-            "practice_questions": json.loads(note.practice_questions) if note.practice_questions else [],
-            "course_name": course.name if course else "",
-            "course_code": course.code if course else "",
-            "year_label": year.label if year else "",
-            "section_name": section.name if section else "",
-            "date": note.date.isoformat(),
-            "duration_minutes": note.duration_minutes,
-            "is_shared": note.is_shared,
-            "shared_at": note.shared_at.isoformat() if note.shared_at else None,
-            "status": note.status,
-            "created_at": note.created_at.isoformat() if note.created_at else None,
+            "id": note["id"],
+            "topic": note["topic"],
+            "summary": note.get("summary"),
+            "content": note.get("content"),
+            "key_concepts": json.loads(note["key_concepts"]) if note.get("key_concepts") else [],
+            "discussion_points": json.loads(note["discussion_points"]) if note.get("discussion_points") else [],
+            "practice_questions": json.loads(note["practice_questions"]) if note.get("practice_questions") else [],
+            "course_name": course["name"] if course else "",
+            "course_code": course["code"] if course else "",
+            "year_label": year["label"] if year else "",
+            "section_name": section["name"] if section else "",
+            "date": note["date"],
+            "duration_minutes": note.get("duration_minutes", 60),
+            "is_shared": note.get("is_shared", False),
+            "shared_at": shared_at.isoformat() if hasattr(shared_at, 'isoformat') else shared_at,
+            "status": note.get("status", "draft"),
+            "created_at": created_at.isoformat() if hasattr(created_at, 'isoformat') else created_at,
         })
 
     return result
@@ -294,109 +282,106 @@ def list_notes(
 @router.get("/{note_id}")
 def get_note(
     note_id: str,
-    teacher: Teacher = Depends(get_current_teacher),
-    db: Session = Depends(get_db),
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
 ):
     """Get a specific daily note."""
-    note = db.query(DailyNote).filter(DailyNote.id == note_id).first()
+    note = db.daily_notes.find_one({"id": note_id})
     if not note:
         raise http_404("Note not found")
-    if note.teacher_id != teacher.id:
+    if note["teacher_id"] != teacher["id"]:
         raise http_403("Not authorized")
 
-    tca = db.query(TeacherCourseAssignment).filter(
-        TeacherCourseAssignment.id == note.teacher_course_assignment_id
-    ).first()
-    course = db.query(Course).filter(Course.id == tca.course_id).first() if tca else None
-    year = db.query(Year).filter(Year.id == tca.year_id).first() if tca else None
-    section = db.query(Section).filter(Section.id == tca.section_id).first() if tca else None
+    tca = db.teacher_course_assignments.find_one({"id": note["teacher_course_assignment_id"]})
+    course = db.courses.find_one({"id": tca["course_id"]}) if tca else None
+    year = db.years.find_one({"id": tca["year_id"]}) if tca else None
+    section = db.sections.find_one({"id": tca["section_id"]}) if tca else None
 
+    shared_at = note.get("shared_at")
+    created_at = note.get("created_at")
     return {
-        "id": note.id,
-        "topic": note.topic,
-        "content": note.content,
-        "key_concepts": json.loads(note.key_concepts) if note.key_concepts else [],
-        "discussion_points": json.loads(note.discussion_points) if note.discussion_points else [],
-        "summary": note.summary,
-        "practice_questions": json.loads(note.practice_questions) if note.practice_questions else [],
-        "course_name": course.name if course else "",
-        "course_code": course.code if course else "",
-        "year_label": year.label if year else "",
-        "section_name": section.name if section else "",
-        "date": note.date.isoformat(),
-        "duration_minutes": note.duration_minutes,
-        "is_shared": note.is_shared,
-        "shared_at": note.shared_at.isoformat() if note.shared_at else None,
-        "status": note.status,
-        "created_at": note.created_at.isoformat() if note.created_at else None,
+        "id": note["id"],
+        "topic": note["topic"],
+        "content": note.get("content"),
+        "key_concepts": json.loads(note["key_concepts"]) if note.get("key_concepts") else [],
+        "discussion_points": json.loads(note["discussion_points"]) if note.get("discussion_points") else [],
+        "summary": note.get("summary"),
+        "practice_questions": json.loads(note["practice_questions"]) if note.get("practice_questions") else [],
+        "course_name": course["name"] if course else "",
+        "course_code": course["code"] if course else "",
+        "year_label": year["label"] if year else "",
+        "section_name": section["name"] if section else "",
+        "date": note["date"],
+        "duration_minutes": note.get("duration_minutes", 60),
+        "is_shared": note.get("is_shared", False),
+        "shared_at": shared_at.isoformat() if hasattr(shared_at, 'isoformat') else shared_at,
+        "status": note.get("status", "draft"),
+        "created_at": created_at.isoformat() if hasattr(created_at, 'isoformat') else created_at,
     }
 
 
 @router.post("/share")
 def share_note_to_class(
     body: ShareNoteRequest,
-    teacher: Teacher = Depends(get_current_teacher),
-    db: Session = Depends(get_db),
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
 ):
     """Share a daily note to all students in a class via email (demo)."""
-    note = db.query(DailyNote).filter(DailyNote.id == body.note_id).first()
+    note = db.daily_notes.find_one({"id": body.note_id})
     if not note:
         raise http_404("Note not found")
-    if note.teacher_id != teacher.id:
+    if note["teacher_id"] != teacher["id"]:
         raise http_403("Not authorized")
 
-    tca = db.query(TeacherCourseAssignment).filter(
-        TeacherCourseAssignment.id == body.class_id,
-        TeacherCourseAssignment.teacher_id == teacher.id,
-    ).first()
+    tca = db.teacher_course_assignments.find_one({
+        "id": body.class_id, "teacher_id": teacher["id"],
+    })
     if not tca:
         raise http_403("Not authorized for this class")
 
-    # Get all students in the class section
-    students = (
-        db.query(Student)
-        .filter(Student.section_id == tca.section_id, Student.is_active == True)
-        .order_by(Student.roll_number)
-        .all()
+    students = list(
+        db.students.find({"section_id": tca["section_id"], "is_active": True})
+        .sort("roll_number", 1)
     )
 
-    course = db.query(Course).filter(Course.id == tca.course_id).first()
-    course_name = course.name if course else "Course"
-    course_code = course.code if course else ""
+    course = db.courses.find_one({"id": tca["course_id"]})
+    course_name = course["name"] if course else "Course"
+    course_code = course["code"] if course else ""
 
-    # Create communication record
     recipients = [
-        {"student_id": s.id, "email": s.email, "name": s.full_name, "status": "sent"}
+        {"student_id": s["id"], "email": s["email"], "name": student_full_name(s), "status": "sent"}
         for s in students
     ]
 
-    comm = Communication(
-        id=str(uuid.uuid4()),
-        teacher_id=teacher.id,
+    comm = new_communication(
+        teacher_id=teacher["id"],
         teacher_course_assignment_id=body.class_id,
         comm_type="email",
         template_type="daily_notes",
-        subject=f"[{course_code}] Discussion Notes: {note.topic}",
-        body=f"Dear Student,\n\nPlease find attached the discussion notes for today's lecture on \"{note.topic}\" in {course_name}.\n\nKey Topics Covered:\n{note.summary}\n\nPlease review these notes and come prepared with questions for the next class.\n\nBest regards,\n{teacher.first_name} {teacher.last_name}\n{teacher.designation}\nAdamas University",
+        subject=f"[{course_code}] Discussion Notes: {note['topic']}",
+        body=f"Dear Student,\n\nPlease find attached the discussion notes for today's lecture on \"{note['topic']}\" in {course_name}.\n\nKey Topics Covered:\n{note.get('summary', '')}\n\nPlease review these notes and come prepared with questions for the next class.\n\nBest regards,\n{teacher['first_name']} {teacher['last_name']}\n{teacher.get('designation', '')}\nAdamas University",
         recipients=json.dumps(recipients),
         total_recipients=len(students),
         sent_count=len(students),
         status="sent",
         sent_at=datetime.now(timezone.utc),
     )
-    db.add(comm)
+    db.communications.insert_one(comm)
 
     # Mark note as shared
-    note.is_shared = True
-    note.shared_at = datetime.now(timezone.utc)
-    note.status = "shared"
-
-    db.commit()
+    db.daily_notes.update_one(
+        {"id": body.note_id},
+        {"$set": {
+            "is_shared": True,
+            "shared_at": datetime.now(timezone.utc),
+            "status": "shared",
+        }},
+    )
 
     return {
         "success": True,
         "message": f"Notes shared with {len(students)} students via email",
         "total_recipients": len(students),
-        "communication_id": comm.id,
-        "student_emails": [s.email for s in students],
+        "communication_id": comm["id"],
+        "student_emails": [s["email"] for s in students],
     }

@@ -3,25 +3,22 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
 
-from app.core.database import get_db
 from app.api.deps import get_current_teacher
-from app.models.teacher import Teacher
 
 router = APIRouter()
 
 
 @router.get("/me")
-def get_current(teacher: Teacher = Depends(get_current_teacher)):
+def get_current(teacher: dict = Depends(get_current_teacher)):
     """Get current teacher info (alias for /auth/me)."""
     return {
-        "id": teacher.id,
-        "faculty_id": teacher.faculty_id,
-        "first_name": teacher.first_name,
-        "last_name": teacher.last_name,
-        "full_name": teacher.full_name,
-        "email": teacher.email,
-        "designation": teacher.designation,
-        "specialization": teacher.specialization,
+        "id": teacher["id"],
+        "faculty_id": teacher["faculty_id"],
+        "first_name": teacher["first_name"],
+        "last_name": teacher["last_name"],
+        "full_name": teacher["full_name"],
+        "email": teacher["email"],
+        "designation": teacher["designation"],
+        "specialization": teacher.get("specialization"),
     }

@@ -40,8 +40,9 @@ class Settings(BaseSettings):
     frontend_url: str = "http://localhost:5173"
     allowed_origins: str = "http://localhost:5173,http://localhost:3000"
 
-    # ---- Database ----
-    database_url: str = "sqlite:///./edupilot.db"
+    # ---- Database (MongoDB Atlas) ----
+    mongodb_uri: str = "mongodb://localhost:27017"
+    mongodb_db_name: str = "edupilot"
 
     # ---- JWT / Auth ----
     jwt_secret_key: str = "dev-jwt-secret-change-in-production"
