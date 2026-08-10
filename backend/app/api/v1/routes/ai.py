@@ -1,4 +1,4 @@
-"""AI routes — EduPilot AI chat, document analysis, and generation endpoints."""
+"""AI routes — EduPilot AI chat, RAG document management, and generation endpoints."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ import re
 import uuid
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, File, UploadFile, Form
+from fastapi import APIRouter, Depends, File, UploadFile, Form, HTTPException
 from pydantic import BaseModel
 from pymongo.database import Database
 import httpx
@@ -20,6 +20,13 @@ from app.api.deps import get_current_teacher
 from app.core.exceptions import http_400, http_404
 from app.models.student import student_full_name
 from app.models.ai_models import new_ai_conversation, new_ai_message
+from app.services.rag_service import (
+    ingest_document,
+    retrieve_context,
+    rewrite_query_with_history,
+    delete_rag_document,
+    list_rag_documents,
+)
 
 router = APIRouter()
 
@@ -32,7 +39,7 @@ class ChatRequest(BaseModel):
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# DOCUMENT & FILE PARSER (PDF, PPT, Excel, Image)
+# DOCUMENT & FILE PARSER (PPT, Excel, Image — non-RAG)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 def parse_uploaded_file(file_bytes: bytes, filename: str, content_type: str) -> dict:
@@ -171,7 +178,113 @@ def _call_gemini_llm(prompt: str, api_key: str, model: str) -> str | None:
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# ROUTES
+# RAG DOCUMENT MANAGEMENT ROUTES
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+@router.post("/rag/upload")
+async def upload_rag_document(
+    file: UploadFile = File(...),
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
+):
+    """Upload a PDF or DOCX file for RAG ingestion (parse → chunk → embed → index).
+
+    The document is split into chunks, each embedded using all-MiniLM-L6-v2,
+    and stored in MongoDB for vector similarity search during chat.
+    """
+    settings = get_settings()
+    filename = file.filename or "uploaded_file"
+    ext = os.path.splitext(filename)[1].lower()
+
+    # Validate file type
+    if ext not in (".pdf", ".docx"):
+        raise HTTPException(
+            status_code=400,
+            detail="Only PDF (.pdf) and DOCX (.docx) files are supported for RAG. "
+                   "Use the regular file upload for PPT, Excel, and Image files.",
+        )
+
+    # Read and validate file size
+    file_bytes = await file.read()
+    max_size = settings.rag_max_file_size_mb * 1024 * 1024
+    if len(file_bytes) > max_size:
+        raise HTTPException(
+            status_code=400,
+            detail=f"File size ({len(file_bytes) / (1024*1024):.1f}MB) exceeds "
+                   f"the maximum allowed size of {settings.rag_max_file_size_mb}MB.",
+        )
+
+    # Run ingestion pipeline
+    try:
+        doc_record = ingest_document(
+            file_bytes=file_bytes,
+            filename=filename,
+            teacher_id=teacher["id"],
+            db=db,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to process document: {str(e)}",
+        )
+
+    return {
+        "success": True,
+        "document": {
+            "id": doc_record["id"],
+            "filename": doc_record["filename"],
+            "file_type": doc_record["file_type"],
+            "chunk_count": doc_record["chunk_count"],
+            "file_size_bytes": doc_record["file_size_bytes"],
+            "status": doc_record["status"],
+            "created_at": doc_record["created_at"].isoformat()
+            if hasattr(doc_record.get("created_at"), "isoformat")
+            else doc_record.get("created_at"),
+        },
+        "message": f"Document '{filename}' indexed successfully with {doc_record['chunk_count']} chunks.",
+    }
+
+
+@router.get("/rag/documents")
+def get_rag_documents(
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
+):
+    """List all RAG documents uploaded by the current teacher."""
+    docs = list_rag_documents(teacher["id"], db)
+    return [
+        {
+            "id": d["id"],
+            "filename": d["filename"],
+            "file_type": d["file_type"],
+            "chunk_count": d.get("chunk_count", 0),
+            "file_size_bytes": d.get("file_size_bytes", 0),
+            "status": d.get("status", "unknown"),
+            "created_at": d["created_at"].isoformat()
+            if hasattr(d.get("created_at"), "isoformat")
+            else d.get("created_at"),
+        }
+        for d in docs
+    ]
+
+
+@router.delete("/rag/documents/{document_id}")
+def delete_rag_doc(
+    document_id: str,
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
+):
+    """Delete a RAG document and all its embedding chunks."""
+    success = delete_rag_document(document_id, teacher["id"], db)
+    if not success:
+        raise http_404("Document not found or you don't have permission to delete it.")
+    return {"success": True, "message": "Document and all chunks deleted successfully."}
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# NON-RAG FILE UPLOAD (PPT, Excel, Image)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 @router.post("/upload-file")
@@ -192,16 +305,29 @@ async def upload_file_for_ai(
     }
 
 
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# MAIN CHAT ENDPOINT (with RAG + Conversation History)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 @router.post("/chat")
 def chat(
     body: ChatRequest,
     teacher: dict = Depends(get_current_teacher),
     db: Database = Depends(get_db),
 ):
-    """Send a message to EduPilot AI with rich portal context and real LLM capabilities."""
+    """Send a message to EduPilot AI with RAG retrieval and conversation history.
+
+    Flow:
+    1. Load last 20 messages from this conversation
+    2. Rewrite query using chat history (for better vector search)
+    3. Vector search: retrieve top-k relevant document chunks
+    4. Build enhanced system prompt with RAG context + class context
+    5. Call LLM (Groq → Gemini → Fallback)
+    6. Save messages and return
+    """
     settings = get_settings()
 
-    # Get active class context
+    # ── Get active class context ──
     class_context_str = ""
     student_summary_str = ""
     if body.class_id:
@@ -226,7 +352,7 @@ def chat(
                 + "\n".join(student_details_list)
             )
 
-    # Retrieve conversation
+    # ── Retrieve or create conversation ──
     conversation = None
     if body.conversation_id:
         conversation = db.ai_conversations.find_one({
@@ -241,14 +367,14 @@ def chat(
         )
         db.ai_conversations.insert_one(conversation)
 
-    # Retrieve previous message history
+    # ── Load conversation history (last 20 messages) ──
     past_messages = list(
         db.ai_messages.find({"conversation_id": conversation["id"]})
         .sort("created_at", 1)
-        .limit(10)
+        .limit(20)
     )
 
-    # Save current user message
+    # ── Save current user message ──
     user_msg = new_ai_message(
         conversation_id=conversation["id"],
         role="user",
@@ -256,50 +382,77 @@ def chat(
     )
     db.ai_messages.insert_one(user_msg)
 
-    # Build System Context Prompt
-    system_prompt = (
-        f"You are EduPilot AI, the intelligent academic copilot for Adamas University, Kolkata.\n"
-        f"You are assisting Professor {teacher['full_name']} ({teacher.get('designation', '')}, {teacher.get('specialization', 'CSE')}).\n"
-        f"Current Academic Context: {class_context_str or 'General Academic Workspace'}\n"
-        f"Live Database Information:\n{student_summary_str or 'N/A'}\n\n"
-        f"Instructions:\n"
-        f"1. Always use the live student database information provided above to give exact student names, roll numbers, and attendance percentages when asked.\n"
-        f"2. Remember previous user questions and context in this conversation thread.\n"
-        f"3. Be concise, structured, professional, and use Markdown formatting without decorative text emojis."
+    # ── RAG: Rewrite query with conversation history ──
+    chat_history_for_rewrite = [
+        {"role": m["role"], "content": m["content"]} for m in past_messages
+    ]
+    standalone_query = rewrite_query_with_history(
+        body.message, chat_history_for_rewrite, settings
     )
 
+    # ── RAG: Retrieve relevant document chunks ──
+    rag_context = retrieve_context(standalone_query, teacher["id"], db)
+
+    # ── Build the full user input ──
     full_user_input = body.message
     if body.file_context:
         full_user_input += f"\n\n[Attached File Content for Analysis]:\n{body.file_context}"
 
+    # ── Build System Context Prompt (with RAG context) ──
+    rag_section = ""
+    if rag_context:
+        rag_section = (
+            f"\n[Retrieved Document Context — from teacher's uploaded PDF/DOCX files]:\n"
+            f"{rag_context}\n"
+        )
+
+    system_prompt = (
+        f"You are EduPilot AI, the intelligent academic copilot for Adamas University, Kolkata.\n"
+        f"You are assisting Professor {teacher['full_name']} ({teacher.get('designation', '')}, {teacher.get('specialization', 'CSE')}).\n"
+        f"Current Academic Context: {class_context_str or 'General Academic Workspace'}\n"
+        f"Live Database Information:\n{student_summary_str or 'N/A'}\n"
+        f"{rag_section}\n"
+        f"Instructions:\n"
+        f"1. Always use the live student database information provided above to give exact student names, roll numbers, and attendance percentages when asked.\n"
+        f"2. Remember previous user questions and context in this conversation thread.\n"
+        f"3. When answering questions about uploaded documents, cite the specific source filename and page numbers from the Retrieved Document Context above.\n"
+        f"4. If the Retrieved Document Context contains relevant information, use it to provide detailed, accurate answers.\n"
+        f"5. Be concise, structured, professional, and use Markdown formatting without decorative text emojis."
+    )
+
+    # ── Build LLM message array ──
     llm_messages = [{"role": "system", "content": system_prompt}]
     for pm in past_messages:
         llm_messages.append({"role": pm["role"], "content": pm["content"]})
     llm_messages.append({"role": "user", "content": full_user_input})
 
-    # Attempt Groq LLM
+    # ── Attempt Groq LLM ──
     model_used = "Groq Llama-3.3-70B"
     ai_response = _call_groq_llm(llm_messages, settings.groq_api_key_1, settings.groq_model)
     if not ai_response:
         ai_response = _call_groq_llm(llm_messages, settings.groq_api_key_2, settings.groq_model)
 
-    # Attempt Gemini fallback
+    # ── Attempt Gemini fallback ──
     if not ai_response:
         model_used = "Gemini 1.5 Flash"
         gemini_prompt = f"{system_prompt}\n\nUser Question: {full_user_input}"
         ai_response = _call_gemini_llm(gemini_prompt, settings.gemini_api_key, settings.gemini_model)
 
-    # Fallback to Smart Contextual Response Generator
+    # ── Fallback to Smart Contextual Response Generator ──
     if not ai_response:
         model_used = "EduPilot Smart Engine"
-        ai_response = _generate_contextual_response(body.message, teacher, db, body.class_id, body.file_context)
+        ai_response = _generate_contextual_response(body.message, teacher, db, body.class_id, body.file_context, rag_context)
 
-    # Save assistant message
+    # ── Determine if RAG was used ──
+    content_type = "rag" if rag_context else "text"
+
+    # ── Save assistant message ──
     assistant_msg = new_ai_message(
         conversation_id=conversation["id"],
         role="assistant",
         content=ai_response,
         model_used=model_used,
+        content_type=content_type,
     )
     db.ai_messages.insert_one(assistant_msg)
 
@@ -308,23 +461,48 @@ def chat(
         {"$inc": {"message_count": 2}, "$set": {"updated_at": datetime.now(timezone.utc)}},
     )
 
+    # ── Build source references for the frontend ──
+    sources = []
+    if rag_context:
+        # Extract unique source filenames from the context
+        import re as re_mod
+        source_matches = re_mod.findall(r"from '([^']+)'", rag_context)
+        seen = set()
+        for src in source_matches:
+            if src not in seen:
+                sources.append(src)
+                seen.add(src)
+
     return {
         "conversation_id": conversation["id"],
         "message": {
             "id": assistant_msg["id"],
             "role": "assistant",
             "content": ai_response,
+            "content_type": content_type,
             "model_used": model_used,
+            "sources": sources,
             "created_at": assistant_msg["created_at"].isoformat() if hasattr(assistant_msg.get("created_at"), 'isoformat') else assistant_msg.get("created_at"),
         },
     }
 
 
 def _generate_contextual_response(
-    message: str, teacher: dict, db: Database, class_id: str | None, file_context: str | None
+    message: str, teacher: dict, db: Database, class_id: str | None, file_context: str | None, rag_context: str | None = None
 ) -> str:
     """Smart contextual answer engine when external LLM API keys are unconfigured."""
     msg_lower = message.lower()
+
+    # If RAG context is available, present it
+    if rag_context:
+        return (
+            f"📄 **Document Analysis (from your uploaded files):**\n\n"
+            f"Based on your uploaded documents, here is the relevant information:\n\n"
+            f"{rag_context[:2000]}\n\n"
+            f"---\n"
+            f"*Note: For more detailed analysis, configure your Groq or Gemini API keys "
+            f"to enable the full AI engine.*"
+        )
 
     if file_context:
         return (
@@ -400,7 +578,8 @@ def _generate_contextual_response(
         f"### How I Can Assist You:\n"
         f"- **Class Metrics**: Ask *'Show students with attendance under 75%'*\n"
         f"- **Schedule & Routine**: Ask *'What classes do I have today?'*\n"
-        f"- **File Analysis**: Upload any PDF, PPT, Excel, or Image using the attachment button.\n"
+        f"- **Document Analysis (RAG)**: Upload any PDF or DOCX using the 📎 button — I'll index it and answer questions about the content.\n"
+        f"- **File Analysis**: Upload PPT, Excel, or Image files for instant extraction.\n"
         f"- **Academic Material**: Ask any subject or curriculum question.\n"
         f"- **Daily Notes & Publish**: Use **Daily Notes** or **Document Studio** to generate and dispatch materials."
     )

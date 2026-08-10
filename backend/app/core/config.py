@@ -74,6 +74,13 @@ class Settings(BaseSettings):
     # ---- Embedding Model ----
     embedding_model: str = "all-MiniLM-L6-v2"
 
+    # ---- RAG Settings ----
+    rag_chunk_size: int = 1000
+    rag_chunk_overlap: int = 150
+    rag_max_file_size_mb: int = 10
+    rag_retrieval_k: int = 5
+    rag_vector_index_name: str = "vector_index"
+
     @property
     def cors_origins(self) -> list[str]:
         return [o.strip() for o in self.allowed_origins.split(",") if o.strip()]

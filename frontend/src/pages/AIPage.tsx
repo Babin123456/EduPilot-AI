@@ -7,7 +7,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Bot, Send, Sparkles, Paperclip, FileText, Image as ImageIcon,
   FileSpreadsheet, Presentation, File, X, Loader2, CheckCircle2, Cpu,
-  Copy, Check, RotateCw, PlusCircle, Trash2, MessageSquare, ChevronDown, Download
+  Copy, Check, RotateCw, PlusCircle, Trash2, MessageSquare, ChevronDown, Download,
+  BookOpen, Upload, Database, AlertCircle
 } from 'lucide-react';
 
 interface AttachedFile {
@@ -17,23 +18,40 @@ interface AttachedFile {
   summary: string;
 }
 
+interface RagDocument {
+  id: string;
+  filename: string;
+  file_type: string;
+  chunk_count: number;
+  file_size_bytes: number;
+  status: string;
+  created_at: string;
+}
+
 export const AIPage: React.FC = () => {
   const { activeClass } = useAuth();
   const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [ragUploading, setRagUploading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [conversations, setConversations] = useState<any[]>([]);
   const [attachedFile, setAttachedFile] = useState<AttachedFile | null>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [selectedModel, setSelectedModel] = useState<string>('Groq Llama-3.3-70B');
 
+  // RAG Document Library state
+  const [ragDocuments, setRagDocuments] = useState<RagDocument[]>([]);
+  const [showDocLibrary, setShowDocLibrary] = useState(false);
+
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const ragFileInputRef = React.useRef<HTMLInputElement>(null);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchConversations();
+    fetchRagDocuments();
   }, []);
 
   useEffect(() => {
@@ -44,6 +62,13 @@ export const AIPage: React.FC = () => {
     try {
       const res = await api.get('/ai/conversations');
       setConversations(res.data || []);
+    } catch (err) {}
+  };
+
+  const fetchRagDocuments = async () => {
+    try {
+      const res = await api.get('/ai/rag/documents');
+      setRagDocuments(res.data || []);
     } catch (err) {}
   };
 
@@ -92,7 +117,64 @@ export const AIPage: React.FC = () => {
     URL.revokeObjectURL(url);
   };
 
+  // ── RAG Document Upload (PDF/DOCX → ingestion pipeline) ──
+  const handleRagUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
+    const ext = file.name.split('.').pop()?.toLowerCase();
+    if (!['pdf', 'docx'].includes(ext || '')) {
+      alert('Only PDF and DOCX files are supported for RAG indexing.');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      alert('File size exceeds the 10MB limit.');
+      return;
+    }
+
+    setRagUploading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await api.post('/ai/rag/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 120000, // 2 min timeout for large documents
+      });
+      if (res.data.success) {
+        fetchRagDocuments();
+        // Auto-send a message about the uploaded document
+        const docName = res.data.document.filename;
+        const chunkCount = res.data.document.chunk_count;
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: `📚 **Document Indexed Successfully**\n\n**${docName}** has been processed and indexed into **${chunkCount} searchable chunks**.\n\nYou can now ask me questions about this document. For example:\n- *"Summarize the key points of ${docName}"*\n- *"What does this document say about [topic]?"*\n- *"Explain the main concepts covered in this file"*`,
+          model_used: 'RAG Engine',
+          content_type: 'rag',
+        }]);
+      }
+    } catch (err: any) {
+      const detail = err?.response?.data?.detail || 'Failed to upload document for RAG indexing.';
+      alert(detail);
+    } finally {
+      setRagUploading(false);
+      if (ragFileInputRef.current) ragFileInputRef.current.value = '';
+    }
+  };
+
+  const handleDeleteRagDocument = async (docId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm('Delete this document and all its indexed chunks?')) return;
+    try {
+      await api.delete(`/ai/rag/documents/${docId}`);
+      fetchRagDocuments();
+    } catch (err) {
+      console.error('Delete RAG document error:', err);
+    }
+  };
+
+  // ── Regular file upload (PPT, Excel, Image — non-RAG) ──
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -125,7 +207,7 @@ export const AIPage: React.FC = () => {
     setLoading(true);
 
     const fileContext = attachedFile ? attachedFile.extracted_text : null;
-    setAttachedFile(null); // Reset file attachment after sending
+    setAttachedFile(null);
 
     try {
       const res = await api.post('/ai/chat', {
@@ -142,6 +224,8 @@ export const AIPage: React.FC = () => {
           role: 'assistant',
           content: res.data.message.content,
           model_used: res.data.message.model_used || selectedModel,
+          content_type: res.data.message.content_type || 'text',
+          sources: res.data.message.sources || [],
         },
       ]);
       fetchConversations();
@@ -162,7 +246,6 @@ export const AIPage: React.FC = () => {
     if (messages.length < 2 || loading) return;
     const lastUserMsg = [...messages].reverse().find((m) => m.role === 'user');
     if (lastUserMsg) {
-      // Remove last assistant message
       setMessages((prev) => prev.slice(0, prev.length - 1));
       handleSend(lastUserMsg.content);
     }
@@ -186,19 +269,23 @@ export const AIPage: React.FC = () => {
     if (type === 'spreadsheet') return <FileSpreadsheet className="w-4 h-4 text-emerald-500" />;
     if (type === 'presentation') return <Presentation className="w-4 h-4 text-amber-500" />;
     if (type === 'image') return <ImageIcon className="w-4 h-4 text-blue-500" />;
+    if (type === 'docx') return <FileText className="w-4 h-4 text-blue-600" />;
     return <File className="w-4 h-4 text-slate-500" />;
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
   return (
     <div className="max-w-7xl mx-auto w-full">
       <div className="flex h-[calc(100vh-6.5rem)] bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-md overflow-hidden -my-3">
-        {/* ─── Left Sidebar: Conversation History ─── */}
+        {/* ─── Left Sidebar: Conversation History + Document Library ─── */}
         <div className="w-64 bg-slate-50 dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 p-3 hidden md:flex flex-col justify-between flex-shrink-0">
 
-
-
-
-        <div className="space-y-3 overflow-y-auto">
+        <div className="space-y-3 overflow-y-auto flex-1">
           <button
             onClick={handleNewChat}
             className="w-full py-2.5 px-3 bg-[#005BAC] hover:bg-[#0A6FD8] text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all"
@@ -207,7 +294,106 @@ export const AIPage: React.FC = () => {
             <span>New Chat Thread</span>
           </button>
 
-          <div className="space-y-1 pt-2">
+          {/* ── RAG Document Library ── */}
+          <div className="border-t border-slate-200 dark:border-slate-800 pt-2">
+            <button
+              onClick={() => setShowDocLibrary(!showDocLibrary)}
+              className="w-full flex items-center justify-between px-2 py-1.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+            >
+              <div className="flex items-center gap-1.5">
+                <BookOpen className="w-3 h-3" />
+                <span>RAG Documents ({ragDocuments.length})</span>
+              </div>
+              <ChevronDown className={`w-3 h-3 transition-transform ${showDocLibrary ? 'rotate-180' : ''}`} />
+            </button>
+
+            <AnimatePresence>
+              {showDocLibrary && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  {/* Upload RAG Document Button */}
+                  <input
+                    type="file"
+                    ref={ragFileInputRef}
+                    onChange={handleRagUpload}
+                    accept=".pdf,.docx"
+                    className="hidden"
+                  />
+                  <button
+                    onClick={() => ragFileInputRef.current?.click()}
+                    disabled={ragUploading}
+                    className="w-full mt-1 py-2 px-3 bg-emerald-50 dark:bg-emerald-950/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 text-[11px] font-bold rounded-lg flex items-center justify-center gap-2 border border-emerald-200 dark:border-emerald-800 transition-all disabled:opacity-50"
+                  >
+                    {ragUploading ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Indexing Document...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>Upload PDF / DOCX</span>
+                      </>
+                    )}
+                  </button>
+
+                  {/* Document List */}
+                  <div className="mt-2 space-y-1 max-h-40 overflow-y-auto">
+                    {ragDocuments.length === 0 ? (
+                      <p className="px-2 py-3 text-[10px] text-slate-400 text-center">
+                        No documents indexed yet.
+                        <br />Upload a PDF or DOCX to get started.
+                      </p>
+                    ) : (
+                      ragDocuments.map((doc) => (
+                        <div
+                          key={doc.id}
+                          className="group flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors"
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            {getFileIcon(doc.file_type)}
+                            <div className="min-w-0">
+                              <p className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 truncate max-w-[130px]" title={doc.filename}>
+                                {doc.filename}
+                              </p>
+                              <div className="flex items-center gap-1.5 text-[9px] text-slate-400">
+                                <span>{doc.chunk_count} chunks</span>
+                                <span>•</span>
+                                <span>{formatFileSize(doc.file_size_bytes)}</span>
+                                {doc.status === 'indexed' && (
+                                  <CheckCircle2 className="w-2.5 h-2.5 text-emerald-500" />
+                                )}
+                                {doc.status === 'processing' && (
+                                  <Loader2 className="w-2.5 h-2.5 text-amber-500 animate-spin" />
+                                )}
+                                {doc.status === 'failed' && (
+                                  <AlertCircle className="w-2.5 h-2.5 text-red-500" />
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <button
+                            onClick={(e) => handleDeleteRagDocument(doc.id, e)}
+                            className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 transition-opacity"
+                            title="Delete document"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* ── Conversation History ── */}
+          <div className="space-y-1 pt-2 border-t border-slate-200 dark:border-slate-800">
             <p className="px-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Recent Threads</p>
             {conversations.length === 0 ? (
               <p className="px-2 py-4 text-[11px] text-slate-400 text-center">No previous threads</p>
@@ -257,6 +443,11 @@ export const AIPage: React.FC = () => {
           <div className="space-y-0.5 relative z-10">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-extrabold text-white">
               <Bot className="w-3 h-3 text-[#8CC63F]" /> EduPilot AI Intelligence Engine
+              {ragDocuments.length > 0 && (
+                <span className="ml-1 px-1.5 py-0.5 bg-emerald-500/30 rounded-full text-[9px]">
+                  📚 {ragDocuments.length} doc{ragDocuments.length !== 1 ? 's' : ''} indexed
+                </span>
+              )}
             </div>
             <h1 className="text-base sm:text-lg font-black">EduPilot AI Copilot</h1>
           </div>
@@ -297,8 +488,13 @@ export const AIPage: React.FC = () => {
               <div>
                 <h3 className="font-extrabold text-slate-900 dark:text-white text-lg">How can EduPilot assist your teaching today?</h3>
                 <p className="text-xs text-slate-500 mt-1">
-                  Ask about attendance metrics, timetable routines, student performance, or upload any PDF, PPT, Excel, or Image file for instant AI explanation!
+                  Ask about attendance metrics, timetable routines, student performance, or upload any PDF/DOCX for deep RAG analysis!
                 </p>
+                {ragDocuments.length > 0 && (
+                  <p className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-1.5 font-semibold">
+                    📚 {ragDocuments.length} document{ragDocuments.length !== 1 ? 's' : ''} indexed — ask questions about your uploaded files!
+                  </p>
+                )}
               </div>
               <div className="grid grid-cols-1 gap-2 w-full pt-2">
                 {samplePrompts.map((prompt, i) => (
@@ -322,8 +518,8 @@ export const AIPage: React.FC = () => {
                 className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 {msg.role === 'assistant' && (
-                  <div className="w-8 h-8 rounded-lg bg-[#8CC63F] text-slate-950 flex items-center justify-center flex-shrink-0 shadow-sm">
-                    <Bot className="w-4 h-4" />
+                  <div className={`w-8 h-8 rounded-lg ${msg.content_type === 'rag' ? 'bg-emerald-500' : 'bg-[#8CC63F]'} text-slate-950 flex items-center justify-center flex-shrink-0 shadow-sm`}>
+                    {msg.content_type === 'rag' ? <BookOpen className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
                   </div>
                 )}
 
@@ -371,14 +567,27 @@ export const AIPage: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Message Action Bar (Copy & Regenerate) */}
+                  {/* Message Action Bar (Copy, Regenerate, Sources) */}
                   <div className="flex items-center justify-between text-[10px] text-slate-400 px-1 pt-1 opacity-80 group-hover:opacity-100 transition-opacity">
-                    {msg.model_used && (
-                      <div className="flex items-center gap-1">
-                        <Cpu className="w-3 h-3 text-[#005BAC] dark:text-[#8CC63F]" />
-                        <span>Powered by {msg.model_used}</span>
-                      </div>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {msg.model_used && (
+                        <div className="flex items-center gap-1">
+                          <Cpu className="w-3 h-3 text-[#005BAC] dark:text-[#8CC63F]" />
+                          <span>Powered by {msg.model_used}</span>
+                        </div>
+                      )}
+                      {/* RAG Source Badges */}
+                      {msg.sources && msg.sources.length > 0 && (
+                        <div className="flex items-center gap-1 ml-1">
+                          <Database className="w-3 h-3 text-emerald-500" />
+                          {msg.sources.map((src: string, si: number) => (
+                            <span key={si} className="px-1.5 py-0.5 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 rounded text-[9px] font-semibold border border-emerald-200 dark:border-emerald-800">
+                              📄 {src}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                     <div className="flex items-center gap-2 ml-auto">
                       <button
                         onClick={() => handleCopy(msg.content, i)}
@@ -442,6 +651,34 @@ export const AIPage: React.FC = () => {
           )}
         </AnimatePresence>
 
+        {/* RAG Upload Progress Bar */}
+        <AnimatePresence>
+          {ragUploading && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="px-6 py-3 bg-emerald-50 dark:bg-emerald-950/30 border-t border-emerald-200 dark:border-emerald-800"
+            >
+              <div className="flex items-center gap-3">
+                <Loader2 className="w-4 h-4 text-emerald-600 animate-spin" />
+                <div className="flex-1">
+                  <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400">Indexing document for RAG...</p>
+                  <p className="text-[10px] text-emerald-600/70 dark:text-emerald-500/70">Parsing → Chunking → Embedding → Storing in Vector DB</p>
+                  <div className="mt-1.5 h-1.5 bg-emerald-200 dark:bg-emerald-900 rounded-full overflow-hidden">
+                    <motion.div
+                      className="h-full bg-emerald-500 rounded-full"
+                      initial={{ width: '5%' }}
+                      animate={{ width: '90%' }}
+                      transition={{ duration: 15, ease: 'easeInOut' }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Input Form */}
         <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
           <form
@@ -451,19 +688,19 @@ export const AIPage: React.FC = () => {
             }}
             className="flex items-center gap-2"
           >
-            {/* File Upload Input Button */}
+            {/* File Upload Input Button (PPT, Excel, Image) */}
             <input
               type="file"
               ref={fileInputRef}
               onChange={handleFileUpload}
-              accept=".pdf,.pptx,.ppt,.xlsx,.xls,.csv,.png,.jpg,.jpeg,.webp"
+              accept=".pptx,.ppt,.xlsx,.xls,.csv,.png,.jpg,.jpeg,.webp"
               className="hidden"
             />
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
-              title="Attach file (PDF, PPT, Excel, Image)"
+              title="Attach file (PPT, Excel, Image)"
               className="p-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl transition-colors disabled:opacity-50"
             >
               {uploading ? (
@@ -477,7 +714,10 @@ export const AIPage: React.FC = () => {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Message EduPilot AI (Groq Llama-3.3 & Gemini 1.5 Flash)..."
+              placeholder={ragDocuments.length > 0
+                ? "Ask about your documents or any academic topic..."
+                : "Message EduPilot AI (Groq Llama-3.3 & Gemini 1.5 Flash)..."
+              }
               className="flex-1 px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#005BAC]"
             />
 
@@ -495,10 +735,3 @@ export const AIPage: React.FC = () => {
   </div>
 );
 };
-
-
-
-
-
-
-

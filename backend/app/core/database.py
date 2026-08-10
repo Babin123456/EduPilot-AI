@@ -93,3 +93,11 @@ def ensure_indexes():
     # Daily Notes
     db.daily_notes.create_index("teacher_id")
     db.daily_notes.create_index("teacher_course_assignment_id")
+
+    # RAG Documents
+    db.rag_documents.create_index("teacher_id")
+    db.rag_documents.create_index("status")
+
+    # RAG Chunks (regular indexes — vector index must be created in Atlas UI)
+    db.rag_chunks.create_index("document_id")
+    db.rag_chunks.create_index("teacher_id")
