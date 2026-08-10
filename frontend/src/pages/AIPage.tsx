@@ -188,6 +188,9 @@ export const AIPage: React.FC = () => {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       setAttachedFile(res.data);
+      if (['pdf', 'docx'].includes(res.data.file_type)) {
+        setTimeout(fetchRagDocuments, 1000);
+      }
     } catch (err) {
       console.error('File upload error:', err);
     } finally {
@@ -688,19 +691,19 @@ export const AIPage: React.FC = () => {
             }}
             className="flex items-center gap-2"
           >
-            {/* File Upload Input Button (PPT, Excel, Image) */}
+            {/* File Upload Input Button (PDF, DOCX, PPT, Excel, Image) */}
             <input
               type="file"
               ref={fileInputRef}
               onChange={handleFileUpload}
-              accept=".pptx,.ppt,.xlsx,.xls,.csv,.png,.jpg,.jpeg,.webp"
+              accept=".pdf,.docx,.pptx,.ppt,.xlsx,.xls,.csv,.png,.jpg,.jpeg,.webp"
               className="hidden"
             />
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
-              title="Attach file (PPT, Excel, Image)"
+              title="Attach file (PDF, DOCX, PPT, Excel, Image)"
               className="p-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl transition-colors disabled:opacity-50"
             >
               {uploading ? (

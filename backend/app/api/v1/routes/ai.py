@@ -9,7 +9,7 @@ import re
 import uuid
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, File, UploadFile, Form, HTTPException
+from fastapi import APIRouter, Depends, File, UploadFile, Form, HTTPException, BackgroundTasks
 from pydantic import BaseModel
 from pymongo.database import Database
 import httpx
@@ -94,12 +94,33 @@ def parse_uploaded_file(file_bytes: bytes, filename: str, content_type: str) -> 
 
         elif ext == ".pdf":
             file_type = "pdf"
-            raw_str = file_bytes.decode("latin1", errors="ignore")
-            text_blocks = re.findall(r"\((.*?)\)\s*Tj", raw_str)
-            if text_blocks:
-                text_content = " ".join(text_blocks)[:4000]
-            else:
-                text_content = f"PDF Document: {filename} ({len(file_bytes)} bytes). Contains course material & reading sections."
+            import tempfile
+            from langchain_community.document_loaders import PyPDFLoader
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+                tmp.write(file_bytes)
+                tmp_path = tmp.name
+            try:
+                loader = PyPDFLoader(tmp_path)
+                docs = loader.load()
+                text_content = "\n\n".join([doc.page_content for doc in docs])[:8000]
+            finally:
+                if os.path.exists(tmp_path):
+                    os.unlink(tmp_path)
+
+        elif ext in [".docx", ".doc"]:
+            file_type = "docx"
+            import tempfile
+            from langchain_community.document_loaders import Docx2txtLoader
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".docx") as tmp:
+                tmp.write(file_bytes)
+                tmp_path = tmp.name
+            try:
+                loader = Docx2txtLoader(tmp_path)
+                docs = loader.load()
+                text_content = "\n\n".join([doc.page_content for doc in docs])[:8000]
+            finally:
+                if os.path.exists(tmp_path):
+                    os.unlink(tmp_path)
 
         elif ext in [".png", ".jpg", ".jpeg", ".webp", ".gif"]:
             file_type = "image"
@@ -289,12 +310,26 @@ def delete_rag_doc(
 
 @router.post("/upload-file")
 async def upload_file_for_ai(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
 ):
     """Upload Image, PDF, Excel, or PPT file for AI analysis and explanation."""
     file_bytes = await file.read()
-    parsed = parse_uploaded_file(file_bytes, file.filename or "uploaded_file", file.content_type or "")
+    filename = file.filename or "uploaded_file"
+    parsed = parse_uploaded_file(file_bytes, filename, file.content_type or "")
+
+    ext = os.path.splitext(filename)[1].lower()
+    if ext in [".pdf", ".docx", ".doc"]:
+        background_tasks.add_task(
+            ingest_document,
+            file_bytes=file_bytes,
+            filename=filename,
+            teacher_id=teacher["id"],
+            db=db,
+        )
+
     return {
         "success": True,
         "filename": parsed["filename"],
@@ -416,7 +451,7 @@ def chat(
         f"1. Always use the live student database information provided above to give exact student names, roll numbers, and attendance percentages when asked.\n"
         f"2. Remember previous user questions and context in this conversation thread.\n"
         f"3. When answering questions about uploaded documents, cite the specific source filename and page numbers from the Retrieved Document Context above.\n"
-        f"4. If the Retrieved Document Context contains relevant information, use it to provide detailed, accurate answers.\n"
+        f"4. If the Retrieved Document Context contains relevant information, you MUST prioritize it over your internal knowledge to answer the question accurately.\n"
         f"5. Be concise, structured, professional, and use Markdown formatting without decorative text emojis."
     )
 

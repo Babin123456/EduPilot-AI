@@ -276,18 +276,42 @@ def retrieve_context(
         results = list(db.rag_chunks.aggregate(pipeline))
     except Exception as e:
         logger.warning(
-            "Atlas Vector Search unavailable (%s). Falling back to basic retrieval.",
+            "Atlas Vector Search unavailable or failed (%s). Falling back to in-memory cosine similarity.",
             str(e),
         )
-        # Fallback: basic text search on chunk content (no vector similarity)
-        results = list(
+        # Fallback: exact in-memory cosine similarity search using numpy
+        all_chunks = list(
             db.rag_chunks.find(
                 {"teacher_id": teacher_id},
-                {"content": 1, "metadata": 1},
+                {"content": 1, "metadata": 1, "embedding": 1},
             )
-            .sort("chunk_index", 1)
-            .limit(k)
         )
+        if not all_chunks:
+            return ""
+            
+        import numpy as np
+        query_vec = np.array(query_vector)
+        query_norm = np.linalg.norm(query_vec)
+        if query_norm == 0:
+            query_norm = 1e-9
+            
+        scored_chunks = []
+        for chunk in all_chunks:
+            emb = chunk.get("embedding")
+            if not emb:
+                continue
+            emb_vec = np.array(emb)
+            emb_norm = np.linalg.norm(emb_vec)
+            if emb_norm == 0:
+                emb_norm = 1e-9
+                
+            similarity = np.dot(query_vec, emb_vec) / (query_norm * emb_norm)
+            chunk["score"] = float(similarity)
+            scored_chunks.append(chunk)
+            
+        # Sort by highest similarity
+        scored_chunks.sort(key=lambda x: x["score"], reverse=True)
+        results = scored_chunks[:k]
 
     if not results:
         return ""
