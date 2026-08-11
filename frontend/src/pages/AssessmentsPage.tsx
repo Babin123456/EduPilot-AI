@@ -516,28 +516,28 @@ export const AssessmentsPage: React.FC = () => {
                           </div>
                           <div className="overflow-x-auto max-h-64 overflow-y-auto">
                             <table className="w-full text-xs">
-                              <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-400 uppercase sticky top-0">
+                              <thead className="bg-slate-50 dark:bg-slate-800/80 text-slate-400 dark:text-slate-300 uppercase sticky top-0">
                                 <tr>
                                   <th className="px-3 py-2 text-left">Roll</th>
                                   <th className="px-3 py-2 text-left">Name</th>
-                                  <th className="px-3 py-2">Score</th>
-                                  <th className="px-3 py-2">%</th>
-                                  <th className="px-3 py-2">Grade</th>
+                                  <th className="px-3 py-2 text-center">Score</th>
+                                  <th className="px-3 py-2 text-center">%</th>
+                                  <th className="px-3 py-2 text-center">Grade</th>
                                 </tr>
                               </thead>
-                              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                              <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-800 dark:text-slate-200">
                                 {results[a.id].map((r: any) => (
-                                  <tr key={r.student_id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
-                                    <td className="px-3 py-2 font-mono">{r.roll_number}</td>
-                                    <td className="px-3 py-2 font-semibold">{r.student_name}</td>
-                                    <td className="px-3 py-2 text-center">{r.score}/{r.max_score}</td>
-                                    <td className="px-3 py-2 text-center font-bold">{r.percentage}%</td>
+                                  <tr key={r.student_id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/60">
+                                    <td className="px-3 py-2 font-mono text-slate-700 dark:text-slate-300">{r.roll_number}</td>
+                                    <td className="px-3 py-2 font-semibold text-slate-900 dark:text-white">{r.student_name}</td>
+                                    <td className="px-3 py-2 text-center text-slate-700 dark:text-slate-300">{r.score}/{r.max_score}</td>
+                                    <td className="px-3 py-2 text-center font-bold text-slate-900 dark:text-white">{r.percentage}%</td>
                                     <td className="px-3 py-2 text-center">
                                       <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                                        r.grade === 'A' ? 'bg-emerald-100 text-emerald-700' :
-                                        r.grade === 'B' ? 'bg-blue-100 text-blue-700' :
-                                        r.grade === 'C' ? 'bg-amber-100 text-amber-700' :
-                                        'bg-red-100 text-red-700'
+                                        r.grade === 'A' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' :
+                                        r.grade === 'B' ? 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300' :
+                                        r.grade === 'C' ? 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300' :
+                                        'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300'
                                       }`}>{r.grade}</span>
                                     </td>
                                   </tr>

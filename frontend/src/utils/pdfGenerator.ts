@@ -27,24 +27,26 @@ function addHeader(doc: jsPDF, title?: string, subtitle?: string) {
   doc.setFillColor(...COLORS.secondary);
   doc.rect(0, 4, pageWidth, 2, 'F');
 
-  // University name
-  doc.setFontSize(18);
-  doc.setFont('times', 'bold');
-  doc.setTextColor(...COLORS.primary);
-  // Document Title Header
-  doc.setFontSize(16);
+  // Document Title Header - compute dynamic font size based on text length to prevent overflow
+  const mainTitle = title ? title.toUpperCase() : 'ACADEMIC OPERATING SYSTEM';
+  const fontSize = mainTitle.length > 40 ? 11 : mainTitle.length > 25 ? 13 : 15;
+  
+  doc.setFontSize(fontSize);
+  doc.setFont('helvetica', 'bold');
   doc.setTextColor(0, 91, 172);
-  doc.text(title ? title.toUpperCase() : 'ACADEMIC OPERATING SYSTEM', pageWidth / 2, 22, { align: 'center' });
-  doc.setFontSize(9);
+  doc.text(mainTitle, pageWidth / 2, 20, { align: 'center', maxWidth: pageWidth - 30 });
+  
+  doc.setFontSize(8.5);
+  doc.setFont('helvetica', 'normal');
   doc.setTextColor(100, 116, 139);
-  doc.text(subtitle ? subtitle.toUpperCase() : 'EDUPILOT AI PLATFORM', pageWidth / 2, 28, { align: 'center' });
+  doc.text(subtitle ? subtitle.toUpperCase() : 'EDUPILOT AI PLATFORM', pageWidth / 2, 27, { align: 'center' });
 
   // Divider Line
   doc.setDrawColor(0, 91, 172);
   doc.setLineWidth(0.5);
-  doc.line(20, 32, pageWidth - 20, 32);
+  doc.line(20, 31, pageWidth - 20, 31);
 
-  return 54; // Y position after header
+  return 42; // Y position after header
 }
 
 function addFooter(doc: jsPDF) {
@@ -340,11 +342,17 @@ export function generateDailyNotePDF(data: DailyNotePDFData) {
   // Content / Notes body
   if (data.content) {
     y = addSectionTitle(doc, y, 'Lecture Notes & Discussion Summary');
-    // Strip markdown headings for clean PDF text rendering
+    // Strip markdown formatting, weird unicode characters, and emojis for clean PDF text rendering
     const cleanedContent = data.content
+      .replace(/[\u0080-\u024F\u1E00-\u1EFF\u2000-\u2BFF]/g, '') // remove non-latin symbols/emojis
       .replace(/^#+\s+/gm, '')
       .replace(/\*\*/g, '')
-      .replace(/`/g, '');
+      .replace(/`/g, '')
+      .replace(/Ø=ÜÝ/g, '')
+      .replace(/Ø<ß¯/g, '')
+      .replace(/Ø=ÜÚ/g, '')
+      .replace(/Ø=Ü¬/g, '')
+      .replace(/Ø=ÜÖ/g, '');
     y = addParagraph(doc, y, cleanedContent);
   } else if (data.summary) {
     y = addSectionTitle(doc, y, 'Lecture Notes');
