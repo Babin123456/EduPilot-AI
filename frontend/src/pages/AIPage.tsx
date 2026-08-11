@@ -10,6 +10,7 @@ import {
   Copy, Check, RotateCw, PlusCircle, Trash2, MessageSquare, ChevronDown, Download,
   BookOpen, Upload, Database, AlertCircle
 } from 'lucide-react';
+import { useToast } from '../context/ToastContext';
 
 interface AttachedFile {
   filename: string;
@@ -30,6 +31,7 @@ interface RagDocument {
 
 export const AIPage: React.FC = () => {
   const { activeClass } = useAuth();
+  const { showToast } = useToast();
   const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -44,6 +46,7 @@ export const AIPage: React.FC = () => {
   const handleCopyCode = (codeText: string, codeId: string) => {
     navigator.clipboard.writeText(codeText);
     setCopiedCodeId(codeId);
+    showToast('Code snippet copied to clipboard!', 'success');
     setTimeout(() => setCopiedCodeId(null), 2000);
   };
 
@@ -263,6 +266,7 @@ export const AIPage: React.FC = () => {
   const handleCopy = (text: string, index: number) => {
     navigator.clipboard.writeText(text);
     setCopiedIndex(index);
+    showToast('Message copied to clipboard!', 'info');
     setTimeout(() => setCopiedIndex(null), 2000);
   };
 
@@ -750,21 +754,29 @@ export const AIPage: React.FC = () => {
               )}
             </button>
 
-            <input
-              type="text"
+            <textarea
+              rows={1}
               value={input}
               onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  if ((input.trim() || attachedFile) && !loading) {
+                    handleSend();
+                  }
+                }
+              }}
               placeholder={ragDocuments.length > 0
-                ? "Ask about your documents or any academic topic..."
-                : "Message EduPilot AI..."
+                ? "Ask about your documents or any academic topic... (Shift+Enter for new line)"
+                : "Message EduPilot AI... (Shift+Enter for new line)"
               }
-              className="flex-1 px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#005BAC]"
+              className="flex-1 px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#005BAC] resize-none min-h-[44px] max-h-36 overflow-y-auto leading-relaxed"
             />
 
             <button
               type="submit"
               disabled={(!input.trim() && !attachedFile) || loading}
-              className="p-3 bg-[#005BAC] hover:bg-[#0A6FD8] text-white rounded-xl shadow disabled:opacity-50 transition-colors"
+              className="p-3 bg-[#005BAC] hover:bg-[#0A6FD8] text-white rounded-xl shadow disabled:opacity-50 transition-colors self-end"
             >
               <Send className="w-4 h-4" />
             </button>
