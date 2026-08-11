@@ -68,13 +68,6 @@ export const StudentsPage: React.FC = () => {
       .finally(() => setLoading(false));
   }, [activeClass, search]);
 
-  const handleCopyEmail = (email: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    navigator.clipboard.writeText(email);
-    setCopiedEmail(email);
-    toast.info('Copied Student Email', email);
-    setTimeout(() => setCopiedEmail(null), 2000);
-  };
 
   const handleExportExcel = () => {
     if (!students.length || !activeClass) return;
