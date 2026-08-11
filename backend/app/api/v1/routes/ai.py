@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import io
 import os
+import uuid
 from datetime import datetime, timezone
+from pathlib import Path
 
 import httpx
 from fastapi import (
@@ -338,20 +340,32 @@ async def upload_file_for_ai(
     teacher: dict = Depends(get_current_teacher),
     db: Database = Depends(get_db),
 ):
-    """Upload Image, PDF, Excel, or PPT file for AI analysis and explanation."""
+    """Upload Image, PDF, Excel, or PPT file for AI analysis, storage, and RAG indexing."""
+    settings = get_settings()
     file_bytes = await file.read()
     filename = file.filename or "uploaded_file"
+    ext = os.path.splitext(filename)[1].lower()
     parsed = parse_uploaded_file(file_bytes, filename, file.content_type or "")
 
-    ext = os.path.splitext(filename)[1].lower()
-    if ext in [".pdf", ".docx", ".doc"]:
-        background_tasks.add_task(
-            ingest_document,
-            file_bytes=file_bytes,
-            filename=filename,
-            teacher_id=teacher["id"],
-            db=db,
-        )
+    image_url = None
+    # Save file to disk for media access if it is an image
+    if ext in [".png", ".jpg", ".jpeg", ".webp", ".gif"]:
+        storage_path = Path(settings.storage_local_path).resolve()
+        storage_path.mkdir(parents=True, exist_ok=True)
+        safe_filename = f"chat_img_{uuid.uuid4().hex[:8]}_{filename.replace(' ', '_')}"
+        file_dest = storage_path / safe_filename
+        with open(file_dest, "wb") as f:
+            f.write(file_bytes)
+        image_url = f"/media/{safe_filename}"
+
+    # Auto-ingest documents and images into RAG Knowledge Library
+    background_tasks.add_task(
+        ingest_document,
+        file_bytes=file_bytes,
+        filename=filename,
+        teacher_id=teacher["id"],
+        db=db,
+    )
 
     return {
         "success": True,
@@ -359,7 +373,8 @@ async def upload_file_for_ai(
         "file_type": parsed["file_type"],
         "size_bytes": parsed["size_bytes"],
         "extracted_text": parsed["text_content"],
-        "summary": f"Uploaded {parsed['file_type'].upper()} file '{parsed['filename']}' ({parsed['size_bytes']} bytes) ready for AI analysis.",
+        "image_url": image_url,
+        "summary": f"Uploaded {parsed['file_type'].upper()} file '{parsed['filename']}' ({parsed['size_bytes']} bytes) ready for AI analysis & stored in Knowledge Base.",
     }
 
 

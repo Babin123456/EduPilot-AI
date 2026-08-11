@@ -17,6 +17,7 @@ interface AttachedFile {
   file_type: string;
   extracted_text: string;
   summary: string;
+  image_url?: string | null;
 }
 
 interface RagDocument {
@@ -40,6 +41,7 @@ export const AIPage: React.FC = () => {
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [conversations, setConversations] = useState<any[]>([]);
   const [attachedFile, setAttachedFile] = useState<AttachedFile | null>(null);
+  const [previewImage, setPreviewImage] = useState<{ url: string; title: string } | null>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [copiedCodeId, setCopiedCodeId] = useState<string | null>(null);
 
@@ -196,9 +198,7 @@ export const AIPage: React.FC = () => {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       setAttachedFile(res.data);
-      if (['pdf', 'docx'].includes(res.data.file_type)) {
-        setTimeout(fetchRagDocuments, 1000);
-      }
+      setTimeout(fetchRagDocuments, 1000);
     } catch (err) {
       console.error('File upload error:', err);
     } finally {
@@ -211,13 +211,18 @@ export const AIPage: React.FC = () => {
     const query = textToSend || input;
     if ((!query.trim() && !attachedFile) || loading) return;
 
-    const userMsgContent = query.trim() + (attachedFile ? `\n\n📎 [Attached File: ${attachedFile.filename}]` : '');
-    const userMsg = { role: 'user', content: userMsgContent };
+    const currentAttached = attachedFile;
+    const userMsgContent = query.trim() + (currentAttached ? `\n\n📎 [Attached File: ${currentAttached.filename}]` : '');
+    const userMsg = {
+      role: 'user',
+      content: userMsgContent,
+      image_url: currentAttached?.image_url || null,
+    };
     setMessages((prev) => [...prev, userMsg]);
     if (!textToSend) setInput('');
     setLoading(true);
 
-    const fileContext = attachedFile ? attachedFile.extracted_text : null;
+    const fileContext = currentAttached ? currentAttached.extracted_text : null;
     setAttachedFile(null);
 
     try {
@@ -516,7 +521,25 @@ export const AIPage: React.FC = () => {
                   >
 
                     {msg.role === 'user' ? (
-                      msg.content
+                      <div className="space-y-2">
+                        {msg.image_url && (
+                          <div className="relative group/img cursor-pointer max-w-xs rounded-xl overflow-hidden border border-white/30 shadow-md">
+                            <img
+                              src={msg.image_url}
+                              alt="Uploaded Chat Attachment"
+                              onClick={() => setPreviewImage({ url: msg.image_url, title: 'Chat Image Attachment' })}
+                              className="w-full h-auto max-h-48 object-cover group-hover/img:scale-105 transition-transform duration-200"
+                            />
+                            <div
+                              onClick={() => setPreviewImage({ url: msg.image_url, title: 'Chat Image Attachment' })}
+                              className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover/img:opacity-100 flex items-center justify-center text-white text-[11px] font-bold transition-opacity"
+                            >
+                              🔍 Click to View Fullscreen
+                            </div>
+                          </div>
+                        )}
+                        <div>{msg.content}</div>
+                      </div>
                     ) : (
                       <ReactMarkdown
                         remarkPlugins={[remarkGfm]}
@@ -735,6 +758,55 @@ export const AIPage: React.FC = () => {
           </form>
         </div>
       </div>
+
+      {/* ── ChatGPT-Style Fullscreen Image Lightbox Modal ── */}
+      <AnimatePresence>
+        {previewImage && (
+          <div
+            onClick={() => setPreviewImage(null)}
+            className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 cursor-pointer"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative max-w-4xl max-h-[90vh] bg-slate-900 rounded-3xl border border-slate-800 shadow-2xl overflow-hidden flex flex-col"
+            >
+              <div className="flex items-center justify-between p-4 border-b border-slate-800 bg-slate-950/80">
+                <span className="text-xs font-bold text-white flex items-center gap-2">
+                  <ImageIcon className="w-4 h-4 text-[#8CC63F]" /> {previewImage.title}
+                </span>
+                <div className="flex items-center gap-2">
+                  <a
+                    href={previewImage.url}
+                    download
+                    target="_blank"
+                    rel="noreferrer"
+                    className="p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 text-xs flex items-center gap-1 font-semibold"
+                  >
+                    <Download className="w-3.5 h-3.5" /> Download
+                  </a>
+                  <button
+                    onClick={() => setPreviewImage(null)}
+                    className="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-4 flex items-center justify-center overflow-auto max-h-[80vh]">
+                <img
+                  src={previewImage.url}
+                  alt="Fullscreen Preview"
+                  className="max-w-full max-h-[75vh] object-contain rounded-xl shadow-lg"
+                />
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   </div>
 );
