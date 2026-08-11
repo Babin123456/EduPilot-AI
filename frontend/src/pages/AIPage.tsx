@@ -222,20 +222,10 @@ export const AIPage: React.FC = () => {
 
   const handleSend = async (textToSend?: string) => {
     const query = textToSend || input;
-    let currentAttached = attachedFile;
+    if (uploading) return;
+    if ((!query.trim() && !attachedFile) || loading) return;
 
-    // If a file is currently uploading while user clicks Send or presses Enter, wait for it
-    if (!currentAttached && uploading && uploadPromiseRef.current) {
-      try {
-        const res = await uploadPromiseRef.current;
-        currentAttached = res.data;
-      } catch (err) {
-        console.error('Pending upload error:', err);
-      }
-    }
-
-    if ((!query.trim() && !currentAttached) || loading) return;
-
+    const currentAttached = attachedFile;
     const userMsgContent = query.trim() + (currentAttached ? `\n\n[Attached File: ${currentAttached.filename}]` : '');
     const userMsg = {
       role: 'user',
@@ -788,7 +778,7 @@ export const AIPage: React.FC = () => {
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
-                  if ((input.trim() || attachedFile || uploading) && !loading) {
+                  if (!uploading && (input.trim() || attachedFile) && !loading) {
                     handleSend();
                   }
                 }
@@ -796,7 +786,7 @@ export const AIPage: React.FC = () => {
               placeholder={attachedFile
                 ? `Ask a question about ${attachedFile.filename} or press Send...`
                 : uploading
-                ? "Uploading file... Press Enter or Send to attach and message."
+                ? "Uploading file, please wait..."
                 : ragDocuments.length > 0
                 ? "Ask about your documents or any academic topic... (Shift+Enter for new line)"
                 : "Message EduPilot AI... (Shift+Enter for new line)"
@@ -806,9 +796,9 @@ export const AIPage: React.FC = () => {
 
             <button
               type="submit"
-              disabled={(!input.trim() && !attachedFile && !uploading) || loading}
+              disabled={uploading || (!input.trim() && !attachedFile) || loading}
               className="p-3 bg-[#005BAC] hover:bg-[#0A6FD8] text-white rounded-xl shadow disabled:opacity-40 disabled:cursor-not-allowed transition-all self-end"
-              title={(!input.trim() && !attachedFile && !uploading) ? 'Type a message or attach a file to send' : 'Send message'}
+              title={uploading ? 'File uploading, please wait...' : (!input.trim() && !attachedFile) ? 'Type a message or attach a file to send' : 'Send message'}
             >
               <Send className="w-4 h-4" />
             </button>
