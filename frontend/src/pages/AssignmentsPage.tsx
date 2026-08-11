@@ -368,14 +368,46 @@ export const AssignmentsPage: React.FC = () => {
             </div>
             <button
               onClick={() => {
-                const qData = Array.from({ length: 5 }, (_, i) => ({
-                  number: i + 1,
-                  text: `Assignment Question ${i + 1} on ${a.topic || 'Course Topic'}: Write a detailed analysis and solution.`,
-                  type: 'short',
-                  marks: Math.ceil((a.total_marks || 25) / 5),
-                }));
-                const mdText = `# ${a.title}\n**Course:** ${activeClass?.course_name || ''} (${activeClass?.course_code || ''})\n**Total Marks:** ${a.total_marks} | **Difficulty:** ${a.difficulty || 'MEDIUM'}\n\n---\n\n` +
-                  qData.map(q => `### Question ${q.number} [${q.marks} Marks]\n${q.text}`).join('\n\n');
+                let mdText = a.instructions || '';
+                let qData = [];
+
+                if (a.questions_json) {
+                  try {
+                    qData = typeof a.questions_json === 'string' ? JSON.parse(a.questions_json) : a.questions_json;
+                  } catch (e) {
+                    qData = [];
+                  }
+                }
+
+                if (!mdText) {
+                  if (qData && qData.length > 0) {
+                    const mdLines = [
+                      `# ${a.title}`,
+                      `**Course:** ${activeClass?.course_name || ''} (\`${activeClass?.course_code || ''}\`) | **Total Marks:** ${a.total_marks || 50} | **Difficulty:** ${(a.difficulty || 'medium').toUpperCase()}`,
+                      '\n---\n',
+                    ];
+                    qData.forEach((q: any) => {
+                      mdLines.push(`### Question ${q.number} [${q.marks || 5} Marks]\n${q.text}\n`);
+                      if (q.options) {
+                        q.options.forEach((opt: string) => mdLines.push(`- ${opt}`));
+                        mdLines.push('');
+                      }
+                    });
+                    mdText = mdLines.join('\n');
+                  } else {
+                    mdText = `# ${a.title}\n**Course:** ${activeClass?.course_name || ''} (\`${activeClass?.course_code || ''}\`)\n\n${a.description || 'No detailed instructions available.'}`;
+                  }
+                }
+
+                if (!qData || qData.length === 0) {
+                  qData = Array.from({ length: 5 }, (_, i) => ({
+                    number: i + 1,
+                    text: `Solve and submit problem ${i + 1} regarding ${a.topic || a.title}.`,
+                    type: 'short',
+                    marks: Math.ceil((a.total_marks || 50) / 5),
+                  }));
+                }
+
                 setGeneratedQuestionsData(qData);
                 setGeneratedMarkdown(mdText);
                 setActiveTitle(a.title);
