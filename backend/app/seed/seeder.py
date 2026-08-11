@@ -92,7 +92,7 @@ COURSES_BY_SEMESTER = {
 
 DEMO_TEACHERS = [
     {
-        "faculty_id": "FAC-AU-001",
+        "faculty_id": "FAC-UNIV-001",
         "first_name": "Rajesh",
         "last_name": "Banerjee",
         "email": "rajesh.banerjee@edupilot.ai",
@@ -102,7 +102,7 @@ DEMO_TEACHERS = [
         "phone": "+91-9876543210",
     },
     {
-        "faculty_id": "FAC-AU-002",
+        "faculty_id": "FAC-UNIV-002",
         "first_name": "Priya",
         "last_name": "Nair",
         "email": "priya.nair@edupilot.ai",
@@ -112,7 +112,7 @@ DEMO_TEACHERS = [
         "phone": "+91-9876543211",
     },
     {
-        "faculty_id": "FAC-AU-003",
+        "faculty_id": "FAC-UNIV-003",
         "first_name": "Amitava",
         "last_name": "Chatterjee",
         "email": "amitava.chatterjee@edupilot.ai",
@@ -122,7 +122,7 @@ DEMO_TEACHERS = [
         "phone": "+91-9876543212",
     },
     {
-        "faculty_id": "FAC-AU-004",
+        "faculty_id": "FAC-UNIV-004",
         "first_name": "Sunita",
         "last_name": "Devi",
         "email": "sunita.devi@edupilot.ai",
@@ -132,7 +132,7 @@ DEMO_TEACHERS = [
         "phone": "+91-9876543213",
     },
     {
-        "faculty_id": "FAC-AU-005",
+        "faculty_id": "FAC-UNIV-005",
         "first_name": "Debashis",
         "last_name": "Ghosh",
         "email": "debashis.ghosh@edupilot.ai",
@@ -142,7 +142,7 @@ DEMO_TEACHERS = [
         "phone": "+91-9876543214",
     },
     {
-        "faculty_id": "FAC-AU-006",
+        "faculty_id": "FAC-UNIV-006",
         "first_name": "Meenakshi",
         "last_name": "Iyer",
         "email": "meenakshi.iyer@edupilot.ai",
@@ -152,7 +152,7 @@ DEMO_TEACHERS = [
         "phone": "+91-9876543215",
     },
     {
-        "faculty_id": "FAC-AU-007",
+        "faculty_id": "FAC-UNIV-007",
         "first_name": "Arpan",
         "last_name": "Mukherjee",
         "email": "arpan.mukherjee@edupilot.ai",
@@ -162,7 +162,7 @@ DEMO_TEACHERS = [
         "phone": "+91-9876543216",
     },
     {
-        "faculty_id": "FAC-AU-008",
+        "faculty_id": "FAC-UNIV-008",
         "first_name": "Kavita",
         "last_name": "Sharma",
         "email": "kavita.sharma@edupilot.ai",
@@ -172,7 +172,7 @@ DEMO_TEACHERS = [
         "phone": "+91-9876543217",
     },
     {
-        "faculty_id": "FAC-AU-009",
+        "faculty_id": "FAC-UNIV-009",
         "first_name": "Subhashis",
         "last_name": "Roy",
         "email": "subhashis.roy@edupilot.ai",
@@ -182,7 +182,7 @@ DEMO_TEACHERS = [
         "phone": "+91-9876543218",
     },
     {
-        "faculty_id": "FAC-AU-010",
+        "faculty_id": "FAC-UNIV-010",
         "first_name": "Ananya",
         "last_name": "Sengupta",
         "email": "ananya.sengupta@edupilot.ai",
