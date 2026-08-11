@@ -15,7 +15,7 @@ const features = [
   {
     icon: BookOpen,
     title: 'AI-Driven Lesson Planning',
-    description: 'Instantly generate detailed lesson outlines, presentation slides, and curriculum maps aligned to your Adamas University syllabus.',
+    description: 'Instantly generate detailed lesson outlines, presentation slides, and curriculum maps aligned to your university syllabus.',
     badge: 'Core Feature',
     image: '/images/features_ai_planning.png',
   },
@@ -100,10 +100,10 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onNavigate }) 
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white">
             Designed for Modern{' '}
-            <span className="text-gradient">Academic Operations</span>
+            <span className="text-gradient font-cursive text-4xl sm:text-5xl lg:text-6xl tracking-normal">Academic Operations</span>
           </h2>
           <p className="text-base sm:text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-            EduPilot AI equips Adamas University faculty with modular tools that streamline daily administration and enhance student outcomes.
+            EduPilot AI equips university faculty with modular tools that streamline daily administration and enhance student outcomes.
           </p>
         </div>
 

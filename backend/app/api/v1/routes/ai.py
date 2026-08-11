@@ -442,7 +442,7 @@ def chat(
         )
 
     system_prompt = (
-        f"You are EduPilot AI, the intelligent academic copilot for Adamas University, Kolkata.\n"
+        f"You are EduPilot AI, the intelligent academic copilot for university faculty.\n"
         f"You are assisting Professor {teacher['full_name']} ({teacher.get('designation', '')}, {teacher.get('specialization', 'CSE')}).\n"
         f"Current Academic Context: {class_context_str or 'General Academic Workspace'}\n"
         f"Live Database Information:\n{student_summary_str or 'N/A'}\n"

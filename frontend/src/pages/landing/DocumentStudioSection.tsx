@@ -13,9 +13,9 @@ const TAB_ITEMS = [
     badge: '.PDF BUNDLE',
     icon: FileText,
     color: 'text-red-500 bg-red-500/10 border-red-500/20',
-    description: 'Auto-formatted with official Adamas University exam headers, marking schemes, and 100% MCQ / Short Question options ready for instant distribution.',
+    description: 'Auto-formatted with official university exam headers, marking schemes, and 100% MCQ / Short Question options ready for instant distribution.',
     sampleTitle: 'Operating Systems (CS304) — Midterm Examination Paper',
-    highlights: ['Adamas University Header & Logo', 'Automated Marks Breakdown (5 Qs × 5 Marks)', 'Answer Key & Grading Rubrics Included'],
+    highlights: ['Official University Header & Logo', 'Automated Marks Breakdown (5 Qs × 5 Marks)', 'Answer Key & Grading Rubrics Included'],
   },
   {
     id: 'pptx',
@@ -87,7 +87,7 @@ export const DocumentStudioSection: React.FC = () => {
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white">
             Publish & Distribute{' '}
-            <span className="text-gradient">Class Materials Effortlessly</span>
+            <span className="text-gradient font-cursive text-4xl sm:text-5xl lg:text-6xl tracking-normal">Class Materials Effortlessly</span>
           </h2>
           <p className="text-base sm:text-lg text-slate-600 dark:text-slate-400">
             Switch between interactive formats to preview, edit, and export syllabus-aligned lesson materials in 1-Click.

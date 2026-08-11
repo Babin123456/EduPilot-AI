@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { ToastProvider } from './context/ToastContext';
 import { MainLayout } from './components/MainLayout';
+import { EduPilotLoader } from './components/EduPilotLoader';
 import { LandingPage } from './pages/landing/LandingPage';
 import { FAQPage } from './pages/landing/FAQPage';
 import { TermsPage } from './pages/landing/TermsPage';
@@ -48,14 +49,19 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 };
 
 export const App: React.FC = () => {
+  const [isAppLoaded, setIsAppLoaded] = useState(false);
+
   return (
     <ThemeProvider>
       <ToastProvider>
         <AuthProvider>
           <ErrorBoundary>
+            {!isAppLoaded && (
+              <EduPilotLoader onComplete={() => setIsAppLoaded(true)} />
+            )}
             <BrowserRouter>
               <Routes>
-                <Route path="/" element={<LandingPage />} />
+                <Route path="/" element={<LandingPage isAppLoaded={isAppLoaded} />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/faq" element={<FAQPage />} />
                 <Route path="/terms" element={<TermsPage />} />

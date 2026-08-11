@@ -18,9 +18,13 @@ from app.seed.seeder import run_seed
 async def lifespan(app: FastAPI):
     """Application lifespan: startup and shutdown."""
     settings = get_settings()
-    # Create indexes and seed on startup
-    ensure_indexes()
-    run_seed()
+    # Create indexes and seed on startup (with graceful fallback if DB is offline)
+    try:
+        ensure_indexes()
+        run_seed()
+    except Exception as e:
+        print(f"[Warning] Database connection deferred during startup: {e}")
+
     # Ensure storage directory exists
     settings.storage_path
     yield
@@ -32,7 +36,7 @@ def create_app() -> FastAPI:
 
     app = FastAPI(
         title="EduPilot AI",
-        description="AI Academic Operating System for Adamas University",
+        description="AI Academic Operating System for Universities",
         version="1.0.0",
         docs_url="/api/docs",
         redoc_url="/api/redoc",

@@ -40,6 +40,7 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ onNavigate }) => {
 
   return (
     <header
+      id="landing-navbar"
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
           ? 'bg-white/90 dark:bg-[#0F172A]/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 shadow-md py-3'
@@ -61,11 +62,11 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ onNavigate }) => {
                 EduPilot AI
               </span>
               <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#005BAC]/10 text-[#005BAC] dark:bg-[#8CC63F]/20 dark:text-[#8CC63F]">
-                <ShieldCheck className="w-3 h-3" /> AU OS
+                <ShieldCheck className="w-3 h-3" /> Univ OS
               </span>
             </div>
             <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium tracking-wide">
-              Adamas University
+              Academic Operating System
             </p>
           </div>
         </Link>

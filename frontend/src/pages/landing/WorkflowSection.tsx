@@ -83,7 +83,7 @@ export const WorkflowSection: React.FC = () => {
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white">
             How EduPilot{' '}
-            <span className="text-gradient">Powers Your Classroom</span>
+            <span className="text-gradient font-cursive text-4xl sm:text-5xl lg:text-6xl tracking-normal">Powers Your Classroom</span>
           </h2>
           <p className="text-base sm:text-lg text-slate-600 dark:text-slate-400">
             EduPilot's multi-agent engine transforms raw syllabus data and attendance records into instant, actionable teaching artifacts.

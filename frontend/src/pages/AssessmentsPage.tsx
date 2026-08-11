@@ -411,7 +411,7 @@ export const AssessmentsPage: React.FC = () => {
                           await api.post('/communications/send-email', {
                             class_id: activeClass?.id,
                             subject: `[Assessment Announcement] ${a.title} (${activeClass?.course_code})`,
-                            body: `Dear Students,\n\nAn assessment titled "${a.title}" has been published for ${activeClass?.course_name}.\n\nDetails:\nTopic: ${a.topic || 'General'}\nTotal Marks: ${a.total_marks}\nDuration: ${a.duration_minutes || 30} Minutes\n\nPlease check Document Studio for the complete PDF question paper.\n\nBest regards,\n${user?.full_name || 'Faculty'}, Adamas University.`,
+                            body: `Dear Students,\n\nAn assessment titled "${a.title}" has been published for ${activeClass?.course_name}.\n\nDetails:\nTopic: ${a.topic || 'General'}\nTotal Marks: ${a.total_marks}\nDuration: ${a.duration_minutes || 30} Minutes\n\nPlease check Document Studio for the complete PDF question paper.\n\nBest regards,\n${user?.full_name || 'Faculty'}, Department of Computer Science.`,
                             recipient_type: 'all',
                           });
                           toast.success('Sent Assessment to All Students via Email', `Dispatched notification for "${a.title}".`);

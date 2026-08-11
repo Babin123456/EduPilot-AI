@@ -30,28 +30,18 @@ export const TermsPage: React.FC = () => {
     },
     {
       icon: ShieldCheck,
-      title: '4. Intellectual Property',
-      content: 'All content, design, code, and AI-generated outputs within EduPilot AI are the intellectual property of Adamas University and its licensors. Faculty-generated content (lesson plans, quizzes, notes) created through the Platform remains the intellectual property of the respective faculty member, with Adamas University retaining a non-exclusive license for institutional use.',
+      title: '4. Limitation of Liability',
+      content: 'EduPilot AI is provided "as is" without warranties of any kind. EduPilot AI shall not be liable for any indirect, incidental, or consequential damages arising from use of the Platform, including but not limited to loss of data or interruption of service.',
     },
     {
       icon: AlertTriangle,
-      title: '5. AI-Generated Content Disclaimer',
-      content: 'EduPilot AI uses large language models (Groq, Gemini) to generate educational content. While we strive for accuracy, AI-generated content may contain errors, inaccuracies, or biases. All AI outputs are presented for teacher review and approval. Faculty members are ultimately responsible for verifying the accuracy and appropriateness of any AI-generated content before distributing it to students.',
+      title: '5. Modifications & Termination',
+      content: 'EduPilot AI reserves the right to modify these Terms of Service at any time. Users will be notified of material changes via email or Platform notification. Continued use after notification constitutes acceptance. Access may be suspended or terminated for violations of these terms.',
     },
     {
       icon: Globe,
       title: '6. Data Usage & Processing',
       content: 'The Platform processes academic data (attendance records, student information, course content) to provide its services. Data is processed in accordance with our Privacy Policy. By using the Platform, you consent to the collection and processing of academic data as described therein. Student data is never sold to third parties or used for commercial advertising purposes.',
-    },
-    {
-      icon: Gavel,
-      title: '7. Limitation of Liability',
-      content: 'EduPilot AI is provided "as is" without warranties of any kind. Adamas University shall not be liable for any indirect, incidental, or consequential damages arising from use of the Platform, including but not limited to loss of data, interruption of service, or errors in AI-generated content. Our total liability shall not exceed the amount paid by the user for access to the Platform.',
-    },
-    {
-      icon: Scale,
-      title: '8. Modifications & Termination',
-      content: 'Adamas University reserves the right to modify these Terms of Service at any time. Users will be notified of material changes via email or Platform notification. Continued use after notification constitutes acceptance. The university may suspend or terminate user access for violations of these terms or institutional policies, with or without notice.',
     },
     {
       icon: Gavel,
@@ -79,7 +69,7 @@ export const TermsPage: React.FC = () => {
             <Scale className="w-8 h-8" />
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">Terms of Service</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Last updated: August 2026 | EduPilot AI — Adamas University</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Last updated: August 2026 | EduPilot AI — Academic OS</p>
         </motion.div>
 
         <div className="space-y-8">

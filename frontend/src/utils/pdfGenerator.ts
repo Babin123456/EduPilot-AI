@@ -31,33 +31,18 @@ function addHeader(doc: jsPDF, title: string, subtitle: string) {
   doc.setFontSize(18);
   doc.setFont('times', 'bold');
   doc.setTextColor(...COLORS.primary);
-  doc.text('ADAMAS UNIVERSITY', pageWidth / 2, 22, { align: 'center' });
+  // Document Title Header
+  doc.setFontSize(16);
+  doc.setTextColor(0, 91, 172);
+  doc.text('ACADEMIC OPERATING SYSTEM', pageWidth / 2, 22, { align: 'center' });
+  doc.setFontSize(9);
+  doc.setTextColor(100, 116, 139);
+  doc.text('EDUPILOT AI PLATFORM', pageWidth / 2, 28, { align: 'center' });
 
-  // Subtitle line
-  doc.setFontSize(8);
-  doc.setFont('times', 'normal');
-  doc.setTextColor(...COLORS.gray);
-  doc.text('School of Engineering & Technology • Computer Science & Engineering', pageWidth / 2, 28, { align: 'center' });
-
-  // Divider
-  doc.setDrawColor(...COLORS.primary);
+  // Divider Line
+  doc.setDrawColor(0, 91, 172);
   doc.setLineWidth(0.5);
   doc.line(20, 32, pageWidth - 20, 32);
-
-  // Document title
-  doc.setFontSize(14);
-  doc.setFont('times', 'bold');
-  doc.setTextColor(...COLORS.dark);
-  doc.text(title, pageWidth / 2, 42, { align: 'center' });
-
-  // Document subtitle
-  if (subtitle) {
-    doc.setFontSize(9);
-    doc.setFont('times', 'normal');
-    doc.setTextColor(...COLORS.gray);
-    doc.text(subtitle, pageWidth / 2, 48, { align: 'center' });
-  }
-
 
   return 54; // Y position after header
 }

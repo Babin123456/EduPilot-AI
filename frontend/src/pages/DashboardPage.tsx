@@ -104,7 +104,7 @@ export const DashboardPage: React.FC = () => {
           <div className="space-y-4 max-w-xl text-center lg:text-left">
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-extrabold border border-white/20">
               <Sparkles className="w-4 h-4 text-[#8CC63F]" />
-              <span>Faculty Command Center • Adamas OS</span>
+              <span>Faculty Command Center • Academic OS</span>
             </div>
             
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight">

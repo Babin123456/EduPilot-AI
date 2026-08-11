@@ -16,7 +16,7 @@ const docSections = [
       {
         icon: BookOpen,
         title: 'What is EduPilot AI?',
-        content: 'EduPilot AI is an Academic Operating System built for Adamas University faculty. It combines a React + TypeScript frontend with a FastAPI Python backend, SQLite WAL database, and dual-LLM AI pipeline (Groq + Gemini) to automate teaching workflows including attendance, lesson planning, quiz generation, analytics, and document management.',
+        content: 'EduPilot AI is an Academic Operating System built for university faculty. It combines a React + TypeScript frontend with a FastAPI Python backend, SQLite WAL database, and dual-LLM AI pipeline (Groq + Gemini) to automate teaching workflows including attendance, lesson planning, quiz generation, analytics, and document management.',
       },
       {
         icon: Code2,

@@ -28,8 +28,8 @@ export const DocumentStudioPage: React.FC = () => {
     try {
       await api.post('/communications/send-email', {
         class_id: activeClass.id,
-        subject: `[Adamas University] ${doc.title} (${activeClass.course_code})`,
-        body: `Dear Students,\n\nPlease find attached the official academic document for your course: "${doc.title}".\n\nBest regards,\n${user?.full_name || 'Faculty'}, Adamas University.`,
+        subject: `[University Academic OS] ${doc.title} (${activeClass.course_code})`,
+        body: `Dear Students,\n\nPlease find attached the official academic document for your course: "${doc.title}".\n\nBest regards,\n${user?.full_name || 'Faculty'}, Department of Computer Science.`,
         recipient_type: 'all',
       });
       toast.success('Dispatched to All Students via Email', `Sent notification for "${doc.title}" to active class enrollment.`);

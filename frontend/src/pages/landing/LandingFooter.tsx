@@ -95,11 +95,11 @@ export const LandingFooter: React.FC<LandingFooterProps> = ({ onNavigate }) => {
                   <Sparkles className="w-3 h-3 text-[#8CC63F]" /> Academic OS
                 </span>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Adamas University • School of Engineering & Technology</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">School of Engineering & Technology</p>
             </div>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md text-center md:text-right">
-            Streamlining institutional operations, class velocity analytics, and RAG-powered classroom copiloting for Adamas faculty.
+            Streamlining institutional operations, class velocity analytics, and RAG-powered classroom copiloting for university faculty.
           </p>
         </div>
 
@@ -182,10 +182,10 @@ export const LandingFooter: React.FC<LandingFooterProps> = ({ onNavigate }) => {
                 </Link>
               </li>
               <li>
-                <a href="https://adamasuniversity.ac.in" target="_blank" rel="noopener noreferrer" className="hover:text-[#005BAC] dark:hover:text-[#8CC63F] transition-colors flex items-center gap-2 group">
+                <Link to="/docs" className="hover:text-[#005BAC] dark:hover:text-[#8CC63F] transition-colors flex items-center gap-2 group">
                   <Globe className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#005BAC] dark:group-hover:text-[#8CC63F] transition-colors" />
-                  <span>adamasuniversity.ac.in</span>
-                </a>
+                  <span>Platform Portal</span>
+                </Link>
               </li>
             </ul>
           </div>
@@ -271,7 +271,7 @@ export const LandingFooter: React.FC<LandingFooterProps> = ({ onNavigate }) => {
           <div className="w-full flex items-center justify-between pt-2 text-[11px] text-slate-500 dark:text-slate-400">
             <div className="flex items-center gap-1.5">
               <ShieldCheck className="w-3.5 h-3.5 text-[#8CC63F]" />
-              <span>© {new Date().getFullYear()} EduPilot AI — Adamas University. All rights reserved.</span>
+              <span>© {new Date().getFullYear()} EduPilot AI. All rights reserved.</span>
             </div>
             <button
               onClick={scrollToTop}

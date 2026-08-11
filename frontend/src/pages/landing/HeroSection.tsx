@@ -84,11 +84,11 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card"
+              className="hero-badge-container inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card"
             >
               <Sparkles className="w-4 h-4 text-[#8CC63F]" />
               <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                Official Adamas University Platform
+                Next-Gen Academic Platform
               </span>
               <span className="w-2 h-2 rounded-full bg-[#8CC63F] animate-pulse" />
             </motion.div>
@@ -98,14 +98,14 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
               <span className="hero-title-line block text-slate-900 dark:text-white">
                 EduPilot AI –
               </span>
-              <span className="hero-title-line block text-gradient mt-1">
+              <span className="hero-title-line block text-gradient font-cursive text-5xl sm:text-6xl lg:text-[4rem] xl:text-7xl mt-1 tracking-normal py-1">
                 Academic Operating System
               </span>
             </h1>
 
             {/* Subtitle */}
             <p className="hero-subtitle text-lg sm:text-xl text-slate-600 dark:text-slate-300 max-w-2xl font-normal leading-relaxed">
-              Less admin, more teaching: harness AI for attendance tracking, automated lesson planning, institutional analytics, and RAG-powered class insights — built for Adamas University.
+              Less admin, more teaching: harness AI for attendance tracking, automated lesson planning, institutional analytics, and RAG-powered class insights — designed for modern universities.
             </p>
 
             {/* Value Bullets */}

@@ -4,12 +4,12 @@ import { useAuth } from '../context/AuthContext';
 import { api } from '../api/client';
 import { ShieldCheck, GraduationCap, ArrowRight, Lock, Mail, Sparkles, CheckCircle2, UserCheck } from 'lucide-react';
 
-const DEFAULT_DEMO_ACCOUNTS = [
-  { faculty_id: 'FAC-AU-001', name: 'Prof. Rajesh Banerjee', email: 'rajesh.banerjee@adamasuniversity.ac.in', password: 'demo@1234', designation: 'Associate Professor', specialization: 'Algorithms & Data Structures' },
-  { faculty_id: 'FAC-AU-002', name: 'Prof. Priya Nair', email: 'priya.nair@adamasuniversity.ac.in', password: 'demo@1234', designation: 'Assistant Professor', specialization: 'Database Systems & Mining' },
-  { faculty_id: 'FAC-AU-003', name: 'Prof. Amitava Chatterjee', email: 'amitava.chatterjee@adamasuniversity.ac.in', password: 'demo@1234', designation: 'Professor', specialization: 'AI & Machine Learning' },
-  { faculty_id: 'FAC-AU-004', name: 'Prof. Sunita Devi', email: 'sunita.devi@adamasuniversity.ac.in', password: 'demo@1234', designation: 'Assistant Professor', specialization: 'Networks & Security' },
-  { faculty_id: 'FAC-AU-005', name: 'Prof. Debashis Ghosh', email: 'debashis.ghosh@adamasuniversity.ac.in', password: 'demo@1234', designation: 'Associate Professor', specialization: 'OS & Cloud Computing' },
+const DEMO_FACULTY = [
+  { faculty_id: 'FAC-UNIV-001', name: 'Prof. Rajesh Banerjee', email: 'rajesh.banerjee@edupilot.ai', password: 'demo@1234', designation: 'Associate Professor', specialization: 'Algorithms & Data Structures' },
+  { faculty_id: 'FAC-UNIV-002', name: 'Prof. Priya Nair', email: 'priya.nair@edupilot.ai', password: 'demo@1234', designation: 'Assistant Professor', specialization: 'Database Systems & Mining' },
+  { faculty_id: 'FAC-UNIV-003', name: 'Prof. Amitava Chatterjee', email: 'amitava.chatterjee@edupilot.ai', password: 'demo@1234', designation: 'Professor', specialization: 'AI & Machine Learning' },
+  { faculty_id: 'FAC-UNIV-004', name: 'Prof. Sunita Devi', email: 'sunita.devi@edupilot.ai', password: 'demo@1234', designation: 'Assistant Professor', specialization: 'Networks & Security' },
+  { faculty_id: 'FAC-UNIV-005', name: 'Prof. Debashis Ghosh', email: 'debashis.ghosh@edupilot.ai', password: 'demo@1234', designation: 'Associate Professor', specialization: 'OS & Cloud Computing' },
 ];
 
 export const LoginPage: React.FC = () => {
@@ -17,7 +17,7 @@ export const LoginPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [demoAccounts, setDemoAccounts] = useState<any[]>(DEFAULT_DEMO_ACCOUNTS);
+  const [demoAccounts, setDemoAccounts] = useState<any[]>(DEMO_FACULTY);
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -87,10 +87,10 @@ export const LoginPage: React.FC = () => {
 
           {/* Top Brand Tag */}
           <div className="relative z-10 space-y-4">
-            <Link to="/" className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-extrabold border border-white/20 hover:bg-white/20 transition-colors">
-              <ShieldCheck className="w-4 h-4 text-[#8CC63F]" />
-              <span>Adamas University Academic OS</span>
-            </Link>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white/10 backdrop-blur-md text-white border border-white/20">
+                <ShieldCheck className="w-4 h-4 text-[#8CC63F]" />
+                <span>Next-Gen Academic OS</span>
+              </span>
 
             <div className="pt-4 space-y-2">
               <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-tight">
@@ -135,7 +135,7 @@ export const LoginPage: React.FC = () => {
                 Sign In to Your Account
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Enter your institutional Adamas University credentials below.
+                Enter your institutional credentials below.
               </p>
             </div>
 
@@ -157,7 +157,7 @@ export const LoginPage: React.FC = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-[#005BAC] dark:focus:ring-[#8CC63F] focus:outline-none transition-shadow"
-                  placeholder="faculty@adamasuniversity.ac.in"
+                  placeholder="faculty@university.edu"
                 />
               </div>
 

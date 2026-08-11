@@ -27,81 +27,82 @@ def get_db() -> Database:
 
 def ensure_indexes():
     """Create indexes for performance and uniqueness constraints."""
-    db = get_db()
+    try:
+        db = get_db()
 
-    # Teachers
-    db.teachers.create_index("email", unique=True)
-    db.teachers.create_index("faculty_id", unique=True)
+        # Teachers
+        db.teachers.create_index("email", unique=True)
+        db.teachers.create_index("faculty_id", unique=True)
 
-    # Students
-    db.students.create_index("email", unique=True)
-    db.students.create_index("student_uid", unique=True)
-    db.students.create_index("registration_number", unique=True)
-    db.students.create_index("section_id")
-    db.students.create_index("year_id")
+        # Students
+        db.students.create_index("email", unique=True)
+        db.students.create_index("student_uid", unique=True)
+        db.students.create_index("registration_number", unique=True)
+        db.students.create_index("section_id")
+        db.students.create_index("year_id")
 
-    # Courses
-    db.courses.create_index("code", unique=True)
-    db.courses.create_index("semester_id")
+        # Courses
+        db.courses.create_index("code", unique=True)
+        db.courses.create_index("semester_id")
 
-    # Teacher Course Assignments
-    db.teacher_course_assignments.create_index("teacher_id")
-    db.teacher_course_assignments.create_index(
-        [("teacher_id", 1), ("course_id", 1), ("section_id", 1)],
-        unique=True,
-    )
+        # Teacher Course Assignments
+        db.teacher_course_assignments.create_index("teacher_id")
+        db.teacher_course_assignments.create_index(
+            [("teacher_id", 1), ("course_id", 1), ("section_id", 1)],
+            unique=True,
+        )
 
-    # Enrollments
-    db.enrollments.create_index(
-        [("student_id", 1), ("course_id", 1)],
-        unique=True,
-    )
+        # Enrollments
+        db.enrollments.create_index(
+            [("student_id", 1), ("course_id", 1)],
+            unique=True,
+        )
 
-    # Timetable
-    db.timetable_entries.create_index("teacher_course_assignment_id")
+        # Timetable
+        db.timetable_entries.create_index("teacher_course_assignment_id")
 
-    # Attendance
-    db.attendance_sessions.create_index("teacher_course_assignment_id")
-    db.attendance_sessions.create_index("date")
-    db.attendance_records.create_index("session_id")
-    db.attendance_records.create_index(
-        [("session_id", 1), ("student_id", 1)],
-        unique=True,
-    )
+        # Attendance
+        db.attendance_sessions.create_index("teacher_course_assignment_id")
+        db.attendance_sessions.create_index("date")
+        db.attendance_records.create_index("session_id")
+        db.attendance_records.create_index(
+            [("session_id", 1), ("student_id", 1)],
+            unique=True,
+        )
 
-    # Assignments
-    db.assignments.create_index("teacher_course_assignment_id")
-    db.assignment_submissions.create_index("assignment_id")
+        # Assignments
+        db.assignments.create_index("teacher_course_assignment_id")
+        db.assignment_submissions.create_index("assignment_id")
 
-    # Assessments
-    db.assessments.create_index("teacher_course_assignment_id")
-    db.assessment_results.create_index("assessment_id")
+        # Assessments
+        db.assessments.create_index("teacher_course_assignment_id")
+        db.assessment_results.create_index("assessment_id")
 
-    # AI
-    db.ai_conversations.create_index("teacher_id")
-    db.ai_messages.create_index("conversation_id")
+        # AI
+        db.ai_conversations.create_index("teacher_id")
+        db.ai_messages.create_index("conversation_id")
 
-    # Documents
-    db.documents.create_index("teacher_id")
+        # Documents
+        db.documents.create_index("teacher_id")
 
-    # Communications
-    db.communications.create_index("teacher_id")
+        # Communications
+        db.communications.create_index("teacher_id")
 
-    # Notifications
-    db.notifications.create_index("teacher_id")
+        # Notifications
+        db.notifications.create_index("teacher_id")
 
-    # Daily Notes
-    db.daily_notes.create_index("teacher_id")
-    db.daily_notes.create_index("teacher_course_assignment_id")
+        # Daily Notes
+        db.daily_notes.create_index("teacher_id")
+        db.daily_notes.create_index("teacher_course_assignment_id")
 
-    # RAG Documents
-    db.rag_documents.create_index("teacher_id")
-    db.rag_documents.create_index("status")
+        # RAG Documents
+        db.rag_documents.create_index("teacher_id")
+        # RAG Chunks (regular indexes — vector index must be created in Atlas UI)
+        db.rag_chunks.create_index("document_id")
+        db.rag_chunks.create_index("teacher_id")
 
-    # RAG Chunks (regular indexes — vector index must be created in Atlas UI)
-    db.rag_chunks.create_index("document_id")
-    db.rag_chunks.create_index("teacher_id")
-
-    # Personal Files
-    db.teacher_personal_files.create_index("teacher_id")
-    db.teacher_personal_files.create_index("id", unique=True)
+        # Personal Files
+        db.teacher_personal_files.create_index("teacher_id")
+        db.teacher_personal_files.create_index("id", unique=True)
+    except Exception as exc:
+        print(f"[Database Warning] Could not ensure MongoDB indexes: {exc}")

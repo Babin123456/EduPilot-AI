@@ -28,7 +28,7 @@ export function downloadExcelSheet(filename: string, headers: string[], rows: (s
 export function downloadPresentationOutline(filename: string, slides: { title: string; bullets: string[] }[]) {
   let content = `====================================================\n`;
   content += `EDUPILOT AI — ACADEMIC PRESENTATION SLIDE OUTLINE\n`;
-  content += `Generated for Adamas University • ${new Date().toLocaleDateString('en-IN')}\n`;
+  content += `Generated via EduPilot AI Platform • ${new Date().toLocaleDateString('en-IN')}\n`;
   content += `====================================================\n\n`;
 
   slides.forEach((slide, idx) => {

@@ -95,7 +95,7 @@ DEMO_TEACHERS = [
         "faculty_id": "FAC-AU-001",
         "first_name": "Rajesh",
         "last_name": "Banerjee",
-        "email": "rajesh.banerjee@adamasuniversity.ac.in",
+        "email": "rajesh.banerjee@edupilot.ai",
         "password": "demo@1234",
         "designation": "Associate Professor",
         "specialization": "Algorithms & Data Structures",
@@ -105,7 +105,7 @@ DEMO_TEACHERS = [
         "faculty_id": "FAC-AU-002",
         "first_name": "Priya",
         "last_name": "Nair",
-        "email": "priya.nair@adamasuniversity.ac.in",
+        "email": "priya.nair@edupilot.ai",
         "password": "demo@1234",
         "designation": "Assistant Professor",
         "specialization": "Database Systems & Data Mining",
@@ -115,7 +115,7 @@ DEMO_TEACHERS = [
         "faculty_id": "FAC-AU-003",
         "first_name": "Amitava",
         "last_name": "Chatterjee",
-        "email": "amitava.chatterjee@adamasuniversity.ac.in",
+        "email": "amitava.chatterjee@edupilot.ai",
         "password": "demo@1234",
         "designation": "Professor",
         "specialization": "Artificial Intelligence & Machine Learning",
@@ -125,7 +125,7 @@ DEMO_TEACHERS = [
         "faculty_id": "FAC-AU-004",
         "first_name": "Sunita",
         "last_name": "Devi",
-        "email": "sunita.devi@adamasuniversity.ac.in",
+        "email": "sunita.devi@edupilot.ai",
         "password": "demo@1234",
         "designation": "Assistant Professor",
         "specialization": "Computer Networks & Security",
@@ -135,7 +135,7 @@ DEMO_TEACHERS = [
         "faculty_id": "FAC-AU-005",
         "first_name": "Debashis",
         "last_name": "Ghosh",
-        "email": "debashis.ghosh@adamasuniversity.ac.in",
+        "email": "debashis.ghosh@edupilot.ai",
         "password": "demo@1234",
         "designation": "Associate Professor",
         "specialization": "Operating Systems & Cloud Computing",
@@ -145,7 +145,7 @@ DEMO_TEACHERS = [
         "faculty_id": "FAC-AU-006",
         "first_name": "Meenakshi",
         "last_name": "Iyer",
-        "email": "meenakshi.iyer@adamasuniversity.ac.in",
+        "email": "meenakshi.iyer@edupilot.ai",
         "password": "demo@1234",
         "designation": "Assistant Professor",
         "specialization": "Software Engineering & Web Technologies",
@@ -155,7 +155,7 @@ DEMO_TEACHERS = [
         "faculty_id": "FAC-AU-007",
         "first_name": "Arpan",
         "last_name": "Mukherjee",
-        "email": "arpan.mukherjee@adamasuniversity.ac.in",
+        "email": "arpan.mukherjee@edupilot.ai",
         "password": "demo@1234",
         "designation": "Professor",
         "specialization": "Deep Learning & NLP",
@@ -165,7 +165,7 @@ DEMO_TEACHERS = [
         "faculty_id": "FAC-AU-008",
         "first_name": "Kavita",
         "last_name": "Sharma",
-        "email": "kavita.sharma@adamasuniversity.ac.in",
+        "email": "kavita.sharma@edupilot.ai",
         "password": "demo@1234",
         "designation": "Assistant Professor",
         "specialization": "Mathematics & Discrete Structures",
@@ -175,7 +175,7 @@ DEMO_TEACHERS = [
         "faculty_id": "FAC-AU-009",
         "first_name": "Subhashis",
         "last_name": "Roy",
-        "email": "subhashis.roy@adamasuniversity.ac.in",
+        "email": "subhashis.roy@edupilot.ai",
         "password": "demo@1234",
         "designation": "Associate Professor",
         "specialization": "Blockchain & Cyber Security",
@@ -185,7 +185,7 @@ DEMO_TEACHERS = [
         "faculty_id": "FAC-AU-010",
         "first_name": "Ananya",
         "last_name": "Sengupta",
-        "email": "ananya.sengupta@adamasuniversity.ac.in",
+        "email": "ananya.sengupta@edupilot.ai",
         "password": "demo@1234",
         "designation": "Assistant Professor",
         "specialization": "Internet of Things & Embedded Systems",
@@ -214,10 +214,10 @@ def _uid() -> str:
 def run_seed():
     """Execute the full database seed."""
     rng = random.Random(RANDOM_SEED)
-    ensure_indexes()
-    db = get_db()
-
     try:
+        ensure_indexes()
+        db = get_db()
+
         if db.universities.count_documents({}) > 0:
             print("[Seed] Database already seeded. Skipping.")
             return
@@ -226,12 +226,14 @@ def run_seed():
 
         # 1. University
         university = new_university(
-            id=_uid(), name="Adamas University", short_name="AU",
-            city="Kolkata", state="West Bengal", country="India",
-            website="https://adamasuniversity.ac.in",
-            address="Barasat - Barrackpore Road, Barbaria, P.O. Jagannathpur, Kolkata - 700126",
+            id=_uid(), name="EduPilot Academic OS", short_name="EP",
+            city="Tech Hub", state="State", country="India",
+            website="https://edupilot.ai",
+            address="University Knowledge Campus, Academic OS Tower",
         )
         db.universities.insert_one(university)
+    except Exception as exc:
+        print(f"[Seed Warning] Could not connect to MongoDB for seeding: {exc}")
 
         # 2. School
         school = new_school(
@@ -572,7 +574,7 @@ def run_seed():
 
         print(f"[Seed] Successfully seeded {student_index} students, {len(teachers)} teachers, "
               f"{len(courses)} courses, {len(tca_map)} class assignments.")
-        print("[Seed] Demo login: rajesh.banerjee@adamasuniversity.ac.in / demo@1234")
+        print("[Seed] Demo login: rajesh.banerjee@edupilot.ai / demo@1234")
 
     except Exception as e:
         print(f"[Seed] Error during seeding: {e}")

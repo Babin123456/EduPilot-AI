@@ -86,7 +86,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
               {!sidebarCollapsed && (
                 <div className="truncate">
                   <h1 className="font-extrabold text-slate-900 dark:text-white leading-none text-base">EduPilot AI</h1>
-                  <p className="text-[10px] text-[#005BAC] dark:text-[#8CC63F] font-bold">Adamas University</p>
+                  <p className="text-[10px] text-[#005BAC] dark:text-[#8CC63F] font-bold">Academic OS</p>
                 </div>
               )}
             </div>

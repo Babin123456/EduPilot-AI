@@ -10,15 +10,15 @@ const faqData = [
     items: [
       {
         q: 'What is EduPilot AI?',
-        a: 'EduPilot AI is an intelligent Academic Operating System designed for Adamas University faculty. It automates routine teaching tasks such as attendance tracking, lesson planning, quiz generation, student analytics, and document management through AI-powered workflows using Groq and Gemini LLMs.',
+        a: 'EduPilot AI is an intelligent Academic Operating System designed for university faculty. It automates routine teaching tasks such as attendance tracking, lesson planning, quiz generation, student analytics, and document management through AI-powered workflows using Groq and Gemini LLMs.',
       },
       {
-        q: 'How do I log in to EduPilot AI?',
-        a: 'Faculty members can log in using their official Adamas University institutional email and password at the /login page. Demo accounts are also available for evaluation purposes with 1-click instant login functionality.',
+        q: 'How do faculty members access EduPilot AI?',
+        a: 'Faculty members can log in using their institutional email and password at the /login page. Demo accounts are also available for evaluation purposes with 1-click instant login functionality.',
       },
       {
-        q: 'Is EduPilot AI free for Adamas University faculty?',
-        a: 'Yes. EduPilot AI is an institutional platform provided to all Adamas University faculty at no individual cost. The platform is maintained by the School of Engineering & Technology and covers all B.Tech CSE sections across all four years.',
+        q: 'Is EduPilot AI free for university faculty?',
+        a: 'Yes. EduPilot AI is an institutional platform provided to faculty at no individual cost. It covers all department sections across all academic years.',
       },
     ],
   },
@@ -149,31 +149,33 @@ export const FAQPage: React.FC = () => {
   })).filter((cat) => cat.items.length > 0);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0F172A] transition-colors duration-200">
-      {/* Navbar */}
-      <header className="sticky top-0 z-50 bg-white/90 dark:bg-[#0F172A]/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 py-4">
-        <div className="max-w-4xl mx-auto px-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-sm font-bold text-slate-600 dark:text-slate-300 hover:text-[#005BAC] dark:hover:text-[#8CC63F] transition-colors">
-            <ArrowLeft className="w-4 h-4" /> Back to Home
+    <div className="min-h-screen bg-slate-50 dark:bg-[#071426] text-slate-900 dark:text-white transition-colors duration-200">
+      <header className="sticky top-0 z-40 bg-white/90 dark:bg-[#0F172A]/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 py-4 px-4 sm:px-8 flex items-center justify-between">
+        <Link to="/" className="flex items-center gap-3">
+          <img src="/brand_logo.png" alt="EduPilot Logo" className="w-8 h-8 object-contain" />
+          <span className="font-extrabold text-base tracking-tight">EduPilot AI</span>
+        </Link>
+        <div className="flex items-center gap-4">
+          <Link to="/docs" className="text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-[#005BAC] dark:hover:text-[#8CC63F] flex items-center gap-1">
+            <BookOpen className="w-3.5 h-3.5" /> Docs
           </Link>
-          <button onClick={toggleTheme} className="p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" aria-label="Toggle theme">
-            {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5 text-amber-400" />}
+          <button onClick={() => navigate('/login')} className="px-4 py-2 rounded-xl bg-[#005BAC] hover:bg-[#0A6FD8] text-white text-xs font-bold shadow-md">
+            Teacher Login
           </button>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-16 space-y-12">
-        {/* Page Header */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="text-center space-y-4">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#005BAC]/10 text-[#005BAC] dark:bg-[#8CC63F]/15 dark:text-[#8CC63F] mx-auto">
-            <HelpCircle className="w-8 h-8" />
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">Frequently Asked Questions</h1>
-          <p className="text-base text-slate-600 dark:text-slate-400 max-w-xl mx-auto">Everything you need to know about EduPilot AI and the Adamas University academic platform.</p>
-        </motion.div>
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-16">
+        <div className="text-center mb-12 space-y-4">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#005BAC]/10 text-[#005BAC] dark:bg-[#8CC63F]/20 dark:text-[#8CC63F]">
+            <HelpCircle className="w-3.5 h-3.5" /> FAQ & Knowledge Base
+          </span>
+          <h1 className="text-3xl sm:text-4xl font-black">Frequently Asked Questions</h1>
+          <p className="text-base text-slate-600 dark:text-slate-400 max-w-xl mx-auto">Everything you need to know about EduPilot AI academic operating platform.</p>
+        </div>
 
         {/* Search */}
-        <div className="relative max-w-lg mx-auto">
+        <div className="relative max-w-lg mx-auto mb-12">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
           <input
             type="text"
@@ -213,7 +215,7 @@ export const FAQPage: React.FC = () => {
         {/* Still have questions? */}
         <div className="text-center py-8 space-y-4">
           <p className="text-sm text-slate-600 dark:text-slate-400">Still have questions?</p>
-          <a href="mailto:support@adamasuniversity.ac.in" className="btn-magnetic inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#005BAC] hover:bg-[#0A6FD8] text-white text-sm font-bold shadow-lg">
+          <a href="mailto:support@edupilot.ai" className="btn-magnetic inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#005BAC] hover:bg-[#0A6FD8] text-white text-sm font-bold shadow-lg">
             Contact Support
           </a>
         </div>

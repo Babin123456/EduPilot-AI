@@ -38,7 +38,7 @@ export const CTASection: React.FC = () => {
           <div className="relative z-10 p-10 sm:p-16 lg:p-20 text-center max-w-4xl mx-auto space-y-8">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md text-xs font-bold text-white border border-white/20">
               <Rocket className="w-4 h-4 text-[#8CC63F]" />
-              <span>Empower Adamas Faculty Today</span>
+              <span>Empower Faculty Today</span>
             </div>
             
             <h2 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight">
@@ -46,11 +46,11 @@ export const CTASection: React.FC = () => {
             </h2>
             
             <p className="text-base sm:text-xl text-slate-200 max-w-2xl mx-auto font-normal leading-relaxed">
-              Experience the future of teaching automation, institutional analytics, and RAG-powered classroom copiloting — built exclusively for Adamas University.
+              Experience the future of teaching automation, institutional analytics, and RAG-powered classroom copiloting — built for higher education institutions.
             </p>
             
             <div className="pt-2 flex flex-wrap justify-center gap-6 text-xs sm:text-sm font-semibold text-slate-200">
-              <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-[#8CC63F]" /> Instant Setup for AU Faculty</span>
+              <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-[#8CC63F]" /> Instant Setup for Faculty</span>
               <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-[#8CC63F]" /> FERPA & Institutional Compliance</span>
               <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-[#8CC63F]" /> 1-Click Class Context</span>
             </div>

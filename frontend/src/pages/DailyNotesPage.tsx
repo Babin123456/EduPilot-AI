@@ -99,7 +99,7 @@ export const DailyNotesPage: React.FC = () => {
         summary: note.summary || '',
         practiceQuestions: note.practice_questions || [],
       });
-      toast.success('Downloaded Daily Notes PDF', `Saved "${note.topic}.pdf" with Adamas University branding.`);
+      toast.success('Downloaded Daily Notes PDF', `Saved "${note.topic}.pdf" with institutional branding.`);
     } catch (err) {
       toast.error('PDF generation error');
     }
