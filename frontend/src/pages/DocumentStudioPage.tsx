@@ -2,19 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { api } from '../api/client';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
-  FileText, Loader2, Clock, File, Send
+  FileText, Clock, File, Send
 } from 'lucide-react';
 
-import { generateQuizPDF, generateClassReportPDF, generateDailyNotePDF } from '../utils/pdfGenerator';
-import { downloadExcelSheet, downloadPresentationOutline } from '../utils/exportUtils';
-
 export const DocumentStudioPage: React.FC = () => {
-  const { activeClass, user } = useAuth();
+  const { activeClass } = useAuth();
   const toast = useToast();
   const [documents, setDocuments] = useState<any[]>([]);
-  const [generating, setGenerating] = useState<string | null>(null);
 
   useEffect(() => {
     if (!activeClass) return;

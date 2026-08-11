@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Mail, Globe, ArrowUp, ShieldCheck, BookOpen, HelpCircle, Scale, Shield, Sparkles, Bot, FileText, CheckSquare, BarChart3, Notebook, Folder } from 'lucide-react';
+import { Globe, ArrowUp, ShieldCheck, BookOpen, HelpCircle, Scale, Shield, Sparkles, FileText, CheckSquare, BarChart3, Folder } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -11,7 +11,6 @@ interface LandingFooterProps {
 }
 
 export const LandingFooter: React.FC<LandingFooterProps> = ({ onNavigate }) => {
-  const navigate = useNavigate();
   const footerRef = useRef<HTMLElement>(null);
   const maskRef = useRef<SVGRectElement>(null);
 

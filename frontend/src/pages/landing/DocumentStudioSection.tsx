@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { FileText, Presentation, FileCheck, FolderOpen, ArrowRight, Sparkles, Download, CheckCircle2 } from 'lucide-react';
+import { FileText, Presentation, FileCheck, FolderOpen, Sparkles, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 gsap.registerPlugin(ScrollTrigger);

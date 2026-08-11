@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../api/client';
-import { Check, X, AlertCircle, CheckCircle2, XCircle, Send } from 'lucide-react';
+import { Check, AlertCircle, CheckCircle2, XCircle, Send } from 'lucide-react';
 
 
 export const AttendancePage: React.FC = () => {
   const { activeClass } = useAuth();
   const [students, setStudents] = useState<any[]>([]);
   const [records, setRecords] = useState<Record<string, string>>({});
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
 
