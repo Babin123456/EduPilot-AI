@@ -196,15 +196,28 @@ async def upload_avatar(
 @router.get("/demo-accounts", response_model=list[DemoTeacherCard])
 def get_demo_accounts(db: Database = Depends(get_db)):
     """Return demo teacher accounts for the login page."""
-    teachers = list(db.teachers.find({"is_demo": True, "is_active": True}))
+    try:
+        teachers = list(db.teachers.find({"is_demo": True, "is_active": True}))
+        if teachers:
+            return [
+                DemoTeacherCard(
+                    faculty_id=t["faculty_id"],
+                    name=teacher_full_name(t),
+                    email=t["email"],
+                    password="demo@1234",
+                    designation=t["designation"],
+                    specialization=t.get("specialization"),
+                )
+                for t in teachers
+            ]
+    except Exception as exc:
+        print(f"[Auth Warning] MongoDB connection error in /demo-accounts: {exc}")
+
+    # Fallback default demo accounts when MongoDB is offline
     return [
-        DemoTeacherCard(
-            faculty_id=t["faculty_id"],
-            name=teacher_full_name(t),
-            email=t["email"],
-            password="demo@1234",
-            designation=t["designation"],
-            specialization=t.get("specialization"),
-        )
-        for t in teachers
+        DemoTeacherCard(faculty_id="FAC-UNIV-001", name="Prof. Rajesh Banerjee", email="rajesh.banerjee@edupilot.ai", password="demo@1234", designation="Associate Professor", specialization="Algorithms & Data Structures"),
+        DemoTeacherCard(faculty_id="FAC-UNIV-002", name="Prof. Priya Nair", email="priya.nair@edupilot.ai", password="demo@1234", designation="Assistant Professor", specialization="Database Systems & Mining"),
+        DemoTeacherCard(faculty_id="FAC-UNIV-003", name="Prof. Amitava Chatterjee", email="amitava.chatterjee@edupilot.ai", password="demo@1234", designation="Professor", specialization="AI & Machine Learning"),
+        DemoTeacherCard(faculty_id="FAC-UNIV-004", name="Prof. Sunita Devi", email="sunita.devi@edupilot.ai", password="demo@1234", designation="Assistant Professor", specialization="Networks & Security"),
+        DemoTeacherCard(faculty_id="FAC-UNIV-005", name="Prof. Debashis Ghosh", email="debashis.ghosh@edupilot.ai", password="demo@1234", designation="Associate Professor", specialization="OS & Cloud Computing"),
     ]

@@ -232,8 +232,6 @@ def run_seed():
             address="University Knowledge Campus, Academic OS Tower",
         )
         db.universities.insert_one(university)
-    except Exception as exc:
-        print(f"[Seed Warning] Could not connect to MongoDB for seeding: {exc}")
 
         # 2. School
         school = new_school(
