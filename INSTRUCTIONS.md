@@ -87,6 +87,7 @@ Copy the generated 64-character strings and set them as `SECRET_KEY` and `JWT_SE
 - `main.tsx`: Entry point mounting the React root DOM.
 - `App.tsx`: Top-level router routing authenticated routes through `MainLayout`.
 - `index.css`: Tailwind CSS directives and custom UI scrollbars.
+- `.oxlintrc.json`: High-performance Rust-based Oxlint configuration enforcing React Hooks and component export rules.
 - `api/client.ts`: Axios client instance equipped with automatic Bearer token injection and 401 redirect handling.
 - `utils/pdfGenerator.ts`: Client-side jsPDF utility for professional university-branded PDF exports (quizzes, reports, notes).
 - `context/AuthContext.tsx`: React Context managing token storage, current teacher profile, and active class selection.
