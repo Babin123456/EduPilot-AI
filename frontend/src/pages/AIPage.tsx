@@ -31,7 +31,7 @@ interface RagDocument {
 
 export const AIPage: React.FC = () => {
   const { activeClass } = useAuth();
-  const { showToast } = useToast();
+  const toast = useToast();
   const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -46,7 +46,7 @@ export const AIPage: React.FC = () => {
   const handleCopyCode = (codeText: string, codeId: string) => {
     navigator.clipboard.writeText(codeText);
     setCopiedCodeId(codeId);
-    showToast('Code snippet copied to clipboard!', 'success');
+    toast.success('Copied!', 'Code snippet copied to clipboard.');
     setTimeout(() => setCopiedCodeId(null), 2000);
   };
 
@@ -266,7 +266,7 @@ export const AIPage: React.FC = () => {
   const handleCopy = (text: string, index: number) => {
     navigator.clipboard.writeText(text);
     setCopiedIndex(index);
-    showToast('Message copied to clipboard!', 'info');
+    toast.info('Copied', 'Message copied to clipboard.');
     setTimeout(() => setCopiedIndex(null), 2000);
   };
 
@@ -489,15 +489,12 @@ export const AIPage: React.FC = () => {
               <div className="w-14 h-14 rounded-2xl bg-brand-blue/10 text-brand-blue dark:text-brand-green flex items-center justify-center shadow-inner">
                 <Sparkles className="w-7 h-7" />
               </div>
-              <div>
+              <div className="space-y-2">
                 <h3 className="font-extrabold text-slate-900 dark:text-white text-lg">How can EduPilot assist your teaching today?</h3>
-              <div className="space-y-1">
-                <h3 className="text-base font-extrabold text-slate-900 dark:text-white">EduPilot AI Copilot</h3>
                 <p className="text-xs text-slate-500 max-w-md">
                   Your intelligent academic copilot. Ask about your active class, student performance, syllabus topics, or upload course documents for RAG analysis.
                 </p>
               </div>
-              
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full pt-2">
                 {samplePrompts.map((prompt, i) => (
                   <button
@@ -782,6 +779,5 @@ export const AIPage: React.FC = () => {
         </div>
       </div>
     </div>
-  </div>
-);
+  );
 };
