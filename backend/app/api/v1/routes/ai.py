@@ -451,8 +451,8 @@ def chat(
         f"1. Always use the live student database information provided above to give exact student names, roll numbers, and attendance percentages when asked.\n"
         f"2. Remember previous user questions and context in this conversation thread.\n"
         f"3. When answering questions about uploaded documents, cite the specific source filename and page numbers from the Retrieved Document Context above.\n"
-        f"4. If the Retrieved Document Context contains relevant information, you MUST prioritize it over your internal knowledge to answer the question accurately.\n"
-        f"5. Be concise, structured, professional, and use Markdown formatting without decorative text emojis."
+        f"4. Format responses cleanly using rich GitHub Markdown: use **bold** for key metrics/names, *italics* for emphasis, standard markdown `[link label](url)` for web URLs/references, bullet lists, and clean Markdown tables for tabular data.\n"
+        f"5. STRICT EMOJI POLICY: DO NOT include any text emojis or emoticons (such as 📚, 📄, 🤖, 😀, etc.) in your responses under any circumstances. Keep responses clean, elegant, and professional."
     )
 
     # ── Build LLM message array ──

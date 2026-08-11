@@ -149,7 +149,7 @@ export const AIPage: React.FC = () => {
         const chunkCount = res.data.document.chunk_count;
         setMessages(prev => [...prev, {
           role: 'assistant',
-          content: `📚 **Document Indexed Successfully**\n\n**${docName}** has been processed and indexed into **${chunkCount} searchable chunks**.\n\nYou can now ask me questions about this document. For example:\n- *"Summarize the key points of ${docName}"*\n- *"What does this document say about [topic]?"*\n- *"Explain the main concepts covered in this file"*`,
+          content: `**Document Indexed Successfully**\n\n**${docName}** has been processed and indexed into **${chunkCount} searchable chunks**.\n\nYou can now ask me questions about this document. For example:\n- *"Summarize the key points of ${docName}"*\n- *"What does this document say about [topic]?"*\n- *"Explain the main concepts covered in this file"*`,
           model_used: 'RAG Engine',
           content_type: 'rag',
         }]);
@@ -447,8 +447,8 @@ export const AIPage: React.FC = () => {
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-extrabold text-white">
               <Bot className="w-3 h-3 text-[#8CC63F]" /> EduPilot AI Intelligence Engine
               {ragDocuments.length > 0 && (
-                <span className="ml-1 px-1.5 py-0.5 bg-emerald-500/30 rounded-full text-[9px]">
-                  📚 {ragDocuments.length} doc{ragDocuments.length !== 1 ? 's' : ''} indexed
+                <span className="ml-1 px-1.5 py-0.5 bg-emerald-500/30 rounded-full text-[9px] inline-flex items-center gap-1">
+                  <FileText className="w-2.5 h-2.5" /> {ragDocuments.length} doc{ragDocuments.length !== 1 ? 's' : ''} indexed
                 </span>
               )}
             </div>
@@ -569,8 +569,8 @@ export const AIPage: React.FC = () => {
                         <div className="flex items-center gap-1">
                           <Database className="w-3 h-3 text-emerald-500" />
                           {msg.sources.map((src: string, si: number) => (
-                            <span key={si} className="px-1.5 py-0.5 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 rounded text-[9px] font-semibold border border-emerald-200 dark:border-emerald-800">
-                              📄 {src}
+                            <span key={si} className="px-1.5 py-0.5 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 rounded text-[9px] font-semibold border border-emerald-200 dark:border-emerald-800 inline-flex items-center gap-1">
+                              <FileText className="w-2.5 h-2.5" /> {src}
                             </span>
                           ))}
                         </div>
