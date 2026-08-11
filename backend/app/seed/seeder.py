@@ -1,7 +1,7 @@
 """EduPilot AI — Deterministic database seeder.
 
 Creates:
-- Adamas University hierarchy
+- Universal Academic hierarchy
 - CSE department, B.Tech program
 - 4 years, 8 semesters, 12 sections (A/B/C per year)
 - ~40 CSE courses across 8 semesters

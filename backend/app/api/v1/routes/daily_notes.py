@@ -359,7 +359,7 @@ def share_note_to_class(
         comm_type="email",
         template_type="daily_notes",
         subject=f"[{course_code}] Discussion Notes: {note['topic']}",
-        body=f"Dear Student,\n\nPlease find attached the discussion notes for today's lecture on \"{note['topic']}\" in {course_name}.\n\nKey Topics Covered:\n{note.get('summary', '')}\n\nPlease review these notes and come prepared with questions for the next class.\n\nBest regards,\n{teacher['first_name']} {teacher['last_name']}\n{teacher.get('designation', '')}\nAdamas University",
+        body=f"Dear Student,\n\nPlease find attached the discussion notes for today's lecture on \"{note['topic']}\" in {course_name}.\n\nKey Topics Covered:\n{note.get('summary', '')}\n\nPlease review these notes and come prepared with questions for the next class.\n\nBest regards,\n{teacher['first_name']} {teacher['last_name']}\n{teacher.get('designation', '')}\nEduPilot Academic Platform",
         recipients=json.dumps(recipients),
         total_recipients=len(students),
         sent_count=len(students),

@@ -13,7 +13,7 @@
 
 </div>
 
-> 🎓 AI Academic Operating System tailored for Adamas University
+> 🎓 Universal AI Academic Operating System
 
 ---
 
@@ -29,7 +29,7 @@ flowchart LR
     API --> CORE[EduPilot Core Orchestrator]
     API --> SERVICES[Academic Services]
 
-    SERVICES --> DB[(SQLite / PostgreSQL)]
+    SERVICES --> DB[(MongoDB / Atlas)]
     SERVICES --> STORE[Local File Storage]
 
     CORE --> ROUTER[Intent & LLM Workflow Router]
@@ -55,7 +55,7 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-    AU[Adamas University]
+    AU[Universal Academic Platform]
     AU --> SET[School of Engineering & Technology]
     SET --> BTECH[B.Tech Program]
     BTECH --> CSE[Computer Science & Engineering]
