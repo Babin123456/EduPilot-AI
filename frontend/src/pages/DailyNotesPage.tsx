@@ -6,7 +6,7 @@ import { useToast } from '../context/ToastContext';
 import { api } from '../api/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Notebook, Sparkles, Send, Download, ChevronDown, ChevronUp,
+  Notebook, Sparkles, Download, ChevronDown, ChevronUp,
   Calendar, Clock, BookOpen, CheckCircle2, Loader2, Mail
 } from 'lucide-react';
 import { generateDailyNotePDF } from '../utils/pdfGenerator';

@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { api } from '../api/client';
 import { motion } from 'framer-motion';
-import { Users, Search, Mail, Download, Phone, Copy, Check, FileSpreadsheet, ArrowUpDown, Send, AlertTriangle } from 'lucide-react';
+import { Users, Search, Mail, Download, FileSpreadsheet } from 'lucide-react';
 import { generateClassReportPDF } from '../utils/pdfGenerator';
 import { downloadExcelSheet } from '../utils/exportUtils';
 
@@ -26,8 +26,7 @@ export const StudentsPage: React.FC = () => {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
-  const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState<'roll_number' | 'full_name' | 'attendance_percentage' | 'cgpa' | 'risk_level'>('roll_number');
+  const [sortBy, setSortBy] = useState<'roll_number' | 'full_name' | 'attendance_percentage' | 'average_score' | 'cgpa' | 'risk_level'>('roll_number');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   const handleSendStudentEmail = (studentEmail: string, studentName?: string, attendancePct?: number) => {

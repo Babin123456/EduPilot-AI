@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { api } from '../api/client';
 import { motion } from 'framer-motion';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
-import { BarChart3, Download } from 'lucide-react';
+import { BarChart3 } from 'lucide-react';
 
 export const AnalyticsPage: React.FC = () => {
   const { activeClass } = useAuth();
