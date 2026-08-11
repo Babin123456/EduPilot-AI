@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=20&duration=3000&pause=1000&color=8CC63F&center=true&vCenter=true&width=650&lines=Python+FastAPI+REST+Framework;SQLAlchemy+2.0+ORM+%E2%80%A2+SQLite+WAL+Mode;Groq+Dual+Keys+%2B+Gemini+Fallback+Router" alt="Typing SVG" />
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=20&duration=3000&pause=1000&color=8CC63F&center=true&vCenter=true&width=650&lines=Python+FastAPI+REST+Framework;PyMongo+%E2%80%A2+MongoDB+Atlas;Groq+Dual+Keys+%2B+Gemini+Fallback+Router" alt="Typing SVG" />
 </p>
 
 ---
@@ -19,7 +19,7 @@
 
 ## 💡 Overview
 
-The backend service powers EduPilot AI using FastAPI, SQLAlchemy, and SQLite WAL mode. It manages data access for 720 unique students, teacher authentication, class scheduling, attendance persistence, profile photo uploads, and context-aware LLM query routing using Groq (dual primary keys) and Gemini (fallback).
+The backend service powers EduPilot AI using FastAPI and MongoDB (PyMongo). It manages data access for 720 unique students, teacher authentication, class scheduling, attendance persistence, profile photo uploads, teacher personal file storage, RAG document library chunking & indexing, and context-aware LLM query routing using Groq (dual primary keys) and Gemini (fallback).
 
 ---
 
@@ -27,14 +27,16 @@ The backend service powers EduPilot AI using FastAPI, SQLAlchemy, and SQLite WAL
 
 - 🐍 **Python 3.11+**
 - ⚡ **FastAPI 0.115**
-- 🗄️ **SQLAlchemy 2.0 ORM**
-- 💾 **SQLite** with `aiosqlite` and WAL Mode
+- 🍃 **MongoDB & PyMongo**
 - 🔐 **JWT Authentication** (`python-jose`, `passlib`, `bcrypt`)
 - 🤖 **Groq & Google Gemini APIs**
+- 📚 **RAG Indexing & PyPDF2 / python-docx Parsing**
 
-## 📊 Analytics & Profile APIs
+## 📊 Analytics, RAG & File APIs
 
 - `GET /api/v1/analytics/classes/{class_id}/overview` returns attendance and assessment metrics scoped to the selected teacher class.
+- `GET /api/v1/ai/rag/documents` & `POST /api/v1/ai/rag/upload` manages and indexes PDF/DOCX course materials for AI retrieval.
+- `GET /api/v1/personal-files` & `POST /api/v1/personal-files/upload` manages teacher personal document storage.
 - `PATCH /api/v1/auth/me` updates teacher profile details and avatar URL.
 - `POST /api/v1/auth/me/avatar` accepts JPG, PNG, or WebP uploads up to 5 MB and returns the stored profile-photo URL.
 

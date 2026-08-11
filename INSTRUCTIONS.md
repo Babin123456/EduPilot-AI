@@ -48,12 +48,12 @@ Copy the generated 64-character strings and set them as `SECRET_KEY` and `JWT_SE
 
 ### 🐍 Backend Files (`backend/app/`)
 
-- `main.py`: Entry point for FastAPI application. Sets up CORS, mounts `/api/v1` routes, handles database creation and automatic seeding on startup.
+- `main.py`: Entry point for FastAPI application. Sets up CORS, mounts `/api/v1` routes, handles database index creation and automatic seeding on startup.
 - `core/config.py`: Environment variable configuration loader built with `pydantic-settings`.
-- `core/database.py`: SQLAlchemy engine setup with SQLite WAL mode and session dependencies.
+- `core/database.py`: MongoDB client & database connection setup (`pymongo`) with index creation helpers.
 - `core/security.py`: Password hashing (bcrypt) and JWT access/refresh token generator and decoder.
 - `core/exceptions.py`: Standardized HTTP exception helpers (401, 403, 404, 500).
-- `models/__init__.py`: Registry importing all SQLAlchemy database models for table reflection.
+- `models/__init__.py`: Registry importing all Pydantic and database domain schemas.
 - `models/university.py`: University, School, Department, and Program entities.
 - `models/academic.py`: AcademicSession, Year (1-4), Semester (1-8), Section (A/B/C), and Course entities.
 - `models/teacher.py`: Faculty teacher user model with credentials and department metadata.
@@ -68,18 +68,19 @@ Copy the generated 64-character strings and set them as `SECRET_KEY` and `JWT_SE
 - `models/knowledge.py`: RAG Knowledge base documents and text chunks.
 - `models/notification.py`: Teacher in-app alert notifications.
 - `seed/names.py`: Curated collection of **720 unique Indian student names**.
-- `seed/seeder.py`: Deterministic database seeder creating 720 student records, 8 faculty accounts, courses, and attendance history.
+- `seed/seeder.py`: Deterministic database seeder creating 720 student records, 10 faculty accounts, courses, and attendance history in MongoDB.
 - `api/deps.py`: Auth dependency extracting current logged-in teacher from Bearer JWT headers.
-- `api/v1/routes/auth.py`: REST routes for teacher login, logout, profile fetching, and demo accounts listing.
+- `api/v1/routes/auth.py`: REST routes for teacher login, logout, profile fetching, profile avatar upload, and demo accounts listing.
 - `api/v1/routes/dashboard.py`: Summary metrics for the teacher command center dashboard.
 - `api/v1/routes/classes.py`: API listing teacher assigned classes and details.
 - `api/v1/routes/timetable.py`: API providing daily and weekly timetable routine schedules.
 - `api/v1/routes/students.py`: Searchable, filterable student directory API.
 - `api/v1/routes/attendance.py`: Interactive attendance session recording API.
 - `api/v1/routes/analytics.py`: Class grade distribution and attendance analytics API.
-- `api/v1/routes/ai.py`: Groq & Gemini powered context-aware AI chat API endpoint.
+- `api/v1/routes/ai.py`: Groq & Gemini powered context-aware AI chat API endpoint with RAG document library integration.
 - `api/v1/routes/daily_notes.py`: Daily topic discussion notes generation, listing, and bulk sharing API.
 - `api/v1/routes/communications.py`: Teacher email composer, student email lookup, and communication history API.
+- `api/v1/routes/personal_files.py`: Teacher personal file storage routes (upload, list, download, delete).
 
 ### ⚛️ Frontend Files (`frontend/src/`)
 
@@ -127,7 +128,8 @@ Copy the generated 64-character strings and set them as `SECRET_KEY` and `JWT_SE
 5. Set **Build Command** to `pip install -r pyproject.toml` or `pip install .`.
 6. Set **Start Command** to `uvicorn app.main:app --host 0.0.0.0 --port $PORT`.
 7. Add Environment Variables in Render:
-   - `DATABASE_URL` = `sqlite:///./edupilot.db` (or a managed PostgreSQL connection string)
+   - `MONGODB_URI` = `mongodb+srv://user:pass@cluster.mongodb.net/` (or local `mongodb://localhost:27017`)
+   - `MONGODB_DB_NAME` = `edupilot_db`
    - `JWT_SECRET_KEY` = your secret
    - `GROQ_API_KEY_1` = your key
    - `GROQ_API_KEY_2` = your key

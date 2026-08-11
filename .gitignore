@@ -59,6 +59,8 @@ Thumbs.db
 # ========================
 backend/storage/
 !backend/storage/.gitkeep
+backend/app/storage/
+!backend/app/storage/.gitkeep
 
 # ========================
 # Logs

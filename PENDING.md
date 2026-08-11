@@ -32,17 +32,17 @@ This document outlines the **unimplemented routes, missing background infrastruc
 | # | Feature / Job Domain | Priority | Impact Area | Complexity | Status |
 | :---: | :--- | :---: | :--- | :---: | :---: |
 | **1** | [Lesson Plans API Route (`/lesson-plans`)](#1--lesson-plans-api-routes) | `HIGH` | Curriculum & Academic | Medium | ⏳ Pending |
-| **2** | [Document Studio & Export Endpoints](#2--document-studio--export-engine) | `HIGH` | PDF / PPTX / Word Export | Medium | ⏳ Pending |
+| **2** | [Document Studio & Export Endpoints](#2--document-studio--export-engine) | `HIGH` | PDF / PPTX / Word Export | Medium | ✅ Completed (jsPDF) |
 | **3** | [Assignment Submissions & AI Auto-Grading](#3--assignment-submissions--ai-grading) | `HIGH` | Evaluation Workflow | High | ⏳ Pending |
 | **4** | [Assessment Questions CRUD & Auto-Quiz](#4--assessment--question-bank-management) | `HIGH` | Exam & Quiz Engine | Medium | ⏳ Pending |
 | **5** | [Automated Test Suite (`pytest`)](#5--automated-testing-suite) | `CRITICAL` | Quality & Reliability | Medium | ⏳ Pending |
-| **6** | [Database Migrations (`Alembic`)](#6--database-migrations--schema-versioning) | `HIGH` | Data Integrity | Low | ⏳ Pending |
+| **6** | [Database Migrations & Mongo Schemas](#6--database-migrations--schema-versioning) | `HIGH` | Data Integrity | Low | ⏳ Pending |
 | **7** | [Async Task Queue (`Celery`/`Redis`/`Arq`)](#7--asynchronous-task-queue--worker) | `MEDIUM` | Performance & Concurrency | High | ⏳ Pending |
 | **8** | [Real SMTP Server Integration & Queue](#8--production-smtp-email-relay) | `MEDIUM` | Student Communications | Medium | ⏳ Pending |
-| **9** | [RAG Vector Index & Semantic Search](#9--vector-store--semantic-rag-layer) | `HIGH` | AI Retrieval Accuracy | High | ⏳ Pending |
-| **10** | [Persistent File Storage Manager](#10--persistent-file-storage-layer) | `MEDIUM` | Media & Document Storage | Medium | ⏳ Pending |
+| **9** | [RAG Vector Index & Semantic Search](#9--vector-store--semantic-rag-layer) | `HIGH` | AI Retrieval Accuracy | High | ✅ Completed |
+| **10** | [Persistent File Storage Manager](#10--persistent-file-storage-layer) | `MEDIUM` | Media & Document Storage | Medium | ✅ Completed |
 | **11** | [Rate Limiting & Security Hardening](#11--security-rate-limiting--middleware) | `HIGH` | API Protection & DoS Guard | Low | ⏳ Pending |
-| **12** | [Docker & Container Deployment Config](#12--docker--container-deployment) | `MEDIUM` | Cloud Hosting & DevOps | Low | ⏳ Pending |
+| **12** | [Docker & Container Deployment Config](#12--docker--container-deployment) | `MEDIUM` | Cloud Hosting & DevOps | Low | ✅ Completed |
 
 ---
 

@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=20&duration=3000&pause=1000&color=8CC63F&center=true&vCenter=true&width=650&lines=Visualizing+EduPilot+AI+Core+Engine;FastAPI+REST+%E2%80%A2+SQLite+WAL+%E2%80%A2+Groq%2FGemini+Pipeline;Multi-Layer+Academic+Workflow+Diagrams" alt="Typing SVG" />
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=20&duration=3000&pause=1000&color=8CC63F&center=true&vCenter=true&width=650&lines=Visualizing+EduPilot+AI+Core+Engine;FastAPI+REST+%E2%80%A2+MongoDB+Atlas+%E2%80%A2+Groq%2FGemini+Pipeline;Multi-Layer+Academic+Workflow+Diagrams" alt="Typing SVG" />
 </p>
 
 ---
@@ -21,9 +21,11 @@
 
 ```mermaid
 flowchart LR
-    T[Teacher User] --> FE[React + Vite Teacher Portal]
+    T[Teacher User] --> NGINX[Nginx Reverse Proxy]
+    NGINX --> FE[React + Vite Teacher Portal]
+    NGINX --> API[FastAPI REST API Layer]
 
-    FE --> API[FastAPI REST API Layer]
+    FE --> API
 
     API --> AUTH[Authentication & Authorization Guard]
     API --> CORE[EduPilot Core Orchestrator]
@@ -44,7 +46,6 @@ flowchart LR
 
     DOC --> STORE
     COMM --> MAIL[Gmail SMTP Server]
-    COMM --> WA[WhatsApp Sharing Workflow]
 
     API --> FE
 ```
@@ -92,7 +93,7 @@ flowchart TD
     DASH --> ROUTINE[Review Today's Schedule]
     ROUTINE --> SELECT[Set Active Academic Context]
     SELECT --> ATTENDANCE[Take Class Attendance]
-    ATTENDANCE --> PERSIST[(Save to SQLite Database)]
+    ATTENDANCE --> PERSIST[(Save to MongoDB Database)]
     PERSIST --> INSIGHTS[Automatic Risk & Analytics Update]
     INSIGHTS --> COPILOT[EduPilot AI Chat & Query Assistant]
     COPILOT --> GENERATE[Generate Quiz / Assignment / Lesson Plan]

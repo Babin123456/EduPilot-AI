@@ -19,7 +19,7 @@
 
 ## 💡 Overview
 
-The frontend portal is built for university faculty members. It delivers a modern visual experience with dark/light mode persistence, dynamic class context switching, interactive attendance taking, class-linked Recharts performance analytics, teacher profile photo uploads, and an integrated EduPilot AI chat workspace.
+The frontend portal is built for university faculty members. It delivers a modern visual experience with dark/light mode persistence, dynamic class context switching, interactive attendance taking, class-linked Recharts performance analytics, teacher profile photo uploads, an integrated RAG Document Library for AI syllabus grounding, client-side jsPDF document generation, and an integrated EduPilot AI chat workspace.
 
 ---
 
@@ -31,7 +31,9 @@ The frontend portal is built for university faculty members. It delivers a moder
 - 🎨 **Tailwind CSS 3** (Brand Blue `#0060B5` & Green `#8CC63F`)
 - 🧩 **Lucide React** (accessible UI icons)
 - 📊 **Recharts**
-- 🌐 **Axios & TanStack Query**
+- 🎬 **Framer Motion** (page transitions & staggered card animations)
+- 📄 **jsPDF & jspdf-autotable** (client-side branded PDF exports)
+- 🌐 **Axios & Context API**
 
 ---
 
