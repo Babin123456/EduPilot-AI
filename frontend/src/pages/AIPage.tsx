@@ -445,6 +445,7 @@ export const AIPage: React.FC = () => {
               <span>Clear Active View</span>
             </button>
           )}
+          </div>{/* end space-y-3 flex-1 */}
         </div>
 
         {/* ─── Main Chat Window ─── */}
@@ -500,7 +501,7 @@ export const AIPage: React.FC = () => {
                     onClick={() => handleSend(prompt)}
                     className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:border-brand-blue hover:bg-brand-blue/5 text-left transition-all duration-200"
                   >
-                    "{prompt}"
+                    {prompt}
                   </button>
                 ))}
               </div>
