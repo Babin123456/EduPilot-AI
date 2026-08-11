@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useTheme } from '../../context/ThemeContext';
-import { ChevronDown, ArrowLeft, HelpCircle, Sun, Moon, Search, BookOpen } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ChevronDown, HelpCircle, Search, BookOpen } from 'lucide-react';
 
 const faqData = [
   {
@@ -31,7 +30,7 @@ const faqData = [
       },
       {
         q: 'Can EduPilot generate quizzes and question papers?',
-        a: 'Yes. EduPilot can generate quizzes, mid-term question papers, and assignment sheets with customizable difficulty levels, question types (MCQ, short answer, long answer), and marking schemes. All outputs are formatted with official Adamas University headers and can be exported as PDF.',
+        a: 'Yes. EduPilot can generate quizzes, mid-term question papers, and assignment sheets with customizable difficulty levels, question types (MCQ, short answer, long answer), and marking schemes. All outputs are formatted with official university headers and can be exported as PDF.',
       },
       {
         q: 'How does the attendance tracking system work?',
@@ -81,7 +80,7 @@ const faqData = [
       },
       {
         q: 'Who do I contact for technical support?',
-        a: 'For technical support, reach out to the EduPilot team via email at support@adamasuniversity.ac.in. For urgent issues during working hours, contact the School of Engineering IT helpdesk. Feature requests and bug reports can be submitted through the platform\'s Communications module.',
+        a: 'For technical support, reach out to the EduPilot team via email at support@edupilot.ai. For urgent issues during working hours, contact the School of Engineering IT helpdesk. Feature requests and bug reports can be submitted through the platform\'s Communications module.',
       },
     ],
   },
@@ -128,7 +127,6 @@ const AccordionItem: React.FC<{ question: string; answer: string; isOpen: boolea
 export const FAQPage: React.FC = () => {
   const [openIndex, setOpenIndex] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   useEffect(() => {
