@@ -8,6 +8,7 @@ export const AttendancePage: React.FC = () => {
   const { activeClass } = useAuth();
   const [students, setStudents] = useState<any[]>([]);
   const [records, setRecords] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
 

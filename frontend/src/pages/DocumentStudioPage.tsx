@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 
 export const DocumentStudioPage: React.FC = () => {
-  const { activeClass } = useAuth();
+  const { activeClass, user } = useAuth();
   const toast = useToast();
   const [documents, setDocuments] = useState<any[]>([]);
 
