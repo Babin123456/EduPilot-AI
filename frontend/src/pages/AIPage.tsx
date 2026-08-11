@@ -526,9 +526,9 @@ export const AIPage: React.FC = () => {
                 <div className="space-y-1 max-w-3xl group">
 
                   <div
-                    className={`p-3.5 rounded-2xl text-xs font-medium whitespace-pre-wrap leading-relaxed shadow-sm relative ${
+                    className={`p-3.5 rounded-2xl text-xs font-medium leading-relaxed shadow-sm relative ${
                       msg.role === 'user'
-                        ? 'bg-[#005BAC] text-white rounded-tr-none'
+                        ? 'bg-[#005BAC] text-white rounded-tr-none whitespace-pre-wrap'
                         : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-tl-none border border-slate-200 dark:border-slate-700'
                     }`}
                   >
