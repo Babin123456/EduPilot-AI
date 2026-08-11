@@ -1,0 +1,74 @@
+# ============================================================
+# EduPilot AI — Docker Compose (Single VPS Deployment)
+# ============================================================
+# Usage:
+#   docker compose up --build        → Build & start all services
+#   docker compose up -d             → Start in background (detached)
+#   docker compose down              → Stop all services
+#   docker compose logs -f backend   → Tail backend logs
+# ============================================================
+
+services:
+  # ── Backend: FastAPI + UV ──
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: edupilot-backend
+    env_file:
+      - .env
+    environment:
+      - APP_ENV=production
+      - DEBUG=false
+      - BACKEND_URL=http://backend:8000
+      - FRONTEND_URL=http://localhost
+      - ALLOWED_ORIGINS=http://localhost,http://frontend
+      - STORAGE_LOCAL_PATH=/app/storage
+    volumes:
+      - backend-storage:/app/storage
+    networks:
+      - edupilot-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/api/health').raise_for_status()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ── Frontend: React/Vite (built into Nginx) ──
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: /api/v1
+    container_name: edupilot-frontend
+    networks:
+      - edupilot-net
+    restart: unless-stopped
+
+  # ── Nginx: Reverse Proxy (Public Entry Point) ──
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: edupilot-nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - edupilot-net
+    restart: unless-stopped
+
+# ── Shared Network ──
+networks:
+  edupilot-net:
+    driver: bridge
+
+# ── Persistent Volumes ──
+volumes:
+  backend-storage:
+    driver: local

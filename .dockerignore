@@ -1,0 +1,67 @@
+# ============================================================
+# .dockerignore — EduPilot AI
+# ============================================================
+# Prevents bloated Docker build contexts.
+# Each service's Dockerfile uses its own build context,
+# but this top-level ignore applies to compose operations.
+# ============================================================
+
+# Version control
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+*.egg
+.venv/
+venv/
+env/
+*.whl
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Environment files (passed via env_file in compose)
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Documentation
+*.md
+LICENSE
+INSTRUCTIONS.md
+ARCHITECTURE.md
+PENDING.md
+
+# Logs
+*.log
+logs/
+
+# Agents
+.agents/
+.gemini/
