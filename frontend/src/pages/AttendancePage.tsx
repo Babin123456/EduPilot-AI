@@ -145,7 +145,12 @@ export const AttendancePage: React.FC = () => {
       )}
 
 
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+      {loading ? (
+        <div className="p-8 text-center text-xs font-semibold text-slate-400">
+          Loading student roster...
+        </div>
+      ) : (
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-400 font-bold uppercase border-b border-slate-200 dark:border-slate-800">
@@ -203,9 +208,9 @@ export const AttendancePage: React.FC = () => {
               ))}
             </tbody>
           </table>
-
         </div>
       </div>
+      )}
     </div>
   );
 };
