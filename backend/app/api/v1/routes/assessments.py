@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import json
 import uuid
+import logging
 from pydantic import BaseModel
 from fastapi import APIRouter, Depends, Query
 from pymongo.database import Database
@@ -13,6 +15,8 @@ from app.core.exceptions import http_403, http_404
 from app.models.assessment import new_assessment, new_assessment_result
 from app.models.document import new_document
 from app.models.student import student_full_name
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -30,7 +34,7 @@ def generate_ai_mcq_quiz(
     teacher: dict = Depends(get_current_teacher),
     db: Database = Depends(get_db),
 ):
-    """Generate 100% MCQ AI Quiz with 10 to 20 questions."""
+    """Generate 100% MCQ AI Quiz using Groq/Gemini LLM with template fallback."""
     tca = db.teacher_course_assignments.find_one({
         "id": body.class_id, "teacher_id": teacher["id"],
     })
@@ -42,32 +46,52 @@ def generate_ai_mcq_quiz(
     course_code = course["code"] if course else ""
 
     topic = body.topic.strip()
-    num_q = max(10, min(20, body.num_questions))
+    num_q = max(5, min(20, body.num_questions))
 
-    mcq_stems = [
-        f"Which of the following best defines the primary objective of {topic} in {course_name}?",
-        f"What is the theoretical time/space complexity trade-off associated with {topic}?",
-        f"In an enterprise system handling {topic}, which component prevents execution bottlenecks?",
-        f"Which operational protocol or invariant must be maintained during {topic} processing?",
-        f"When optimizing {topic}, which algorithm or data structure provides the highest throughput?",
-    ]
+    # ── Try real LLM generation first ──
+    questions = None
+    try:
+        from app.services.llm_generation_service import generate_real_mcq_quiz
+        questions = generate_real_mcq_quiz(
+            topic=topic,
+            course_name=course_name,
+            course_code=course_code,
+            difficulty=body.difficulty,
+            num_questions=num_q,
+        )
+        if questions:
+            logger.info("LLM generated %d real MCQ questions for topic '%s'", len(questions), topic)
+    except Exception as e:
+        logger.warning("LLM quiz generation failed, falling back to templates: %s", str(e))
 
-    questions = []
-    for i in range(num_q):
-        stem = mcq_stems[i % len(mcq_stems)]
-        questions.append({
-            "number": i + 1,
-            "text": f"Q{i + 1}: {stem}",
-            "type": "mcq",
-            "options": [
-                f"A) Primary theoretical model for {topic}",
-                f"B) Secondary optimization framework",
-                f"C) Algorithmic decomposition pattern",
-                f"D) Asynchronous execution pipeline",
-            ],
-            "correct_option": "A",
-            "marks": 2,
-        })
+    # ── Fallback: template-based generation if LLM fails ──
+    if not questions:
+        logger.info("Using template fallback for quiz generation on topic '%s'", topic)
+        mcq_stems = [
+            f"Which of the following best defines the primary objective of {topic} in {course_name}?",
+            f"What is the theoretical time/space complexity trade-off associated with {topic}?",
+            f"In an enterprise system handling {topic}, which component prevents execution bottlenecks?",
+            f"Which operational protocol or invariant must be maintained during {topic} processing?",
+            f"When optimizing {topic}, which algorithm or data structure provides the highest throughput?",
+        ]
+        questions = []
+        for i in range(num_q):
+            stem = mcq_stems[i % len(mcq_stems)]
+            questions.append({
+                "number": i + 1,
+                "text": f"Q{i + 1}: {stem}",
+                "type": "mcq",
+                "options": [
+                    f"A) Primary theoretical model for {topic}",
+                    f"B) Secondary optimization framework",
+                    f"C) Algorithmic decomposition pattern",
+                    f"D) Asynchronous execution pipeline",
+                ],
+                "correct_option": "A",
+                "marks": 2,
+            })
+
+    total_marks = sum(q.get("marks", 2) for q in questions)
 
     # Save Assessment
     assessment_doc = new_assessment(
@@ -77,9 +101,10 @@ def generate_ai_mcq_quiz(
         assessment_type="quiz",
         topic=topic,
         difficulty=body.difficulty,
-        total_marks=num_q * 2,
-        duration_minutes=num_q * 3,
-        total_questions=num_q,
+        total_marks=total_marks,
+        duration_minutes=len(questions) * 3,
+        total_questions=len(questions),
+        questions_json=json.dumps(questions),
         status="published",
         is_published=True,
         is_ai_generated=True,
@@ -100,8 +125,8 @@ def generate_ai_mcq_quiz(
         "id": assessment_doc["id"],
         "title": assessment_doc["title"],
         "topic": topic,
-        "total_questions": num_q,
-        "total_marks": assessment_doc["total_marks"],
+        "total_questions": len(questions),
+        "total_marks": total_marks,
         "questions": questions,
     }
 
@@ -124,8 +149,15 @@ def list_assessments(
         .sort("created_at", -1)
     )
 
-    return [
-        {
+    results = []
+    for a in assessments:
+        q_list = []
+        if a.get("questions_json"):
+            try:
+                q_list = json.loads(a["questions_json"])
+            except Exception:
+                q_list = []
+        results.append({
             "id": a["id"],
             "title": a["title"],
             "assessment_type": a.get("assessment_type", "quiz"),
@@ -133,13 +165,47 @@ def list_assessments(
             "difficulty": a.get("difficulty", "medium"),
             "total_marks": a.get("total_marks", 50),
             "duration_minutes": a.get("duration_minutes"),
-            "total_questions": a.get("total_questions", 0),
+            "total_questions": a.get("total_questions", len(q_list)),
+            "questions": q_list,
             "status": a.get("status", "draft"),
             "is_ai_generated": a.get("is_ai_generated", False),
             "created_at": a["created_at"].isoformat() if hasattr(a.get("created_at"), 'isoformat') else a.get("created_at"),
-        }
-        for a in assessments
-    ]
+        })
+    return results
+
+
+@router.get("/{assessment_id}")
+def get_assessment_details(
+    assessment_id: str,
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
+):
+    """Get single assessment details with full questions list."""
+    assessment = db.assessments.find_one({"id": assessment_id})
+    if not assessment:
+        raise http_404("Assessment not found")
+
+    q_list = []
+    if assessment.get("questions_json"):
+        try:
+            q_list = json.loads(assessment["questions_json"])
+        except Exception:
+            q_list = []
+
+    return {
+        "id": assessment["id"],
+        "title": assessment["title"],
+        "assessment_type": assessment.get("assessment_type", "quiz"),
+        "topic": assessment.get("topic"),
+        "difficulty": assessment.get("difficulty", "medium"),
+        "total_marks": assessment.get("total_marks", 50),
+        "duration_minutes": assessment.get("duration_minutes"),
+        "total_questions": assessment.get("total_questions", len(q_list)),
+        "questions": q_list,
+        "status": assessment.get("status", "draft"),
+        "is_ai_generated": assessment.get("is_ai_generated", False),
+        "created_at": assessment["created_at"].isoformat() if hasattr(assessment.get("created_at"), 'isoformat') else assessment.get("created_at"),
+    }
 
 
 @router.get("/{assessment_id}/results")

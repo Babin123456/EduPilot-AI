@@ -23,7 +23,7 @@ def new_assignment(*, teacher_course_assignment_id, teacher_id, title,
                    difficulty="medium", total_marks=100, deadline=None,
                    learning_objectives=None, rubric=None, answer_key=None,
                    bloom_taxonomy=None, is_ai_generated=False, is_published=False,
-                   attachment_url=None, status="draft", id=None):
+                   questions_json=None, attachment_url=None, status="draft", id=None):
     return {
         "id": id or _uid(),
         "teacher_course_assignment_id": teacher_course_assignment_id,
@@ -41,11 +41,13 @@ def new_assignment(*, teacher_course_assignment_id, teacher_id, title,
         "bloom_taxonomy": bloom_taxonomy,
         "is_ai_generated": is_ai_generated,
         "is_published": is_published,
+        "questions_json": questions_json,
         "attachment_url": attachment_url,
         "status": status,
         "created_at": _utcnow(),
         "updated_at": _utcnow(),
     }
+
 
 
 def new_assignment_submission(*, assignment_id, student_id, file_url=None,

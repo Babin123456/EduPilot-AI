@@ -1,7 +1,9 @@
 """Assignments routes."""
 
 from __future__ import annotations
+import json
 import uuid
+import logging
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, Query
@@ -14,6 +16,8 @@ from app.core.exceptions import http_403, http_404
 from app.models.assignment import new_assignment
 from app.models.document import new_document
 from app.models.student import student_full_name
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -42,7 +46,7 @@ def generate_ai_assignment(
     teacher: dict = Depends(get_current_teacher),
     db: Database = Depends(get_db),
 ):
-    """Generate dynamic AI assignment question paper."""
+    """Generate dynamic AI assignment question paper using Groq/Gemini LLM with template fallback."""
     tca = db.teacher_course_assignments.find_one({
         "id": body.class_id, "teacher_id": teacher["id"],
     })
@@ -54,52 +58,75 @@ def generate_ai_assignment(
     course_code = course["code"] if course else ""
 
     topic = body.topic.strip()
-    questions = []
 
-    q_templates = [
-        f"Analyze the core architectural principles of {topic} in the context of {course_name}. Detail how system throughput and execution efficiency are maintained.",
-        f"Compare and contrast key algorithmic paradigms used when implementing {topic}. Provide concrete mathematical or structural trade-offs.",
-        f"Design a robust solution for a real-world enterprise scenario requiring {topic}. Identify potential failure modes and mitigation strategies.",
-        f"Explain how error-handling, data validation, and fault tolerance operate within {topic} frameworks.",
-        f"Derive the time and space complexity bounds for standard operations in {topic}, highlighting best-case vs worst-case bounds.",
-    ]
+    # ── Try real LLM generation first ──
+    questions = None
+    full_markdown = None
+    try:
+        from app.services.llm_generation_service import generate_real_assignment
+        result = generate_real_assignment(
+            topic=topic,
+            course_name=course_name,
+            course_code=course_code,
+            difficulty=body.difficulty,
+            num_questions=body.num_questions,
+        )
+        if result:
+            questions, full_markdown = result
+            logger.info("LLM generated %d real assignment questions for topic '%s'", len(questions), topic)
+    except Exception as e:
+        logger.warning("LLM assignment generation failed, falling back to templates: %s", str(e))
 
-    for i in range(body.num_questions):
-        idx = i % len(q_templates)
-        q_text = q_templates[idx]
-        is_mcq = (i % 2 == 0)
-        options = None
-        if is_mcq:
-            options = [
-                f"A) Primary theoretical model for {topic}",
-                f"B) Extended optimization strategy",
-                f"C) Algorithmic decomposition pattern",
-                f"D) Asynchronous execution pipeline",
-            ]
+    # ── Fallback: template-based generation if LLM fails ──
+    if not questions:
+        logger.info("Using template fallback for assignment generation on topic '%s'", topic)
+        q_templates = [
+            f"Analyze the core architectural principles of {topic} in the context of {course_name}. Detail how system throughput and execution efficiency are maintained.",
+            f"Compare and contrast key algorithmic paradigms used when implementing {topic}. Provide concrete mathematical or structural trade-offs.",
+            f"Design a robust solution for a real-world enterprise scenario requiring {topic}. Identify potential failure modes and mitigation strategies.",
+            f"Explain how error-handling, data validation, and fault tolerance operate within {topic} frameworks.",
+            f"Derive the time and space complexity bounds for standard operations in {topic}, highlighting best-case vs worst-case bounds.",
+        ]
 
-        questions.append({
-            "number": i + 1,
-            "text": q_text,
-            "type": "mcq" if is_mcq else "short",
-            "options": options,
-            "marks": 5,
-        })
+        questions = []
+        for i in range(body.num_questions):
+            idx = i % len(q_templates)
+            q_text = q_templates[idx]
+            is_mcq = (i % 2 == 0)
+            options = None
+            if is_mcq:
+                options = [
+                    f"A) Primary theoretical model for {topic}",
+                    f"B) Extended optimization strategy",
+                    f"C) Algorithmic decomposition pattern",
+                    f"D) Asynchronous execution pipeline",
+                ]
 
-    md_lines = [
-        f"# Assignment Task Paper — {topic}",
-        f"**Course:** {course_name} (`{course_code}`) | **Total Marks:** {body.num_questions * 5} | **Difficulty:** {body.difficulty.upper()}",
-        f"**Faculty:** {teacher['first_name']} {teacher['last_name']} ({teacher.get('designation', 'Department of CSE')})",
-        "\n---\n",
-    ]
+            questions.append({
+                "number": i + 1,
+                "text": q_text,
+                "type": "mcq" if is_mcq else "short",
+                "options": options,
+                "marks": 5,
+            })
 
-    for q in questions:
-        md_lines.append(f"### Question {q['number']} [{q['marks']} Marks]\n{q['text']}")
-        if q['options']:
-            for opt in q['options']:
-                md_lines.append(f"- {opt}")
-        md_lines.append("")
+        md_lines = [
+            f"# Assignment Task Paper — {topic}",
+            f"**Course:** {course_name} (`{course_code}`) | **Total Marks:** {body.num_questions * 5} | **Difficulty:** {body.difficulty.upper()}",
+            f"**Faculty:** {teacher['first_name']} {teacher['last_name']} ({teacher.get('designation', 'Department of CSE')})",
+            "\n---\n",
+        ]
 
-    full_markdown = "\n".join(md_lines)
+        for q in questions:
+            md_lines.append(f"### Question {q['number']} [{q['marks']} Marks]\n{q['text']}")
+            if q['options']:
+                for opt in q['options']:
+                    md_lines.append(f"- {opt}")
+            md_lines.append("")
+
+        full_markdown = "\n".join(md_lines)
+
+    total_marks = sum(q.get("marks", 5) for q in questions)
 
     # Auto-save assignment record
     assignment_doc = new_assignment(
@@ -110,7 +137,8 @@ def generate_ai_assignment(
         instructions=full_markdown,
         topic=topic,
         difficulty=body.difficulty,
-        total_marks=body.num_questions * 5,
+        total_marks=total_marks,
+        questions_json=json.dumps(questions),
         status="published",
         is_published=True,
         is_ai_generated=True,
@@ -135,6 +163,7 @@ def generate_ai_assignment(
         "questions": questions,
         "markdown": full_markdown,
     }
+
 
 
 @router.get("")
@@ -165,6 +194,13 @@ def list_assignments(
             "section_id": tca["section_id"], "is_active": True,
         })
 
+        q_list = []
+        if a.get("questions_json"):
+            try:
+                q_list = json.loads(a["questions_json"])
+            except Exception:
+                q_list = []
+
         created_at = a.get("created_at")
         result.append({
             "id": a["id"],
@@ -172,6 +208,8 @@ def list_assignments(
             "topic": a.get("topic"),
             "difficulty": a.get("difficulty", "medium"),
             "total_marks": a.get("total_marks", 100),
+            "instructions": a.get("instructions", ""),
+            "questions": q_list,
             "deadline": a["deadline"].isoformat() if hasattr(a.get("deadline"), 'isoformat') else a.get("deadline"),
             "status": a.get("status", "draft"),
             "is_ai_generated": a.get("is_ai_generated", False),
@@ -181,6 +219,7 @@ def list_assignments(
         })
 
     return result
+
 
 
 @router.post("")

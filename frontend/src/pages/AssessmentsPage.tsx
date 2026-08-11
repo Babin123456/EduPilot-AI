@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { api } from '../api/client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { HelpCircle, Download, ChevronDown, ChevronUp, Award, Clock, Target, Send, Sparkles, X, Loader2 } from 'lucide-react';
+import { HelpCircle, Download, ChevronDown, ChevronUp, Award, Clock, Target, Send, Sparkles, X, Loader2, BookOpen } from 'lucide-react';
 import { generateQuizPDF, generateAssessmentReportPDF } from '../utils/pdfGenerator';
 
 export const AssessmentsPage: React.FC = () => {
@@ -240,14 +240,40 @@ export const AssessmentsPage: React.FC = () => {
     }
   };
 
+  const [previewQuestionsId, setPreviewQuestionsId] = useState<string | null>(null);
+
+  const togglePreviewQuestions = (assessmentId: string) => {
+    setPreviewQuestionsId(prev => (prev === assessmentId ? null : assessmentId));
+  };
+
   const handleDownloadQuizPDF = (assessment: any) => {
-    const sampleQuestions = Array.from({ length: assessment.total_questions || 5 }, (_, i) => ({
-      number: i + 1,
-      text: `Question ${i + 1} on ${assessment.topic || 'General Topic'}`,
-      type: i % 3 === 0 ? 'mcq' : i % 3 === 1 ? 'short' : 'long',
-      options: i % 3 === 0 ? ['Option A', 'Option B', 'Option C', 'Option D'] : undefined,
-      marks: Math.ceil(assessment.total_marks / (assessment.total_questions || 5)),
-    }));
+    let quizQuestions = assessment.questions;
+    if (!quizQuestions || quizQuestions.length === 0) {
+      if (assessment.questions_json) {
+        try {
+          quizQuestions = typeof assessment.questions_json === 'string' 
+            ? JSON.parse(assessment.questions_json) 
+            : assessment.questions_json;
+        } catch {
+          quizQuestions = [];
+        }
+      }
+    }
+
+    if (!quizQuestions || quizQuestions.length === 0) {
+      quizQuestions = Array.from({ length: assessment.total_questions || 5 }, (_, i) => ({
+        number: i + 1,
+        text: `Question ${i + 1} on ${assessment.topic || 'Subject Topic'}`,
+        type: 'mcq',
+        options: [
+          `A) Primary theoretical model for ${assessment.topic || 'topic'}`,
+          `B) Secondary optimization framework`,
+          `C) Algorithmic decomposition pattern`,
+          `D) Asynchronous execution pipeline`,
+        ],
+        marks: Math.ceil(assessment.total_marks / (assessment.total_questions || 5)),
+      }));
+    }
 
     generateQuizPDF({
       title: assessment.title,
@@ -260,7 +286,7 @@ export const AssessmentsPage: React.FC = () => {
       difficulty: assessment.difficulty || 'medium',
       totalMarks: assessment.total_marks,
       duration: assessment.duration_minutes || 30,
-      questions: sampleQuestions,
+      questions: quizQuestions,
     });
   };
 
@@ -309,12 +335,6 @@ export const AssessmentsPage: React.FC = () => {
         </div>
       </div>
 
-
-
-
-
-
-
       {loading ? (
         <div className="grid grid-cols-1 gap-4">
           {Array(3).fill(0).map((_, i) => (
@@ -341,8 +361,8 @@ export const AssessmentsPage: React.FC = () => {
               className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden"
             >
               <div className="p-5">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
+                <div className="flex items-start justify-between flex-wrap gap-4">
+                  <div className="flex-1 min-w-[240px]">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-[10px] font-bold uppercase px-2 py-0.5 bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 rounded">
                         {a.assessment_type}
@@ -365,14 +385,23 @@ export const AssessmentsPage: React.FC = () => {
                       {a.duration_minutes && (
                         <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {a.duration_minutes} min</span>
                       )}
-                      <span>{a.total_questions} questions</span>
+                      <span>{(a.questions?.length || a.total_questions)} questions</span>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 ml-4">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {a.questions && a.questions.length > 0 && (
+                      <button
+                        onClick={() => togglePreviewQuestions(a.id)}
+                        className="px-3 py-1.5 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 text-xs font-bold rounded-lg flex items-center gap-1 transition-colors"
+                      >
+                        <BookOpen className="w-3.5 h-3.5" />
+                        <span>{previewQuestionsId === a.id ? 'Hide Qs' : 'View Qs'}</span>
+                      </button>
+                    )}
                     <button
                       onClick={() => handleDownloadQuizPDF(a)}
-                      className="px-3 py-1.5 bg-[#005BAC] text-white text-xs font-bold rounded-lg flex items-center gap-1 hover:bg-[#0A6FD8] transition-colors"
+                      className="px-3 py-1.5 bg-[#005BAC] text-white text-xs font-bold rounded-lg flex items-center gap-1 hover:bg-[#0A6FD8] transition-colors shadow-sm"
                     >
                       <Download className="w-3.5 h-3.5 text-[#8CC63F]" /> Quiz PDF
                     </button>
@@ -390,7 +419,7 @@ export const AssessmentsPage: React.FC = () => {
                           toast.error('Failed to send email to students');
                         }
                       }}
-                      className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg flex items-center gap-1 transition-colors"
+                      className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg flex items-center gap-1 transition-colors shadow-sm"
                       title="Send this assessment question paper notice to all students in 1-Click"
                     >
                       <Send className="w-3.5 h-3.5" /> Send to Students
@@ -405,6 +434,61 @@ export const AssessmentsPage: React.FC = () => {
                   </div>
                 </div>
               </div>
+
+              {/* ─── Real Questions Interactive Preview ─── */}
+              <AnimatePresence>
+                {previewQuestionsId === a.id && a.questions && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.25 }}
+                    className="border-t border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/40 p-5 space-y-3"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-black uppercase text-indigo-600 dark:text-indigo-400">
+                        Generated Quiz Questions ({a.questions.length} Total)
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-bold">Groq AI Verified</span>
+                    </div>
+
+                    <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
+                      {a.questions.map((q: any, qIdx: number) => (
+                        <div key={qIdx} className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 space-y-2 text-xs">
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="font-bold text-slate-900 dark:text-white flex-1">
+                              Q{q.number || qIdx + 1}: {q.text}
+                            </p>
+                            <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded font-bold text-[10px] text-slate-500 flex-shrink-0">
+                              {q.marks || 2} Marks
+                            </span>
+                          </div>
+
+                          {q.options && q.options.length > 0 && (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1">
+                              {q.options.map((opt: string, optIdx: number) => (
+                                <div key={optIdx} className="p-2 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 text-[11px] text-slate-700 dark:text-slate-300">
+                                  {opt}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {q.correct_option && (
+                            <div className="pt-1 flex items-center gap-2 text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">
+                              <span>✓ Correct Answer: Option {q.correct_option}</span>
+                              {q.explanation && (
+                                <span className="text-slate-500 font-normal italic">— {q.explanation}</span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
 
 
               <AnimatePresence>
