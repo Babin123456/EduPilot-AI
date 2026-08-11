@@ -261,34 +261,10 @@ export const ProfilePage: React.FC = () => {
             </div>
           </div>
 
-          {/* Faculty Identity Status Card */}
-          <div className="rounded-3xl border border-[#005BAC]/20 bg-gradient-to-br from-[#005BAC]/5 via-white to-[#8CC63F]/10 dark:from-[#005BAC]/20 dark:via-slate-900 dark:to-[#8CC63F]/10 p-6 shadow-sm">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-wider text-[#005BAC] dark:text-[#8CC63F]">Faculty Identity</p>
-                <h3 className="mt-1 text-base font-black text-slate-900 dark:text-white leading-snug">Your profile is ready to represent you</h3>
-                <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">Keep your contact details and profile photo current so students and dashboard tools always see the right faculty information.</p>
-              </div>
-              <CheckCircle2 className="w-6 h-6 flex-shrink-0 text-emerald-500" />
-            </div>
-            <div className="mt-5 grid grid-cols-3 gap-2 text-center">
-              <div className="rounded-2xl bg-white/70 dark:bg-slate-800/70 p-2.5">
-                <p className="text-base font-black text-slate-900 dark:text-white">{user?.classes?.length || 0}</p>
-                <p className="text-[9px] font-bold uppercase text-slate-400">Classes</p>
-              </div>
-              <div className="rounded-2xl bg-white/70 dark:bg-slate-800/70 p-2.5">
-                <p className="text-base font-black text-slate-900 dark:text-white truncate">CSE</p>
-                <p className="text-[9px] font-bold uppercase text-slate-400">Dept</p>
-              </div>
-              <div className="rounded-2xl bg-white/70 dark:bg-slate-800/70 p-2.5">
-                <p className="text-base font-black text-emerald-600 dark:text-emerald-400">Active</p>
-                <p className="text-[9px] font-bold uppercase text-slate-400">Status</p>
-              </div>
-            </div>
           </div>
         </div>
 
-        {/* ─── Right Column: Contact Form + Personal Files Vault ─── */}
+        {/* ─── Right Column: Contact Form + Faculty Identity Card + Personal Files Vault ─── */}
         <div className="lg:col-span-8 space-y-6">
           
           {/* Contact Details & Specialization Form */}
@@ -345,7 +321,32 @@ export const ProfilePage: React.FC = () => {
                 <Save className="w-4 h-4" />
                 <span>{saving ? 'Saving...' : 'Save Profile Changes'}</span>
               </button>
-            </div>
+           </div>
+
+           {/* Faculty Identity Status Card */}
+           <div className="rounded-3xl border border-[#005BAC]/20 bg-gradient-to-br from-[#005BAC]/5 via-white to-[#8CC63F]/10 dark:from-[#005BAC]/20 dark:via-slate-900 dark:to-[#8CC63F]/10 p-6 shadow-sm">
+             <div className="flex items-start justify-between gap-4">
+               <div>
+                 <p className="text-[10px] font-black uppercase tracking-wider text-[#005BAC] dark:text-[#8CC63F]">Faculty Identity</p>
+                 <h3 className="mt-1 text-base font-black text-slate-900 dark:text-white leading-snug">Your profile is ready to represent you</h3>
+                 <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">Keep your contact details and profile photo current so students and dashboard tools always see the right faculty information.</p>
+               </div>
+               <CheckCircle2 className="w-6 h-6 flex-shrink-0 text-emerald-500" />
+             </div>
+             <div className="mt-5 grid grid-cols-3 gap-2 text-center">
+               <div className="rounded-2xl bg-white/70 dark:bg-slate-800/70 p-2.5">
+                 <p className="text-base font-black text-slate-900 dark:text-white">{user?.classes?.length || 0}</p>
+                 <p className="text-[9px] font-bold uppercase text-slate-400">Classes</p>
+               </div>
+               <div className="rounded-2xl bg-white/70 dark:bg-slate-800/70 p-2.5">
+                 <p className="text-base font-black text-slate-900 dark:text-white truncate">CSE</p>
+                 <p className="text-[9px] font-bold uppercase text-slate-400">Dept</p>
+               </div>
+               <div className="rounded-2xl bg-white/70 dark:bg-slate-800/70 p-2.5">
+                 <p className="text-base font-black text-emerald-600 dark:text-emerald-400">Active</p>
+                 <p className="text-[9px] font-bold uppercase text-slate-400">Status</p>
+               </div>
+             </div>
            </div>
 
            {/* ═══════════════════════════════════════════════
