@@ -236,7 +236,7 @@ export const AIPage: React.FC = () => {
 
     if ((!query.trim() && !currentAttached) || loading) return;
 
-    const userMsgContent = query.trim() + (currentAttached ? `\n\n📎 [Attached File: ${currentAttached.filename}]` : '');
+    const userMsgContent = query.trim() + (currentAttached ? `\n\n[Attached File: ${currentAttached.filename}]` : '');
     const userMsg = {
       role: 'user',
       content: userMsgContent,
@@ -556,9 +556,9 @@ export const AIPage: React.FC = () => {
                             />
                             <div
                               onClick={() => setPreviewImage({ url: msg.image_url, title: 'Chat Image Attachment' })}
-                              className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover/img:opacity-100 flex items-center justify-center text-white text-[11px] font-bold transition-opacity"
+                              className="absolute inset-0 bg-slate-950/50 opacity-0 group-hover/img:opacity-100 flex items-center justify-center text-white text-[11px] font-bold transition-opacity gap-1.5"
                             >
-                              🔍 Click to View Fullscreen
+                              <ImageIcon className="w-3.5 h-3.5" /> Click to View Fullscreen
                             </div>
                           </div>
                         )}

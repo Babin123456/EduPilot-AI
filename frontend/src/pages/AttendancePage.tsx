@@ -1,28 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { api } from '../api/client';
-import { Check, AlertCircle, CheckCircle2, XCircle, Send } from 'lucide-react';
+import { Check, AlertCircle, CheckCircle2, XCircle, Send, Edit3, Lock } from 'lucide-react';
 
 
 export const AttendancePage: React.FC = () => {
   const { activeClass } = useAuth();
+  const toast = useToast();
   const [students, setStudents] = useState<any[]>([]);
   const [records, setRecords] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState('');
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (!activeClass) return;
     setLoading(true);
+    setIsSubmitted(false);
+    setIsEditing(false);
     api.get(`/attendance/students/${activeClass.id}`)
       .then((res) => {
         setStudents(res.data);
         const initial: Record<string, string> = {};
+        let hasSavedRecords = false;
         res.data.forEach((s: any) => {
           initial[s.id] = s.today_status || 'present';
+          if (s.today_status) hasSavedRecords = true;
         });
         setRecords(initial);
+        if (hasSavedRecords) setIsSubmitted(true);
       })
       .finally(() => setLoading(false));
   }, [activeClass]);
@@ -32,12 +40,12 @@ export const AttendancePage: React.FC = () => {
   const isWeekendClosed = todayDay === 6 || todayDay === 0;
 
   const handleStatusChange = (studentId: string, status: string) => {
-    if (isWeekendClosed) return;
+    if (isWeekendClosed || (isSubmitted && !isEditing)) return;
     setRecords((prev) => ({ ...prev, [studentId]: status }));
   };
 
   const handleBulkMark = (status: string) => {
-    if (isWeekendClosed) return;
+    if (isWeekendClosed || (isSubmitted && !isEditing)) return;
     const updated: Record<string, string> = {};
     students.forEach((s) => {
       updated[s.id] = status;
@@ -49,7 +57,6 @@ export const AttendancePage: React.FC = () => {
     if (!activeClass || isWeekendClosed) return;
     setSaving(true);
 
-    setMessage('');
     try {
       const formattedRecords = Object.entries(records).map(([student_id, status]) => ({
         student_id,
@@ -60,9 +67,14 @@ export const AttendancePage: React.FC = () => {
         date: new Date().toISOString().split('T')[0],
         records: formattedRecords,
       });
-      setMessage('Attendance saved successfully!');
+      setIsSubmitted(true);
+      setIsEditing(false);
+      toast.success(
+        'Attendance Submitted to Portal!',
+        `Today's register for ${activeClass.course_name} (${activeClass.year_label} Sec ${activeClass.section_name}) has been dispatched to the university portal.`
+      );
     } catch (err: any) {
-      setMessage('Failed to save attendance.');
+      toast.error('Submission Failed', 'Failed to transmit attendance records to the portal. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -94,7 +106,7 @@ export const AttendancePage: React.FC = () => {
         <div className="flex flex-wrap items-center gap-2.5 relative z-10">
           <button
             onClick={() => handleBulkMark('present')}
-            disabled={isWeekendClosed}
+            disabled={isWeekendClosed || (isSubmitted && !isEditing)}
             className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black rounded-xl transition-all shadow-md active:scale-95 flex items-center gap-1.5 border border-emerald-400/50 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <CheckCircle2 className="w-4 h-4 text-emerald-200" />
@@ -102,20 +114,32 @@ export const AttendancePage: React.FC = () => {
           </button>
           <button
             onClick={() => handleBulkMark('absent')}
-            disabled={isWeekendClosed}
+            disabled={isWeekendClosed || (isSubmitted && !isEditing)}
             className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-black rounded-xl transition-all shadow-md active:scale-95 flex items-center gap-1.5 border border-rose-400/50 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <XCircle className="w-4 h-4 text-rose-200" />
             Mark All Absent
           </button>
-          <button
-            onClick={handleSubmit}
-            disabled={saving || isWeekendClosed}
-            className="px-5 py-2 bg-slate-950 hover:bg-slate-900 text-white text-xs font-black rounded-xl transition-all shadow-lg active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5 border border-slate-700"
-          >
-            <Send className="w-4 h-4 text-[#8CC63F]" />
-            {saving ? 'Saving...' : 'Submit Attendance'}
-          </button>
+
+          {isSubmitted && !isEditing ? (
+            <button
+              onClick={() => setIsEditing(true)}
+              disabled={isWeekendClosed}
+              className="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black rounded-xl transition-all shadow-lg active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5 border border-amber-300"
+            >
+              <Edit3 className="w-4 h-4" />
+              Edit Submitted Entry
+            </button>
+          ) : (
+            <button
+              onClick={handleSubmit}
+              disabled={saving || isWeekendClosed}
+              className="px-5 py-2 bg-slate-950 hover:bg-slate-900 text-white text-xs font-black rounded-xl transition-all shadow-lg active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5 border border-slate-700"
+            >
+              <Send className="w-4 h-4 text-[#8CC63F]" />
+              {saving ? 'Transmitting...' : isEditing ? 'Update & Re-submit' : 'Submit Attendance'}
+            </button>
+          )}
         </div>
 
 
@@ -138,9 +162,33 @@ export const AttendancePage: React.FC = () => {
         </div>
       )}
 
-      {message && (
-        <div className="p-3 bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 text-xs font-bold rounded-lg border border-emerald-200 dark:border-emerald-800">
-          {message}
+      {isSubmitted && !isEditing && (
+        <div className="p-3.5 bg-emerald-50 dark:bg-emerald-950/70 border border-emerald-300 dark:border-emerald-700/80 rounded-2xl flex items-center justify-between gap-3 text-emerald-900 dark:text-emerald-200 text-xs font-semibold">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+            <span>Attendance for today has been submitted to the portal. Click <strong>"Edit Submitted Entry"</strong> if you need to correct any student's record.</span>
+          </div>
+          <button
+            onClick={() => setIsEditing(true)}
+            className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-extrabold flex items-center gap-1 shadow-sm transition-all"
+          >
+            <Edit3 className="w-3 h-3" /> Edit
+          </button>
+        </div>
+      )}
+
+      {isSubmitted && isEditing && (
+        <div className="p-3.5 bg-amber-50 dark:bg-amber-950/70 border border-amber-300 dark:border-amber-700/80 rounded-2xl flex items-center justify-between gap-3 text-amber-900 dark:text-amber-200 text-xs font-semibold">
+          <div className="flex items-center gap-2">
+            <Edit3 className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+            <span><strong>Edit Mode Active:</strong> Modify any student's present/absent status and click <strong>"Update & Re-submit"</strong> to sync with portal.</span>
+          </div>
+          <button
+            onClick={() => setIsEditing(false)}
+            className="px-3 py-1 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 text-slate-800 dark:text-slate-200 rounded-lg text-[11px] font-bold transition-all"
+          >
+            Cancel
+          </button>
         </div>
       )}
 
@@ -190,8 +238,9 @@ export const AttendancePage: React.FC = () => {
                       {['present', 'absent'].map((st) => (
                         <button
                           key={st}
+                          disabled={isWeekendClosed || (isSubmitted && !isEditing)}
                           onClick={() => handleStatusChange(s.id, st)}
-                          className={`px-3.5 py-1 rounded-md text-[10px] font-extrabold uppercase transition-all ${
+                          className={`px-3.5 py-1 rounded-md text-[10px] font-extrabold uppercase transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
                             records[s.id] === st
                               ? st === 'present'
                                 ? 'bg-emerald-500 text-white shadow'
