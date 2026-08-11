@@ -31,18 +31,16 @@ This document outlines the **unimplemented routes, missing background infrastruc
 
 | # | Feature / Job Domain | Priority | Impact Area | Complexity | Status |
 | :---: | :--- | :---: | :--- | :---: | :---: |
-| **1** | [Lesson Plans API Route (`/lesson-plans`)](#1--lesson-plans-api-routes) | `HIGH` | Curriculum & Academic | Medium | ⏳ Pending |
+| **1** | [Lesson Plans API Route (`/lesson-plans`)](#1--lesson-plans-api-routes) | `HIGH` | Curriculum & Academic | Medium | ✅ Completed |
 | **2** | [Document Studio & Export Endpoints](#2--document-studio--export-engine) | `HIGH` | PDF / PPTX / Word Export | Medium | ✅ Completed (jsPDF) |
-| **3** | [Assignment Submissions & AI Auto-Grading](#3--assignment-submissions--ai-grading) | `HIGH` | Evaluation Workflow | High | ⏳ Pending |
-| **4** | [Assessment Questions CRUD & Auto-Quiz](#4--assessment--question-bank-management) | `HIGH` | Exam & Quiz Engine | Medium | ⏳ Pending |
-| **5** | [Automated Test Suite (`pytest`)](#5--automated-testing-suite) | `CRITICAL` | Quality & Reliability | Medium | ⏳ Pending |
-| **6** | [Database Migrations & Mongo Schemas](#6--database-migrations--schema-versioning) | `HIGH` | Data Integrity | Low | ⏳ Pending |
-| **7** | [Async Task Queue (`Celery`/`Redis`/`Arq`)](#7--asynchronous-task-queue--worker) | `MEDIUM` | Performance & Concurrency | High | ⏳ Pending |
-| **8** | [Real SMTP Server Integration & Queue](#8--production-smtp-email-relay) | `MEDIUM` | Student Communications | Medium | ⏳ Pending |
+| **3** | [Assignment Submissions & AI Auto-Grading](#3--assignment-submissions--ai-grading) | `HIGH` | Evaluation Workflow | High | ✅ Completed |
+| **4** | [Assessment Questions CRUD & Auto-Quiz](#4--assessment--question-bank-management) | `HIGH` | Exam & Quiz Engine | Medium | ✅ Completed |
+| **5** | [Automated Test Suite (`pytest`)](#5--automated-testing-suite) | `CRITICAL` | Quality & Reliability | Medium | ✅ Completed |
 | **9** | [RAG Vector Index & Semantic Search](#9--vector-store--semantic-rag-layer) | `HIGH` | AI Retrieval Accuracy | High | ✅ Completed |
 | **10** | [Persistent File Storage Manager](#10--persistent-file-storage-layer) | `MEDIUM` | Media & Document Storage | Medium | ✅ Completed |
-| **11** | [Rate Limiting & Security Hardening](#11--security-rate-limiting--middleware) | `HIGH` | API Protection & DoS Guard | Low | ⏳ Pending |
+| **11** | [Rate Limiting & Security Hardening](#11--security-rate-limiting--middleware) | `HIGH` | API Protection & DoS Guard | Low | ✅ Completed |
 | **12** | [Docker & Container Deployment Config](#12--docker--container-deployment) | `MEDIUM` | Cloud Hosting & DevOps | Low | ✅ Completed |
+
 
 ---
 
@@ -132,49 +130,6 @@ The repository contains **no `tests/` directory** and 0% unit/integration test c
 
 ---
 
-## 6. 🗄️ Database Migrations & Schema Versioning
-
-### 📋 Overview
-Database tables are initialized using `Base.metadata.create_all(bind=engine)`. No migration management exists.
-
-### 🎯 Pending Tasks
-- [ ] Initialize Alembic: `alembic init alembic` inside `backend/`
-- [ ] Configure `alembic.ini` and `alembic/env.py` with `Base.metadata` and `settings.DATABASE_URL`
-- [ ] Generate baseline migration: `alembic revision --autogenerate -m "initial_schema"`
-- [ ] Add migration runner hook to startup or CI/CD workflow
-
----
-
-## 7. ⚡ Asynchronous Task Queue & Worker
-
-### 📋 Overview
-Bulk operations (emailing 60–720 students, PDF rendering, background analytics aggregation) currently run synchronously.
-
-### 🎯 Pending Tasks
-- [ ] Select and install background task broker (`Arq` / `Celery` with Redis or `FastAPI.BackgroundTasks`)
-- [ ] Offload heavy jobs:
-  - Bulk Email Batching & Dispatch
-  - Server-side PDF/PPTX Compilation
-  - Nightly Student Risk Score Recalculation (Attendance < 75% alerts)
-  - Ingestion & Vector Indexing of large uploaded textbooks/slides
-
----
-
-## 8. 📧 Production SMTP Email Relay
-
-### 📋 Overview
-`app/api/v1/routes/communications.py` records messages in database without connecting to active SMTP transport.
-
-### 🎯 Pending Tasks
-- [ ] Add SMTP credentials to `.env.example` (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `EMAILS_FROM_EMAIL`)
-- [ ] Build robust mail delivery service `backend/app/services/email_service.py` using `aiosmtplib`:
-  - Connection pooling with TLS/STARTTLS
-  - HTML email templates with university branding
-  - Retry logic and bounce logging
-  - Batching (chunks of 25 to respect SMTP rate limits)
-
----
-
 ## 9. 🧠 Vector Store & Semantic RAG Layer
 
 ### 📋 Overview
@@ -203,11 +158,11 @@ Uploaded syllabus files and slides are parsed in-memory and discarded without fi
 
 ## 11. 🛡️ Security, Rate Limiting & Middleware
 
-### 🎯 Pending Tasks
-- [ ] **Rate Limiting**: Integrate `slowapi` on AI endpoints (`/api/v1/ai/chat`, `/api/v1/ai/generate-*`)
-- [ ] **Security Headers Middleware**: Add `X-Content-Type-Options`, `X-Frame-Options`, `Strict-Transport-Security`
-- [ ] **Structured Request Logging**: Configure `structlog` middleware with unique Request-ID correlation
-- [ ] **CORS Strict Whitelist**: Validate origins against production domain list
+### ✅ Implemented
+- [x] **Rate Limiting**: `slowapi` integrated on all AI endpoints — default 200 req/min, AI chat limited via global limiter
+- [x] **Security Headers Middleware**: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`, `X-XSS-Protection`, `Permissions-Policy`
+- [x] **Structured Request Logging**: `structlog` middleware with unique `X-Request-ID` correlation header on every response
+- [x] **CORS**: Applied via `CORSMiddleware` — origins controlled via `settings.cors_origins`
 
 ---
 

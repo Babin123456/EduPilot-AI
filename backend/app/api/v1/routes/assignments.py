@@ -293,3 +293,269 @@ def get_submissions(
 
     result.sort(key=lambda x: x["roll_number"])
     return result
+
+
+# ─── Task 3: Submission Ingestion ────────────────────────────────────────────
+
+class SubmitAssignmentRequest(BaseModel):
+    student_id: str
+    content: str | None = None
+    file_url: str | None = None
+
+
+@router.post("/{assignment_id}/submit", status_code=201)
+def submit_assignment(
+    assignment_id: str,
+    body: SubmitAssignmentRequest,
+    db: Database = Depends(get_db),
+):
+    """Ingest a student's assignment submission (text or file URL)."""
+    from app.models.assignment import new_assignment_submission
+
+    assignment = db.assignments.find_one({"id": assignment_id})
+    if not assignment:
+        raise http_404("Assignment not found")
+
+    student = db.students.find_one({"id": body.student_id})
+    if not student:
+        raise http_404("Student not found")
+
+    now = datetime.now(timezone.utc)
+    deadline = assignment.get("deadline")
+    is_late = False
+    if deadline and hasattr(deadline, "replace"):
+        is_late = now > deadline
+
+    existing = db.assignment_submissions.find_one(
+        {"assignment_id": assignment_id, "student_id": body.student_id}
+    )
+    if existing:
+        db.assignment_submissions.update_one(
+            {"id": existing["id"]},
+            {"$set": {
+                "content": body.content,
+                "file_url": body.file_url,
+                "submitted_at": now,
+                "is_late": is_late,
+                "status": "submitted",
+                "updated_at": now,
+            }},
+        )
+        return {"submission_id": existing["id"], "message": "Submission updated successfully", "is_late": is_late}
+
+    sub_doc = new_assignment_submission(
+        assignment_id=assignment_id,
+        student_id=body.student_id,
+        content=body.content,
+        file_url=body.file_url,
+        submitted_at=now,
+        is_late=is_late,
+        max_score=assignment.get("total_marks", 100),
+        status="submitted",
+    )
+    db.assignment_submissions.insert_one(sub_doc)
+    return {"submission_id": sub_doc["id"], "message": "Submission received successfully", "is_late": is_late}
+
+
+# ─── Task 3: AI Auto-Grading ─────────────────────────────────────────────────
+
+@router.post("/{assignment_id}/evaluate-ai")
+def evaluate_assignment_ai(
+    assignment_id: str,
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
+):
+    """Run LLM evaluation on all ungraded submissions for this assignment."""
+    assignment = db.assignments.find_one({"id": assignment_id})
+    if not assignment:
+        raise http_404("Assignment not found")
+
+    tca = db.teacher_course_assignments.find_one(
+        {"id": assignment["teacher_course_assignment_id"], "teacher_id": teacher["id"]}
+    )
+    if not tca:
+        raise http_403("Not authorized")
+
+    subs = list(db.assignment_submissions.find({"assignment_id": assignment_id, "is_graded": False}))
+    if not subs:
+        return {"message": "No ungraded submissions found", "graded_count": 0}
+
+    max_score = assignment.get("total_marks", 100)
+    rubric = assignment.get("rubric") or "Grade based on conceptual correctness, clarity, and completeness."
+    graded_count = 0
+
+    for sub in subs:
+        content = sub.get("content") or ""
+        if not content.strip():
+            continue
+
+        feedback = ""
+        score = 0.0
+        ai_confidence = 0.5
+
+        try:
+            from app.services.llm_generation_service import evaluate_submission_with_llm
+            result = evaluate_submission_with_llm(
+                submission_text=content,
+                rubric=rubric,
+                max_score=max_score,
+                assignment_title=assignment.get("title", ""),
+            )
+            if result:
+                score = result.get("score", 0.0)
+                feedback = result.get("feedback", "")
+                ai_confidence = result.get("confidence", 0.75)
+        except Exception as exc:
+            logger.warning("LLM evaluation failed for submission %s: %s", sub["id"], exc)
+            word_count = len(content.split())
+            score = min(max_score, round(max_score * min(word_count / 250, 1.0) * 0.80, 1))
+            feedback = (
+                f"Auto-evaluated: submission contains {word_count} words. "
+                f"Manual review recommended to verify accuracy and depth."
+            )
+            ai_confidence = 0.4
+
+        now = datetime.now(timezone.utc)
+        db.assignment_submissions.update_one(
+            {"id": sub["id"]},
+            {"$set": {
+                "score": score,
+                "max_score": max_score,
+                "feedback": feedback,
+                "ai_evaluation": feedback,
+                "ai_confidence": ai_confidence,
+                "is_graded": True,
+                "graded_by": "ai",
+                "graded_at": now,
+                "status": "graded",
+                "updated_at": now,
+            }},
+        )
+        graded_count += 1
+
+    return {
+        "assignment_id": assignment_id,
+        "graded_count": graded_count,
+        "message": f"AI evaluation complete — {graded_count} submission(s) graded.",
+    }
+
+
+# ─── Task 3: Teacher Grade Override ──────────────────────────────────────────
+
+class GradeOverrideRequest(BaseModel):
+    score: float
+    feedback: str | None = None
+
+
+@router.put("/submissions/{submission_id}/grade")
+def teacher_grade_override(
+    submission_id: str,
+    body: GradeOverrideRequest,
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
+):
+    """Teacher override to set final score and feedback on a submission."""
+    sub = db.assignment_submissions.find_one({"id": submission_id})
+    if not sub:
+        raise http_404("Submission not found")
+
+    assignment = db.assignments.find_one({"id": sub["assignment_id"]})
+    if not assignment:
+        raise http_404("Assignment not found")
+
+    tca = db.teacher_course_assignments.find_one(
+        {"id": assignment["teacher_course_assignment_id"], "teacher_id": teacher["id"]}
+    )
+    if not tca:
+        raise http_403("Not authorized")
+
+    max_score = assignment.get("total_marks", 100)
+    score = min(max_score, max(0.0, body.score))
+    now = datetime.now(timezone.utc)
+
+    db.assignment_submissions.update_one(
+        {"id": submission_id},
+        {"$set": {
+            "score": score,
+            "max_score": max_score,
+            "feedback": body.feedback,
+            "is_graded": True,
+            "graded_by": teacher["id"],
+            "graded_at": now,
+            "status": "graded",
+            "updated_at": now,
+        }},
+    )
+    return {
+        "submission_id": submission_id,
+        "score": score,
+        "max_score": max_score,
+        "message": "Grade saved successfully",
+    }
+
+
+# ─── Task 3: Submission Analytics ────────────────────────────────────────────
+
+@router.get("/{assignment_id}/analytics")
+def assignment_analytics(
+    assignment_id: str,
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
+):
+    """Submission rate, score distribution, and late submission stats."""
+    assignment = db.assignments.find_one({"id": assignment_id})
+    if not assignment:
+        raise http_404("Assignment not found")
+
+    tca = db.teacher_course_assignments.find_one(
+        {"id": assignment["teacher_course_assignment_id"], "teacher_id": teacher["id"]}
+    )
+    if not tca:
+        raise http_403("Not authorized")
+
+    total_students = db.students.count_documents({"section_id": tca.get("section_id"), "is_active": True})
+    subs = list(db.assignment_submissions.find({"assignment_id": assignment_id}))
+
+    total_submitted = len(subs)
+    graded_subs = [s for s in subs if s.get("is_graded")]
+    late_subs = [s for s in subs if s.get("is_late")]
+    scores = [s["score"] for s in graded_subs if s.get("score") is not None]
+
+    avg_score = round(sum(scores) / len(scores), 2) if scores else 0
+    max_score_val = max(scores) if scores else 0
+    min_score_val = min(scores) if scores else 0
+    pass_mark = (assignment.get("total_marks", 100) or 100) * 0.40
+    pass_count = sum(1 for s in scores if s >= pass_mark)
+
+    # Simple score buckets
+    buckets = {"90-100%": 0, "75-89%": 0, "60-74%": 0, "40-59%": 0, "<40%": 0}
+    total_marks = assignment.get("total_marks") or 100
+    for s in scores:
+        pct = (s / total_marks) * 100
+        if pct >= 90:
+            buckets["90-100%"] += 1
+        elif pct >= 75:
+            buckets["75-89%"] += 1
+        elif pct >= 60:
+            buckets["60-74%"] += 1
+        elif pct >= 40:
+            buckets["40-59%"] += 1
+        else:
+            buckets["<40%"] += 1
+
+    return {
+        "assignment_id": assignment_id,
+        "title": assignment.get("title"),
+        "total_students": total_students,
+        "total_submitted": total_submitted,
+        "submission_rate": round((total_submitted / total_students * 100), 1) if total_students else 0,
+        "total_graded": len(graded_subs),
+        "late_submissions": len(late_subs),
+        "average_score": avg_score,
+        "highest_score": max_score_val,
+        "lowest_score": min_score_val,
+        "pass_count": pass_count,
+        "fail_count": len(scores) - pass_count,
+        "score_distribution": buckets,
+    }
+

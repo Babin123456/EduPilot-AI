@@ -51,6 +51,8 @@ dependencies = [
     # ---- Logging ----
     "structlog>=24.2.0",
     "pymongo>=4.17.0",
+    # ---- Rate Limiting ----
+    "slowapi>=0.1.9",
 ]
 
 [tool.setuptools.packages.find]

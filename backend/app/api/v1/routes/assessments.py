@@ -329,3 +329,221 @@ def submit_quiz_answers(
         "grade": grade,
         "message": "Quiz submission evaluated and saved successfully.",
     }
+
+
+# ─── Task 4: Question-Level CRUD ─────────────────────────────────────────────
+
+class AddQuestionRequest(BaseModel):
+    text: str
+    question_type: str = "mcq"   # mcq | short | coding
+    options: list[str] | None = None
+    correct_option: str | None = None
+    marks: int = 2
+    bloom_tag: str | None = None  # remember | understand | apply | analyse | evaluate | create
+
+
+class EditQuestionRequest(BaseModel):
+    text: str | None = None
+    options: list[str] | None = None
+    correct_option: str | None = None
+    marks: int | None = None
+    bloom_tag: str | None = None
+
+
+@router.get("/{assessment_id}/questions")
+def list_questions(
+    assessment_id: str,
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
+):
+    """Retrieve individual question items with Bloom's taxonomy tags."""
+    assessment = db.assessments.find_one({"id": assessment_id})
+    if not assessment:
+        raise http_404("Assessment not found")
+
+    q_list = []
+    if assessment.get("questions_json"):
+        try:
+            q_list = json.loads(assessment["questions_json"])
+        except Exception:
+            q_list = []
+
+    # Enrich with bloom tags if missing
+    for i, q in enumerate(q_list):
+        if "bloom_tag" not in q:
+            q["bloom_tag"] = None
+        if "id" not in q:
+            q["id"] = str(uuid.uuid4())  # stable IDs for existing questions
+        q["number"] = i + 1
+
+    return q_list
+
+
+@router.post("/{assessment_id}/questions", status_code=201)
+def add_question(
+    assessment_id: str,
+    body: AddQuestionRequest,
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
+):
+    """Add a manual question to the assessment's question bank."""
+    assessment = db.assessments.find_one({"id": assessment_id})
+    if not assessment:
+        raise http_404("Assessment not found")
+
+    tca = db.teacher_course_assignments.find_one(
+        {"id": assessment["teacher_course_assignment_id"], "teacher_id": teacher["id"]}
+    )
+    if not tca:
+        raise http_403("Not authorized")
+
+    q_list = []
+    if assessment.get("questions_json"):
+        try:
+            q_list = json.loads(assessment["questions_json"])
+        except Exception:
+            q_list = []
+
+    new_q = {
+        "id": str(uuid.uuid4()),
+        "number": len(q_list) + 1,
+        "text": body.text,
+        "type": body.question_type,
+        "options": body.options,
+        "correct_option": body.correct_option,
+        "marks": body.marks,
+        "bloom_tag": body.bloom_tag,
+    }
+    q_list.append(new_q)
+
+    new_total_marks = sum(q.get("marks", 2) for q in q_list)
+    db.assessments.update_one(
+        {"id": assessment_id},
+        {"$set": {
+            "questions_json": json.dumps(q_list),
+            "total_questions": len(q_list),
+            "total_marks": new_total_marks,
+        }},
+    )
+    return {"question_id": new_q["id"], "number": new_q["number"], "message": "Question added successfully"}
+
+
+@router.put("/questions/{question_id}")
+def edit_question(
+    question_id: str,
+    body: EditQuestionRequest,
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
+):
+    """Edit question text, options, or correct answer in an assessment."""
+    # Find the assessment containing this question
+    all_assessments = db.assessments.find({"teacher_id": teacher["id"]})
+    target_assessment = None
+    target_q_list = []
+
+    for assessment in all_assessments:
+        if not assessment.get("questions_json"):
+            continue
+        try:
+            q_list = json.loads(assessment["questions_json"])
+        except Exception:
+            continue
+        for q in q_list:
+            if q.get("id") == question_id:
+                target_assessment = assessment
+                target_q_list = q_list
+                break
+        if target_assessment:
+            break
+
+    if not target_assessment:
+        raise http_404("Question not found")
+
+    updates = {k: v for k, v in body.model_dump().items() if v is not None}
+    for q in target_q_list:
+        if q.get("id") == question_id:
+            q.update(updates)
+            break
+
+    db.assessments.update_one(
+        {"id": target_assessment["id"]},
+        {"$set": {"questions_json": json.dumps(target_q_list)}},
+    )
+    return {"question_id": question_id, "message": "Question updated successfully"}
+
+
+@router.delete("/questions/{question_id}", status_code=204)
+def delete_question(
+    question_id: str,
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
+):
+    """Remove a question from an assessment."""
+    all_assessments = db.assessments.find({"teacher_id": teacher["id"]})
+    target_assessment = None
+    target_q_list = []
+
+    for assessment in all_assessments:
+        if not assessment.get("questions_json"):
+            continue
+        try:
+            q_list = json.loads(assessment["questions_json"])
+        except Exception:
+            continue
+        for q in q_list:
+            if q.get("id") == question_id:
+                target_assessment = assessment
+                target_q_list = q_list
+                break
+        if target_assessment:
+            break
+
+    if not target_assessment:
+        raise http_404("Question not found")
+
+    target_q_list = [q for q in target_q_list if q.get("id") != question_id]
+    # Re-number
+    for i, q in enumerate(target_q_list):
+        q["number"] = i + 1
+
+    new_total_marks = sum(q.get("marks", 2) for q in target_q_list)
+    db.assessments.update_one(
+        {"id": target_assessment["id"]},
+        {"$set": {
+            "questions_json": json.dumps(target_q_list),
+            "total_questions": len(target_q_list),
+            "total_marks": new_total_marks,
+        }},
+    )
+
+
+@router.post("/{assessment_id}/publish")
+def publish_assessment(
+    assessment_id: str,
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
+):
+    """Publish quiz to the student portal / section roster."""
+    assessment = db.assessments.find_one({"id": assessment_id})
+    if not assessment:
+        raise http_404("Assessment not found")
+
+    tca = db.teacher_course_assignments.find_one(
+        {"id": assessment["teacher_course_assignment_id"], "teacher_id": teacher["id"]}
+    )
+    if not tca:
+        raise http_403("Not authorized")
+
+    if assessment.get("status") == "published":
+        return {"message": "Assessment is already published", "assessment_id": assessment_id}
+
+    db.assessments.update_one(
+        {"id": assessment_id},
+        {"$set": {"status": "published", "is_published": True}},
+    )
+    return {
+        "assessment_id": assessment_id,
+        "title": assessment.get("title"),
+        "message": "Assessment published successfully. Students can now access it.",
+    }
+

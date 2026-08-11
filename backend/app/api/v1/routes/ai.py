@@ -9,7 +9,7 @@ import re
 import uuid
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, File, UploadFile, Form, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, File, UploadFile, Form, HTTPException, BackgroundTasks, Request
 from pydantic import BaseModel
 from pymongo.database import Database
 import httpx
@@ -346,6 +346,7 @@ async def upload_file_for_ai(
 
 @router.post("/chat")
 def chat(
+    request: Request,
     body: ChatRequest,
     teacher: dict = Depends(get_current_teacher),
     db: Database = Depends(get_db),
