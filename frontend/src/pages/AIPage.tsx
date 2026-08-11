@@ -298,7 +298,7 @@ export const AIPage: React.FC = () => {
         {/* ─── Left Sidebar: Conversation History + Document Library ─── */}
         <div className="w-64 bg-slate-50 dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 p-3 hidden md:flex flex-col justify-between flex-shrink-0">
           <div className="space-y-3 overflow-y-auto flex-1">
-          <button
+            <button
             onClick={handleNewChat}
             className="w-full py-2.5 px-3 bg-[#005BAC] hover:bg-[#0A6FD8] text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all"
           >
@@ -402,6 +402,7 @@ export const AIPage: React.FC = () => {
                 </motion.div>
               )}
             </AnimatePresence>
+          </div>
           </div>
 
           {/* ── Conversation History ── */}
@@ -778,6 +779,7 @@ export const AIPage: React.FC = () => {
         </div>
       </div>
     </div>
-  </div>
   );
-}
+};
+
+export default AIPage;
