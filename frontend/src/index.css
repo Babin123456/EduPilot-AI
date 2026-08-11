@@ -19,17 +19,46 @@
     pointer-events: none;
   }
   body {
-    @apply bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 antialiased min-h-screen transition-colors duration-200 font-sans;
+    background-color: rgb(248 250 252);
+    color: rgb(15 23 42);
+    min-height: 100vh;
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 200ms;
+  }
+  .dark body {
+    background-color: rgb(2 6 23);
+    color: rgb(241 245 249);
   }
 }
 
 /* ─── Glassmorphism & Gradient Utilities ─── */
 .glass-card {
-  @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-700/60 shadow-2xl;
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
+.dark .glass-card {
+  background-color: rgba(15, 23, 42, 0.7);
+  border-color: rgba(51, 65, 85, 0.6);
+}
+
 .glass-card-hover {
-  @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-700/60 shadow-2xl;
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   transition: transform 0.3s cubic-bezier(.22,1,.36,1), box-shadow 0.3s cubic-bezier(.22,1,.36,1), border-color 0.3s ease;
+}
+.dark .glass-card-hover {
+  background-color: rgba(15, 23, 42, 0.7);
+  border-color: rgba(51, 65, 85, 0.6);
 }
 .glass-card-hover:hover {
   transform: translateY(-5px);
@@ -42,7 +71,9 @@
 }
 
 .text-gradient {
-  @apply bg-clip-text text-transparent;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
   background-image: linear-gradient(135deg, #005BAC 0%, #0A6FD8 40%, #8CC63F 100%);
 }
 
@@ -59,9 +90,13 @@
   0%, 100% { transform: translateY(0px) rotate(0deg); }
   50% { transform: translateY(-20px) rotate(2deg); }
 }
-@keyframes glow-pulse {
+@keyframes float-delay {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes pulse-glow {
   0%, 100% { opacity: 0.4; transform: scale(1); }
-  50% { opacity: 0.7; transform: scale(1.08); }
+  50% { opacity: 0.8; transform: scale(1.05); }
 }
 @keyframes gradient-shift {
   0% { background-position: 0% 50%; }
@@ -73,12 +108,12 @@
   to { transform: rotate(360deg); }
 }
 
-.animate-float { animation: float 5s ease-in-out infinite; }
-.animate-float-slow { animation: float-slow 7s ease-in-out infinite; }
-.animate-float-delay { animation: float 5s ease-in-out 1.5s infinite; }
-.animate-glow { animation: glow-pulse 4s ease-in-out infinite; }
+.animate-float { animation: float 6s ease-in-out infinite; }
+.animate-float-slow { animation: float-slow 9s ease-in-out infinite; }
+.animate-float-delay { animation: float-delay 7s ease-in-out 2s infinite; }
+.animate-glow { animation: pulse-glow 4s ease-in-out infinite; }
 .animate-gradient { animation: gradient-shift 6s ease infinite; background-size: 200% 200%; }
-.animate-spin-slow { animation: spin-slow 30s linear infinite; }
+.animate-spin-slow { animation: spin-slow 25s linear infinite; }
 
 /* ─── Parallax Layer Utilities ─── */
 .parallax-layer {
@@ -86,7 +121,7 @@
   transition: transform 0.1s linear;
 }
 
-/* ─── Section Wave Dividers ─── */
+/* ─── Accordion & Wave Dividers ─── */
 .wave-divider {
   position: relative;
   overflow: hidden;
