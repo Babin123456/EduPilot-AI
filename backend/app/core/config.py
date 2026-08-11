@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-import os
-from pathlib import Path
 from functools import lru_cache
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pathlib import Path
 
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Locate project root directory dynamically (EduPilot-AI/)
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent

@@ -13,13 +13,10 @@ import {
   Sparkles,
   BookOpen,
   BarChart3,
-  TrendingUp,
-  Award,
-  Zap,
   ChevronRight
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, AreaChart, Area, PieChart, Pie, Cell } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell } from 'recharts';
 
 
 const SkeletonBlock: React.FC<{ className?: string }> = ({ className }) => (
@@ -160,11 +157,7 @@ export const DashboardPage: React.FC = () => {
 
            {/* Teacher avatar is shared with the profile page through AuthContext. */}
            <div className="relative z-10 w-full sm:w-80 h-48 flex items-center justify-center flex-shrink-0">
-             {user?.avatar_url ? (
-               <img src={user.avatar_url} alt={`${user.full_name} avatar`} className="w-36 h-36 rounded-[2rem] object-contain" />
-             ) : (
-               <img src="/images/hero_illustration.png" alt="Academic Intelligence Command Center" className="w-full h-auto max-h-48 object-contain drop-shadow-[0_15px_35px_rgba(0,0,0,0.5)]" />
-             )}
+             <img src={user?.avatar_url || '/images/avatar.png'} alt={`${user?.full_name || 'Teacher'} avatar`} className="w-36 h-36 rounded-[2rem] object-contain drop-shadow-md" />
           </div>
 
         </div>

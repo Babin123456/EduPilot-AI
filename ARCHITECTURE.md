@@ -34,10 +34,15 @@ flowchart LR
     SERVICES --> DB[(MongoDB / Atlas)]
     SERVICES --> STORE[Local File Storage]
 
-    CORE --> ROUTER[Intent & LLM Workflow Router]
-    ROUTER --> GROQ[Groq LLM Primary: Dual Keys]
-    ROUTER --> GEMINI[Gemini LLM Fallback]
-    ROUTER --> RAG[RAG Retrieval Layer]
+    CORE --> ROUTER[Smart Task-Based LLM & Vision Router]
+    ROUTER -->|Standard Text Chat| GROQ[Groq LLM Primary: Llama-3.3-70B]
+    ROUTER -->|File / Image Upload| GEMINI[Gemini 1.5 Flash Vision]
+    ROUTER -->|Offline Local OCR| OCR[RapidOCR ONNX Engine]
+    ROUTER -->|Vector Knowledge| RAG[RAG Retrieval Layer]
+
+    GROQ -.->|Fallback| GEMINI
+    GEMINI -.->|Fallback| GROQ
+    OCR --> ROUTER
 
     RAG --> DB
 

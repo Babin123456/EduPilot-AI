@@ -1,13 +1,14 @@
 """Dashboard routes — aggregated teacher metrics."""
 
 from __future__ import annotations
+
 from datetime import date
 
 from fastapi import APIRouter, Depends, Query
 from pymongo.database import Database
 
-from app.core.database import get_db
 from app.api.deps import get_current_teacher
+from app.core.database import get_db
 
 router = APIRouter()
 

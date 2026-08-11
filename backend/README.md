@@ -19,7 +19,7 @@
 
 ## 💡 Overview
 
-The backend service powers EduPilot AI using FastAPI and MongoDB (PyMongo). It manages data access for 720 unique students, teacher authentication, class scheduling, attendance persistence, profile photo uploads, teacher personal file storage, RAG document library chunking & indexing, and context-aware LLM query routing using Groq (dual primary keys) and Gemini (fallback).
+The backend service powers EduPilot AI using FastAPI and MongoDB (PyMongo). It manages data access for 720 unique students, teacher authentication, class scheduling, attendance persistence, profile photo uploads, teacher personal file storage, RAG document library chunking & indexing, local offline image OCR via RapidOCR (`rapidocr-onnxruntime`), and smart task-based LLM query routing using Groq (primary for fast chat) and Gemini (primary for image/file vision analysis & fallback).
 
 ---
 
@@ -29,8 +29,9 @@ The backend service powers EduPilot AI using FastAPI and MongoDB (PyMongo). It m
 - ⚡ **FastAPI 0.115**
 - 🍃 **MongoDB & PyMongo**
 - 🔐 **JWT Authentication** (`python-jose`, `passlib`, `bcrypt`)
-- 🤖 **Groq & Google Gemini APIs**
-- 📚 **RAG Indexing & PyPDF2 / python-docx Parsing**
+- 🤖 **Groq & Google Gemini APIs** (Smart Model Router)
+- 👁️ **RapidOCR (`rapidocr-onnxruntime`)** (Pure Python offline image OCR — no Tesseract C++ required)
+- 📚 **RAG Indexing & PyPDF / python-docx Parsing**
 
 ## 📊 Analytics, RAG & File APIs
 

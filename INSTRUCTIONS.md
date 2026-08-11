@@ -77,7 +77,7 @@ Copy the generated 64-character strings and set them as `SECRET_KEY` and `JWT_SE
 - `api/v1/routes/students.py`: Searchable, filterable student directory API.
 - `api/v1/routes/attendance.py`: Interactive attendance session recording API.
 - `api/v1/routes/analytics.py`: Class grade distribution and attendance analytics API.
-- `api/v1/routes/ai.py`: Groq & Gemini powered context-aware AI chat API endpoint with RAG document library integration.
+- `api/v1/routes/ai.py`: Context-aware AI chat API endpoint with RAG document library integration, local RapidOCR (`rapidocr-onnxruntime`) image text extraction, and Smart Task-Based LLM Model Router (Groq primary for standard text chat, Gemini 1.5 Flash Vision primary for file/image analysis).
 - `api/v1/routes/daily_notes.py`: Daily topic discussion notes generation, listing, and bulk sharing API.
 - `api/v1/routes/communications.py`: Teacher email composer, student email lookup, and communication history API.
 - `api/v1/routes/personal_files.py`: Teacher personal file storage routes (upload, list, download, delete).
@@ -104,11 +104,37 @@ Copy the generated 64-character strings and set them as `SECRET_KEY` and `JWT_SE
 - `pages/DocumentStudioPage.tsx`: Document Studio for on-demand branded PDF generation and download.
 - `pages/CommunicationsPage.tsx`: Teacher email communications hub with student email directory, template composer, and history.
 
+### 🐳 Docker & Infrastructure Files (`nginx/` & `docker-compose.yml`)
+
+- `docker-compose.yml`: Multi-container orchestrator bringing up Backend (FastAPI:8000), Frontend (React:80), and Nginx reverse proxy (Port 80) simultaneously.
+- `nginx/nginx.conf`: Production Nginx reverse proxy configuration. Routes `/api/*` and `/media/*` requests to the backend service and all single-page frontend routes (`/*`) to the React build with gzip compression and 50MB file size limits.
+- `nginx/Dockerfile`: Lightweight Nginx Docker container wrapper bundling `nginx.conf`.
+
 ---
 
-## 🌐 3. Deployment Process (Vercel + Render)
+## 🌐 3. Deployment Process & Environment Setup
 
-### ⚛️ Frontend Deployment (Vercel)
+### 🐳 Option A: Single-Command Docker Deployment (Recommended)
+
+To run the entire EduPilot AI stack (Frontend, Backend, Nginx Proxy) locally or on a VPS:
+
+```bash
+# 1. Build and start all services in detached mode
+docker compose up --build -d
+
+# 2. View live logs across all containers
+docker compose logs -f
+
+# 3. Stop all containers
+docker compose down
+```
+
+> 🌐 **App Portal**: `http://localhost` (Port 80)  
+> 📡 **API Documentation**: `http://localhost/api/docs`
+
+---
+
+### ⚛️ Option B: Frontend Cloud Deployment (Vercel)
 
 1. Push project repository to GitHub.
 2. Go to [Vercel Dashboard](https://vercel.com/) and click **Add New Project**.
@@ -125,7 +151,7 @@ Copy the generated 64-character strings and set them as `SECRET_KEY` and `JWT_SE
 2. Connect your GitHub repository `EduPilot-AI`.
 3. Set **Root Directory** to `backend`.
 4. Set **Runtime** to `Python 3`.
-5. Set **Build Command** to `pip install -r pyproject.toml` or `pip install .`.
+5. Set **Build Command** to `pip install -e .`.
 6. Set **Start Command** to `uvicorn app.main:app --host 0.0.0.0 --port $PORT`.
 7. Add Environment Variables in Render:
    - `MONGODB_URI` = `mongodb+srv://user:pass@cluster.mongodb.net/` (or local `mongodb://localhost:27017`)

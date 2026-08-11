@@ -1,10 +1,11 @@
 """Notifications routes."""
 from __future__ import annotations
+
 from fastapi import APIRouter, Depends
 from pymongo.database import Database
 
-from app.core.database import get_db
 from app.api.deps import get_current_teacher
+from app.core.database import get_db
 
 router = APIRouter()
 

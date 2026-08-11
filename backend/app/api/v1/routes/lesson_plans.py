@@ -9,10 +9,10 @@ from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
 from pymongo.database import Database
 
-from app.core.database import get_db
 from app.api.deps import get_current_teacher
+from app.core.database import get_db
 from app.core.exceptions import http_403, http_404
-from app.models.lesson import new_lesson_plan, LESSON_PLANS
+from app.models.lesson import LESSON_PLANS, new_lesson_plan
 
 logger = logging.getLogger(__name__)
 
@@ -249,7 +249,7 @@ def generate_ai_lesson_plan(
             "activities": [
                 f"Group discussion: Brainstorm real-world uses of {topic}",
                 f"Worksheet: Solve 3 practice problems on {topic}",
-                f"Peer review: Exchange solutions and critique each other's approach",
+                "Peer review: Exchange solutions and critique each other's approach",
             ],
             "assessment_questions": [
                 f"Define {topic} and state its importance in {course_name}.",

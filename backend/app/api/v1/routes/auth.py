@@ -2,18 +2,19 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
-from pathlib import Path
 import uuid
+from pathlib import Path
+
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from pydantic import BaseModel, EmailStr
 from pymongo.database import Database
 
-from app.core.database import get_db
-from app.core.security import verify_password, create_access_token, create_refresh_token
-from app.core.exceptions import http_401
 from app.api.deps import get_current_teacher
-from app.models.teacher import teacher_full_name
 from app.core.config import get_settings
+from app.core.database import get_db
+from app.core.exceptions import http_401
+from app.core.security import create_access_token, create_refresh_token, verify_password
+from app.models.teacher import teacher_full_name
 
 router = APIRouter()
 

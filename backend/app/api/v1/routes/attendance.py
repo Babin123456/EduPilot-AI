@@ -3,17 +3,17 @@
 from __future__ import annotations
 
 import uuid
-from datetime import date, datetime, timezone
+from datetime import date
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
 from pymongo.database import Database
 
-from app.core.database import get_db
 from app.api.deps import get_current_teacher
-from app.core.exceptions import http_404, http_403
+from app.core.database import get_db
+from app.core.exceptions import http_403
+from app.models.attendance import new_attendance_record, new_attendance_session
 from app.models.student import student_full_name
-from app.models.attendance import new_attendance_session, new_attendance_record
 
 router = APIRouter()
 

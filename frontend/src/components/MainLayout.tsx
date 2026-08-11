@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -19,7 +19,6 @@ import {
   ChevronDown,
   Menu,
   X,
-  Bell,
   Notebook,
   User,
   PanelLeftClose,
@@ -31,7 +30,6 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
   const { user, activeClass, setActiveClass, logout, classesByYear, classChangeKey } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
-  const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [classDropdownOpen, setClassDropdownOpen] = useState(false);
@@ -125,12 +123,8 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
           <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
             <div className="flex items-center justify-between">
               <Link to="/profile" className="flex items-center gap-3 overflow-hidden group">
-                <div className="w-8 h-8 rounded-full bg-[#005BAC]/10 text-[#005BAC] dark:bg-[#8CC63F]/20 dark:text-[#8CC63F] flex items-center justify-center font-bold text-xs flex-shrink-0 group-hover:scale-105 transition-transform">
-                  {user?.avatar_url ? (
-                    <img src={user.avatar_url} alt={user.full_name} className="w-full h-full rounded-full object-cover" />
-                  ) : (
-                    `${user?.first_name?.[0] || ''}${user?.last_name?.[0] || ''}`
-                  )}
+                <div className="w-8 h-8 rounded-full bg-[#005BAC]/10 text-[#005BAC] dark:bg-[#8CC63F]/20 dark:text-[#8CC63F] flex items-center justify-center font-bold text-xs flex-shrink-0 group-hover:scale-105 transition-transform overflow-hidden">
+                  <img src={user?.avatar_url || '/images/avatar.png'} alt={user?.full_name || 'Teacher avatar'} className="w-full h-full object-cover" />
                 </div>
                 {!sidebarCollapsed && (
                   <div className="truncate">

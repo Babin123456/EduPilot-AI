@@ -11,7 +11,6 @@ from __future__ import annotations
 import logging
 import os
 import tempfile
-import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -19,7 +18,7 @@ import httpx
 from pymongo.database import Database
 
 from app.core.config import get_settings
-from app.models.rag_models import new_rag_document, new_rag_chunk
+from app.models.rag_models import new_rag_chunk, new_rag_document
 
 logger = logging.getLogger(__name__)
 
@@ -288,13 +287,13 @@ def retrieve_context(
         )
         if not all_chunks:
             return ""
-            
+
         import numpy as np
         query_vec = np.array(query_vector)
         query_norm = np.linalg.norm(query_vec)
         if query_norm == 0:
             query_norm = 1e-9
-            
+
         scored_chunks = []
         for chunk in all_chunks:
             emb = chunk.get("embedding")
@@ -304,11 +303,11 @@ def retrieve_context(
             emb_norm = np.linalg.norm(emb_vec)
             if emb_norm == 0:
                 emb_norm = 1e-9
-                
+
             similarity = np.dot(query_vec, emb_vec) / (query_norm * emb_norm)
             chunk["score"] = float(similarity)
             scored_chunks.append(chunk)
-            
+
         # Sort by highest similarity
         scored_chunks.sort(key=lambda x: x["score"], reverse=True)
         results = scored_chunks[:k]

@@ -3,14 +3,15 @@
 from __future__ import annotations
 
 import json
-import uuid
 import logging
-from pydantic import BaseModel
+import uuid
+
 from fastapi import APIRouter, Depends, Query
+from pydantic import BaseModel
 from pymongo.database import Database
 
-from app.core.database import get_db
 from app.api.deps import get_current_teacher
+from app.core.database import get_db
 from app.core.exceptions import http_403, http_404
 from app.models.assessment import new_assessment, new_assessment_result
 from app.models.document import new_document
@@ -83,9 +84,9 @@ def generate_ai_mcq_quiz(
                 "type": "mcq",
                 "options": [
                     f"A) Primary theoretical model for {topic}",
-                    f"B) Secondary optimization framework",
-                    f"C) Algorithmic decomposition pattern",
-                    f"D) Asynchronous execution pipeline",
+                    "B) Secondary optimization framework",
+                    "C) Algorithmic decomposition pattern",
+                    "D) Asynchronous execution pipeline",
                 ],
                 "correct_option": "A",
                 "marks": 2,

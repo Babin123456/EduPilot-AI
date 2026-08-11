@@ -6,8 +6,8 @@ from fastapi import Depends, Header
 from pymongo.database import Database
 
 from app.core.database import get_db
-from app.core.security import decode_token
 from app.core.exceptions import http_401
+from app.core.security import decode_token
 from app.models.teacher import teacher_full_name
 
 

@@ -132,7 +132,7 @@ It unifies daily teaching workflows, institutional data, AI copilot intelligence
 - 📊 **Teacher Command Center**: Instant visibility into daily routine, pending attendance, grading tasks, and at-risk students with skeleton loaders and staggered animations.
 - 🎯 **Smooth Class/Year Switching**: Changing year and class context updates all pages simultaneously with smooth framer-motion transitions, grouped-by-year dropdown, and animated content re-rendering.
 - 📝 **Interactive Attendance Module**: One-click attendance taking with real-time risk alerts for attendance below 75%.
-- 🤖 **Context-Aware EduPilot AI**: Dual Groq primary LLM execution with automatic Gemini fallback for student queries, lesson planning, and quiz generation.
+- 🤖 **Context-Aware EduPilot AI & Smart Model Router**: Dual Groq primary LLM execution for fast standard text chat, automatic Gemini 1.5 Flash Vision routing for image/file upload analysis, and local RapidOCR (`rapidocr-onnxruntime`) for pure Python offline text extraction without any external C++ dependencies.
 - 📈 **Class Analytics**: Real-time grade distributions and attendance trends rendered via accessible charts with loading skeletons.
 - 🎓 **Teacher Profile Photos**: Teachers can upload JPG, PNG, or WebP profile photos up to 5 MB; the photo is stored by the backend and shared across the profile and dashboard.
 - 🎯 **Class-Linked Performance**: Attendance and assessment analytics are calculated only from records belonging to the selected class; classes without records show a clear empty state.
@@ -150,8 +150,10 @@ It unifies daily teaching workflows, institutional data, AI copilot intelligence
 - **Framework**: Python 3.11+ & FastAPI 0.115
 - **Database**: MongoDB / Atlas & PyMongo
 - **Security**: JWT Access/Refresh tokens + direct bcrypt password hashing
-- **AI Engine**: Groq API (Dual Primary Keys) & Google Gemini (Fallback)
-- **Communications**: Gmail SMTP Integration
+- **AI Engine & Router**: Smart Model Router with Groq API (`llama-3.3-70b-versatile` Dual Primary Keys) & Google Gemini (`gemini-1.5-flash` Vision)
+- **Image OCR Engine**: Local RapidOCR (`rapidocr-onnxruntime`) for pure Python offline text extraction (zero C++ / Tesseract setup)
+- **Vector RAG Engine**: HuggingFace `all-MiniLM-L6-v2` embeddings & MongoDB vector search / cosine similarity
+- **Communications**: Integrated Teacher-Student Mail Engine & Gmail SMTP Integration
 
 ### ⚛️ Frontend Architecture
 

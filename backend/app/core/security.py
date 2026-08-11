@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
-import bcrypt
 
+import bcrypt
 from jose import JWTError, jwt
+
 from app.core.config import get_settings
 
 

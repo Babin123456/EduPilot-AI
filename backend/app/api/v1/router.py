@@ -2,7 +2,25 @@
 
 from fastapi import APIRouter
 
-from app.api.v1.routes import auth, teachers, classes, timetable, students, attendance, assignments, assessments, analytics, dashboard, ai, documents, communications, notifications, daily_notes, personal_files, lesson_plans
+from app.api.v1.routes import (
+    ai,
+    analytics,
+    assessments,
+    assignments,
+    attendance,
+    auth,
+    classes,
+    communications,
+    daily_notes,
+    dashboard,
+    documents,
+    lesson_plans,
+    notifications,
+    personal_files,
+    students,
+    teachers,
+    timetable,
+)
 
 api_router = APIRouter()
 

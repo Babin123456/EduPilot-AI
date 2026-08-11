@@ -17,16 +17,28 @@ from __future__ import annotations
 import json
 import random
 import uuid
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, timedelta
 
-from app.core.database import get_db, ensure_indexes
+from app.core.database import ensure_indexes, get_db
 from app.core.security import hash_password
 from app.models import (
-    new_university, new_school, new_department, new_program,
-    new_academic_session, new_year, new_semester, new_section, new_course,
-    new_teacher, new_student, new_enrollment, new_teacher_course_assignment,
-    new_timetable_entry, new_attendance_session, new_attendance_record,
+    new_academic_session,
+    new_attendance_record,
+    new_attendance_session,
+    new_course,
+    new_department,
+    new_enrollment,
     new_notification,
+    new_program,
+    new_school,
+    new_section,
+    new_semester,
+    new_student,
+    new_teacher,
+    new_teacher_course_assignment,
+    new_timetable_entry,
+    new_university,
+    new_year,
 )
 from app.seed.names import STUDENT_NAMES
 
@@ -222,7 +234,7 @@ def run_seed():
             print("[Seed] Database already seeded. Updating teacher & student records to clean emails...")
             # Update any existing teacher accounts that may still have old email domains in MongoDB
             for t_data in DEMO_TEACHERS:
-                old_email = t_data["email"].replace("@edupilot.ai", "@adamasuniversity.ac.in")
+                old_email = t_data["email"].replace("@edupilot.ai", "@demo.ac.in")
                 db.teachers.update_one(
                     {"$or": [{"email": old_email}, {"faculty_id": t_data["faculty_id"]}]},
                     {"$set": {
@@ -231,15 +243,13 @@ def run_seed():
                         "hashed_password": hash_password(t_data["password"]),
                     }}
                 )
-            # Update existing student records in MongoDB to ensure zero adamas emails
-            db.students.update_many(
-                {"email": {"$regex": "@adamasuniversity\\.ac\\.in$"}},
-                [{"$set": {"email": {"$replaceOne": {"input": "$email", "find": "@adamasuniversity.ac.in", "replacement": "@student.university.edu"}}}}],
-            )
-            # Fallback for MongoDB versions without pipeline updates
-            for student in db.students.find({"email": {"$regex": "@adamasuniversity"}}):
-                new_email = student["email"].replace("@adamasuniversity.ac.in", "@student.university.edu").replace("@adamas", "@university")
-                db.students.update_one({"_id": student["_id"]}, {"$set": {"email": new_email}})
+            # Update existing student records in MongoDB to ensure all student emails use @demo.ac.in
+            for student in db.students.find():
+                email = student.get("email", "")
+                if email and not email.endswith("@demo.ac.in"):
+                    user_part = email.split("@")[0]
+                    new_email = f"{user_part}@demo.ac.in"
+                    db.students.update_one({"_id": student["_id"]}, {"$set": {"email": new_email}})
             return
 
         print("[Seed] Starting database seed...")
@@ -287,7 +297,7 @@ def run_seed():
         years: dict[int, dict] = {}
         semesters: dict[int, dict] = {}
         sections: dict[str, dict] = {}
-        
+
         years_to_insert = []
         semesters_to_insert = []
         sections_to_insert = []
@@ -404,7 +414,7 @@ def run_seed():
                     reg_num = f"REG-{25 - yn + 1}-CSE-{str(student_index + 1).zfill(4)}"
                     student_uid = f"EP{25 - yn + 1}CSE{str(student_index + 1).zfill(4)}"
                     email_name = f"{first_name.lower()}.{last_name.lower()}{rng.randint(1, 99)}"
-                    email = f"{email_name}@student.university.edu"
+                    email = f"{email_name}@demo.ac.in"
 
                     att_pct = round(rng.gauss(82, 12), 1)
                     att_pct = max(40, min(100, att_pct))
@@ -452,7 +462,7 @@ def run_seed():
                     student_index += 1
 
                 students_by_section[sec_key] = students_in_sec
-                
+
         db.students.insert_many(students_to_insert)
 
         # 11. Enrollments
@@ -542,7 +552,7 @@ def run_seed():
                     end_time="10:00",
                     is_submitted=True,
                 )
-                
+
                 for student in section_students:
                     roll = rng.random()
                     if roll < 0.78:
@@ -566,7 +576,7 @@ def run_seed():
                 att_session["total_present"] = present_count
                 att_session["total_absent"] = absent_count
                 att_session["total_late"] = late_count
-                
+
                 att_sessions_to_insert.append(att_session)
 
         db.attendance_sessions.insert_many(att_sessions_to_insert)
@@ -587,7 +597,7 @@ def run_seed():
                 title=title, message=msg, notification_type=ntype,
             )
             notifs_to_insert.append(notif)
-            
+
         db.notifications.insert_many(notifs_to_insert)
 
         print(f"[Seed] Successfully seeded {student_index} students, {len(teachers)} teachers, "

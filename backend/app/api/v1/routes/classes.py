@@ -5,10 +5,9 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends
 from pymongo.database import Database
 
-from app.core.database import get_db
 from app.api.deps import get_current_teacher
-from app.core.exceptions import http_404, http_403
-from app.models.student import student_full_name
+from app.core.database import get_db
+from app.core.exceptions import http_403, http_404
 
 router = APIRouter()
 

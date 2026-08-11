@@ -1,8 +1,8 @@
 """Assignments routes."""
 
 from __future__ import annotations
+
 import json
-import uuid
 import logging
 from datetime import datetime, timezone
 
@@ -10,8 +10,8 @@ from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
 from pymongo.database import Database
 
-from app.core.database import get_db
 from app.api.deps import get_current_teacher
+from app.core.database import get_db
 from app.core.exceptions import http_403, http_404
 from app.models.assignment import new_assignment
 from app.models.document import new_document
@@ -97,9 +97,9 @@ def generate_ai_assignment(
             if is_mcq:
                 options = [
                     f"A) Primary theoretical model for {topic}",
-                    f"B) Extended optimization strategy",
-                    f"C) Algorithmic decomposition pattern",
-                    f"D) Asynchronous execution pipeline",
+                    "B) Extended optimization strategy",
+                    "C) Algorithmic decomposition pattern",
+                    "D) Asynchronous execution pipeline",
                 ]
 
             questions.append({

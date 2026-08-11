@@ -11,9 +11,9 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from pymongo.database import Database
 
+from app.api.deps import get_current_teacher
 from app.core.config import get_settings
 from app.core.database import get_db
-from app.api.deps import get_current_teacher
 
 router = APIRouter()
 
