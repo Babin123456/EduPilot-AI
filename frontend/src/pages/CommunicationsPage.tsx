@@ -5,7 +5,7 @@ import { useToast } from '../context/ToastContext';
 import { api } from '../api/client';
 import {
   Mail, Send, Users, Search, CheckCircle2, Loader2,
-  Clock, ChevronDown, ChevronUp, Inbox
+  Clock, ChevronDown, ChevronUp, Inbox, FileText
 } from 'lucide-react';
 
 export const CommunicationsPage: React.FC = () => {
@@ -304,14 +304,40 @@ export const CommunicationsPage: React.FC = () => {
 
             {/* Body */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">
-                Email Message Content *
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase">
+                  Email Message Content *
+                </label>
+                {/* 1-Click Knowledge Base Material Picker */}
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!activeClass) return;
+                    try {
+                      const res = await api.get('/documents', { params: { class_id: activeClass.id } });
+                      const docs = res.data || [];
+                      if (docs.length === 0) {
+                        toast.info('No Saved Documents', 'Generate a document in Daily Notes or Document Studio first.');
+                        return;
+                      }
+                      const latestDoc = docs[0];
+                      setSubject(`[${activeClass.course_code}] Course Material: ${latestDoc.title}`);
+                      setBody(`Dear Students,\n\nPlease review the attached official course document for ${activeClass.course_name} (${activeClass.course_code}):\n\n📌 Title: ${latestDoc.title}\n📅 Date: ${new Date(latestDoc.created_at || Date.now()).toLocaleDateString()}\n\n---\nSummary / Outline:\n${latestDoc.content?.substring(0, 500) || 'Official material generated via EduPilot AI.'}\n\nBest regards,\n${user?.full_name || 'Faculty'}, Department of Computer Science.`);
+                      toast.success('Attached Knowledge Base Document', `Inserted "${latestDoc.title}" into email draft.`);
+                    } catch (err) {
+                      toast.error('Could not load Knowledge Base files');
+                    }
+                  }}
+                  className="text-[11px] font-bold text-[#005BAC] dark:text-[#8CC63F] hover:underline flex items-center gap-1"
+                >
+                  <FileText className="w-3 h-3 text-[#8CC63F]" /> Attach Latest Knowledge Base File
+                </button>
+              </div>
               <textarea
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
                 rows={6}
-                placeholder="Type your message content here..."
+                placeholder="Type your message content here or click 'Attach Latest Knowledge Base File'..."
                 className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-blue"
               />
             </div>
@@ -329,12 +355,12 @@ export const CommunicationsPage: React.FC = () => {
               <button
                 onClick={handleSendEmail}
                 disabled={!subject.trim() || !body.trim() || sending}
-                className="px-6 py-2.5 bg-brand-blue hover:bg-brand-blue-dark text-white text-xs font-bold rounded-xl shadow transition-all flex items-center gap-2 disabled:opacity-50"
+                className="px-6 py-2.5 bg-[#005BAC] hover:bg-[#0A6FD8] text-white text-xs font-bold rounded-xl shadow transition-all flex items-center gap-2 disabled:opacity-50"
               >
                 {sending ? (
                   <><Loader2 className="w-4 h-4 animate-spin" /> Dispatching Emails...</>
                 ) : (
-                  <><Send className="w-4 h-4" /> Send Email Now</>
+                  <><Send className="w-4 h-4 text-[#8CC63F]" /> Send Email Now</>
                 )}
               </button>
             </div>
