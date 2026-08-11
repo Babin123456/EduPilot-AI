@@ -6,7 +6,7 @@ import { api } from '../api/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Bot, Send, Sparkles, Paperclip, FileText, Image as ImageIcon,
-  FileSpreadsheet, Presentation, File, X, Loader2, CheckCircle2, Cpu,
+  FileSpreadsheet, Presentation, File, X, Loader2, CheckCircle2,
   Copy, Check, RotateCw, PlusCircle, Trash2, MessageSquare, ChevronDown, Download,
   BookOpen, Upload, Database, AlertCircle
 } from 'lucide-react';
@@ -38,6 +38,7 @@ export const AIPage: React.FC = () => {
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [conversations, setConversations] = useState<any[]>([]);
   const [attachedFile, setAttachedFile] = useState<AttachedFile | null>(null);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [copiedCodeId, setCopiedCodeId] = useState<string | null>(null);
 
   const handleCopyCode = (codeText: string, codeId: string) => {
@@ -231,7 +232,7 @@ export const AIPage: React.FC = () => {
         {
           role: 'assistant',
           content: res.data.message.content,
-          model_used: res.data.message.model_used || selectedModel,
+          model_used: res.data.message.model_used || 'EduPilot AI',
           content_type: res.data.message.content_type || 'text',
           sources: res.data.message.sources || [],
         },
