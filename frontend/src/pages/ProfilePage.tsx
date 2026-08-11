@@ -261,7 +261,6 @@ export const ProfilePage: React.FC = () => {
             </div>
           </div>
 
-          </div>
         </div>
 
         {/* ─── Right Column: Contact Form + Faculty Identity Card + Personal Files Vault ─── */}
