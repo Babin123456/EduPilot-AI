@@ -1,82 +1,45 @@
-# ========================
-# Python
-# ========================
+# ============================================================
+# EduPilot AI — Root .gitignore
+# ============================================================
+
+# ---- Python & Virtual Environments ----
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 *.egg-info/
-*.egg
-dist/
-build/
-.eggs/
-*.whl
 .venv/
 venv/
-env/
-*.env
-.Python
 
-# ========================
-# Node / Frontend
-# ========================
+# ---- Node.js & Frontend Builds ----
 node_modules/
+frontend/node_modules/
 frontend/dist/
 frontend/.vite/
 *.tsbuildinfo
 
-# ========================
-# Environment & Secrets
-# ========================
+# ---- Environment Secrets ----
 .env
 .env.local
 .env.*.local
 !.env.example
-!backend/.env.example
 
-# ========================
-# Database
-# ========================
-*.db
-*.db-shm
-*.db-wal
-*.sqlite
-*.sqlite3
-
-# ========================
-# IDE
-# ========================
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.DS_Store
-Thumbs.db
-
-# ========================
-# Storage / Uploads
-# ========================
-backend/storage/
+# ---- Local Storage & Uploads ----
+backend/storage/*
 !backend/storage/.gitkeep
-backend/app/storage/
+backend/app/storage/*
 !backend/app/storage/.gitkeep
+*.db
+*.sqlite
 
-# ========================
-# Logs
-# ========================
+# ---- Logs & Test Caches ----
 *.log
 logs/
-
-# ========================
-# Testing
-# ========================
-.coverage
-htmlcov/
 .pytest_cache/
-coverage/
+.coverage
 
-# ========================
-# Build
-# ========================
-*.pyc
+# ---- IDE & OS Artifacts ----
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
