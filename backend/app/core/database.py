@@ -101,3 +101,7 @@ def ensure_indexes():
     # RAG Chunks (regular indexes — vector index must be created in Atlas UI)
     db.rag_chunks.create_index("document_id")
     db.rag_chunks.create_index("teacher_id")
+
+    # Personal Files
+    db.teacher_personal_files.create_index("teacher_id")
+    db.teacher_personal_files.create_index("id", unique=True)
