@@ -219,7 +219,18 @@ def run_seed():
         db = get_db()
 
         if db.universities.count_documents({}) > 0:
-            print("[Seed] Database already seeded. Skipping.")
+            print("[Seed] Database already seeded. Updating teacher records to clean edupilot.ai emails...")
+            # Update any existing teacher accounts that may still have old email domains in MongoDB
+            for t_data in DEMO_TEACHERS:
+                old_email = t_data["email"].replace("@edupilot.ai", "@adamasuniversity.ac.in")
+                db.teachers.update_one(
+                    {"$or": [{"email": old_email}, {"faculty_id": t_data["faculty_id"]}]},
+                    {"$set": {
+                        "email": t_data["email"],
+                        "faculty_id": t_data["faculty_id"],
+                        "hashed_password": hash_password(t_data["password"]),
+                    }}
+                )
             return
 
         print("[Seed] Starting database seed...")
