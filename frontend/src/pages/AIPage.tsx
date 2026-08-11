@@ -557,16 +557,19 @@ export const AIPage: React.FC = () => {
                           code: ({ node, inline, className, children, ...props }: any) => {
                             const match = /language-(\w+)/.exec(className || '');
                             const rawCode = String(children).replace(/\n$/, '');
-                            const codeId = `${i}-${Math.random()}`;
-                            const isCopied = copiedCodeId === codeId;
+                            const hasNewlines = rawCode.includes('\n');
+                            const isBlock = !inline && (hasNewlines || !!match);
 
-                            if (inline) {
+                            if (!isBlock) {
                               return (
-                                <code className="bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 rounded text-[11px] font-mono text-slate-800 dark:text-slate-200" {...props}>
+                                <code className="bg-slate-200 dark:bg-slate-700/80 px-1.5 py-0.5 rounded-md text-[11px] font-mono text-slate-800 dark:text-slate-200 font-semibold mx-0.5" {...props}>
                                   {children}
                                 </code>
                               );
                             }
+
+                            const codeId = `${i}-${Math.random()}`;
+                            const isCopied = copiedCodeId === codeId;
 
                             return (
                               <div className="relative my-3 rounded-xl overflow-hidden border border-slate-700/80 shadow-md bg-slate-900 dark:bg-slate-950">
