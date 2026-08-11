@@ -7,7 +7,6 @@ import {
   BookOpen,
   Award,
   Sparkles,
-  Phone,
   Mail,
   Building,
   CheckCircle2,
@@ -278,7 +277,7 @@ export const ProfilePage: React.FC = () => {
                 <p className="text-[9px] font-bold uppercase text-slate-400">Classes</p>
               </div>
               <div className="rounded-2xl bg-white/70 dark:bg-slate-800/70 p-2.5">
-                <p className="text-base font-black text-slate-900 dark:text-white truncate">{user?.department_short || 'CSE'}</p>
+                <p className="text-base font-black text-slate-900 dark:text-white truncate">CSE</p>
                 <p className="text-[9px] font-bold uppercase text-slate-400">Dept</p>
               </div>
               <div className="rounded-2xl bg-white/70 dark:bg-slate-800/70 p-2.5">

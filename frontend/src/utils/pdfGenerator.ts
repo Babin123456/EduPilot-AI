@@ -18,7 +18,7 @@ const COLORS = {
   amber: [245, 158, 11] as [number, number, number],
 };
 
-function addHeader(doc: jsPDF, title: string, subtitle: string) {
+function addHeader(doc: jsPDF, title?: string, subtitle?: string) {
   const pageWidth = doc.internal.pageSize.getWidth();
   
   // Top accent bar
@@ -34,10 +34,10 @@ function addHeader(doc: jsPDF, title: string, subtitle: string) {
   // Document Title Header
   doc.setFontSize(16);
   doc.setTextColor(0, 91, 172);
-  doc.text('ACADEMIC OPERATING SYSTEM', pageWidth / 2, 22, { align: 'center' });
+  doc.text(title ? title.toUpperCase() : 'ACADEMIC OPERATING SYSTEM', pageWidth / 2, 22, { align: 'center' });
   doc.setFontSize(9);
   doc.setTextColor(100, 116, 139);
-  doc.text('EDUPILOT AI PLATFORM', pageWidth / 2, 28, { align: 'center' });
+  doc.text(subtitle ? subtitle.toUpperCase() : 'EDUPILOT AI PLATFORM', pageWidth / 2, 28, { align: 'center' });
 
   // Divider Line
   doc.setDrawColor(0, 91, 172);
@@ -47,7 +47,7 @@ function addHeader(doc: jsPDF, title: string, subtitle: string) {
   return 54; // Y position after header
 }
 
-function addFooter(doc: jsPDF, pageNum?: number) {
+function addFooter(doc: jsPDF) {
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   const totalPages = doc.getNumberOfPages();
