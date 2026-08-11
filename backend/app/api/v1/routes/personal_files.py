@@ -80,6 +80,19 @@ async def upload_personal_file(
     }
     db.teacher_personal_files.insert_one(doc)
 
+    # Auto-ingest profile file into RAG Knowledge Base
+    if ext in (".pdf", ".docx"):
+        from app.services.rag_service import ingest_document
+        try:
+            ingest_document(
+                file_bytes=content,
+                filename=file.filename,
+                teacher_id=teacher["id"],
+                db=db,
+            )
+        except Exception as e:
+            print(f"[Warning] RAG auto-ingest failed for personal file: {e}")
+
     return {
         "id": doc["id"],
         "original_filename": doc["original_filename"],
