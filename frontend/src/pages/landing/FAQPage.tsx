@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChevronDown, HelpCircle, Search, BookOpen } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
+import { ChevronDown, HelpCircle, Search, BookOpen, Sun, Moon } from 'lucide-react';
 
 const faqData = [
   {
@@ -125,6 +126,7 @@ const AccordionItem: React.FC<{ question: string; answer: string; isOpen: boolea
 };
 
 export const FAQPage: React.FC = () => {
+  const { theme, toggleTheme } = useTheme();
   const [openIndex, setOpenIndex] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
@@ -155,6 +157,13 @@ export const FAQPage: React.FC = () => {
           <span className="font-extrabold text-base tracking-tight">EduPilot AI</span>
         </Link>
         <div className="flex items-center gap-4">
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+            title="Toggle theme"
+          >
+            {theme === 'dark' ? <Sun className="w-4 h-4 text-[#8CC63F]" /> : <Moon className="w-4 h-4 text-[#005BAC]" />}
+          </button>
           <Link to="/docs" className="text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-[#005BAC] dark:hover:text-[#8CC63F] flex items-center gap-1">
             <BookOpen className="w-3.5 h-3.5" /> Docs
           </Link>
