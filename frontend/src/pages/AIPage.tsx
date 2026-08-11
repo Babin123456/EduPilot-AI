@@ -185,6 +185,8 @@ export const AIPage: React.FC = () => {
   };
 
   // ── Regular file upload (PPT, Excel, Image — non-RAG) ──
+  const uploadPromiseRef = React.useRef<Promise<any> | null>(null);
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -193,25 +195,47 @@ export const AIPage: React.FC = () => {
     const formData = new FormData();
     formData.append('file', file);
 
+    const promise = api.post('/ai/upload-file', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    uploadPromiseRef.current = promise;
+
     try {
-      const res = await api.post('/ai/upload-file', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      setAttachedFile(res.data);
+      const res = await promise;
+      const fileData = res.data;
+      if (fileData && fileData.image_url && fileData.image_url.startsWith('/media')) {
+        const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+        const serverOrigin = baseURL.replace(/\/api\/v1\/?$/, '');
+        fileData.image_url = `${serverOrigin}${fileData.image_url}`;
+      }
+      setAttachedFile(fileData);
       setTimeout(fetchRagDocuments, 1000);
+      return fileData;
     } catch (err) {
       console.error('File upload error:', err);
     } finally {
       setUploading(false);
+      uploadPromiseRef.current = null;
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
   const handleSend = async (textToSend?: string) => {
     const query = textToSend || input;
-    if ((!query.trim() && !attachedFile) || loading) return;
+    let currentAttached = attachedFile;
 
-    const currentAttached = attachedFile;
+    // If a file is currently uploading while user clicks Send or presses Enter, wait for it
+    if (!currentAttached && uploading && uploadPromiseRef.current) {
+      try {
+        const res = await uploadPromiseRef.current;
+        currentAttached = res.data;
+      } catch (err) {
+        console.error('Pending upload error:', err);
+      }
+    }
+
+    if ((!query.trim() && !currentAttached) || loading) return;
+
     const userMsgContent = query.trim() + (currentAttached ? `\n\n📎 [Attached File: ${currentAttached.filename}]` : '');
     const userMsg = {
       role: 'user',
@@ -227,7 +251,7 @@ export const AIPage: React.FC = () => {
 
     try {
       const res = await api.post('/ai/chat', {
-        message: query || `Please analyze the attached ${attachedFile?.file_type} file: ${attachedFile?.filename}`,
+        message: query || `Please analyze the attached ${currentAttached?.file_type} file: ${currentAttached?.filename}`,
         conversation_id: conversationId,
         class_id: activeClass?.id,
         file_context: fileContext,
@@ -744,13 +768,15 @@ export const AIPage: React.FC = () => {
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
-                  if ((input.trim() || attachedFile) && !loading) {
+                  if ((input.trim() || attachedFile || uploading) && !loading) {
                     handleSend();
                   }
                 }
               }}
               placeholder={attachedFile
                 ? `Ask a question about ${attachedFile.filename} or press Send...`
+                : uploading
+                ? "Uploading file... Press Enter or Send to attach and message."
                 : ragDocuments.length > 0
                 ? "Ask about your documents or any academic topic... (Shift+Enter for new line)"
                 : "Message EduPilot AI... (Shift+Enter for new line)"
@@ -760,9 +786,9 @@ export const AIPage: React.FC = () => {
 
             <button
               type="submit"
-              disabled={(!input.trim() && !attachedFile) || loading}
+              disabled={(!input.trim() && !attachedFile && !uploading) || loading}
               className="p-3 bg-[#005BAC] hover:bg-[#0A6FD8] text-white rounded-xl shadow disabled:opacity-40 disabled:cursor-not-allowed transition-all self-end"
-              title={(!input.trim() && !attachedFile) ? 'Type a message or attach a file to send' : 'Send message'}
+              title={(!input.trim() && !attachedFile && !uploading) ? 'Type a message or attach a file to send' : 'Send message'}
             >
               <Send className="w-4 h-4" />
             </button>
