@@ -2,16 +2,16 @@
 <div align="center">
 
 <p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:0060B5,100:8CC63F&height=220&section=header&text=EduPilot%20AI&fontSize=65&fontColor=ffffff&animation=fadeIn&fontAlign=50&fontAlignY=38&desc=AI%20Academic%20Operating%20System%20%E2%80%A2%20Adamas%20University&descFontSize=20&descAlign=50&descAlignY=62" alt="Header Banner" width="100%" />
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:0060B5,100:8CC63F&height=220&section=header&text=EduPilot%20AI&fontSize=65&fontColor=ffffff&animation=fadeIn&fontAlign=50&fontAlignY=38&desc=AI%20Academic%20Operating%20System%20%E2%80%A2%20Universal%20University%20Edition&descFontSize=20&descAlign=50&descAlignY=62" alt="Header Banner" width="100%" />
 </p>
 
 <p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=Outfit&weight=700&size=24&duration=3000&pause=1000&color=0060B5&center=true&vCenter=true&width=700&lines=Built+for+VibeForge+1.0+Hackathon;By+Team+Triangle+%E2%80%A2+Adamas+University;Empowering+Faculty+with+AI-Assisted+Classroom+Intelligence;Streamlined+Attendance%2C+Analytics+%26+Lesson+Planning" alt="Typing SVG" />
+  <img src="https://readme-typing-svg.demolab.com?font=Outfit&weight=700&size=24&duration=3000&pause=1000&color=0060B5&center=true&vCenter=true&width=700&lines=Built+for+VibeForge+1.0+Hackathon;By+Team+Triangle;Empowering+Faculty+with+AI-Assisted+Classroom+Intelligence;Streamlined+Attendance%2C+Analytics+%26+Lesson+Planning" alt="Typing SVG" />
 </p>
 
-[![Hackathon](https://img.shields.io/badge/Hackathon-VibeForge%201.0-FF6B6B?style=for-the-badge&logo=rocket&logoColor=white)](https://adamasuniversity.ac.in)
+[![Hackathon](https://img.shields.io/badge/Hackathon-VibeForge%201.0-FF6B6B?style=for-the-badge&logo=rocket&logoColor=white)](https://github.com/Babin123456/EduPilot-AI)
 [![Team](https://img.shields.io/badge/Team-Triangle-8CC63F?style=for-the-badge&logo=users&logoColor=slate)](https://github.com/Babin123456/EduPilot-AI)
-[![Institution](https://img.shields.io/badge/Institution-Adamas%20University-0060B5?style=for-the-badge&logo=academic&logoColor=white)](https://adamasuniversity.ac.in)
+[![Platform](https://img.shields.io/badge/Platform-Academic%20OS-0060B5?style=for-the-badge&logo=academic&logoColor=white)](https://github.com/Babin123456/EduPilot-AI)
 [![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge&logo=open-source-initiative&logoColor=white)](LICENSE)
 
 ---
@@ -20,13 +20,13 @@
 
 ## 🏆 Hackathon Submission (VibeForge 1.0)
 
-This project was crafted for **VibeForge 1.0 Hackathon** by **Team Triangle** from **Adamas University, Kolkata**:
+This project was crafted for **VibeForge 1.0 Hackathon** by **Team Triangle**:
 
 | Role | Name | Institution |
 | :--- | :--- | :--- |
-| 👑 **Team Leader** | **Babin Bid** | Adamas University |
-| 🛠️ **Team Member** | **Baibhab Adhikari** | Adamas University |
-| 🚀 **Team Member** | **Subhajyoti Halder** | Adamas University |
+| 👑 **Team Leader** | **Babin Bid** | University Student |
+| 🛠️ **Team Member** | **Baibhab Adhikari** | University Student |
+| 🚀 **Team Member** | **Subhajyoti Halder** | University Student |
 
 ---
 
@@ -71,16 +71,16 @@ On the login screen, click any of the **Quick Demo Faculty Cards** to pre-fill c
 
 | # | Faculty Name | Designation & Specialization | Institutional Email | Demo Password |
 | :--- | :--- | :--- | :--- | :--- |
-| **1** | **Prof. Rajesh Banerjee** | Associate Professor • Algorithms & Data Structures | `rajesh.banerjee@adamasuniversity.ac.in` | `demo@1234` |
-| **2** | **Prof. Priya Nair** | Assistant Professor • Database Systems & Mining | `priya.nair@adamasuniversity.ac.in` | `demo@1234` |
-| **3** | **Prof. Amitava Chatterjee** | Professor • AI & Machine Learning | `amitava.chatterjee@adamasuniversity.ac.in` | `demo@1234` |
-| **4** | **Prof. Sunita Devi** | Assistant Professor • Networks & Security | `sunita.devi@adamasuniversity.ac.in` | `demo@1234` |
-| **5** | **Prof. Debashis Ghosh** | Associate Professor • OS & Cloud Computing | `debashis.ghosh@adamasuniversity.ac.in` | `demo@1234` |
-| **6** | **Prof. Meenakshi Iyer** | Assistant Professor • Software Engineering & Web | `meenakshi.iyer@adamasuniversity.ac.in` | `demo@1234` |
-| **7** | **Prof. Arpan Mukherjee** | Professor • Deep Learning & NLP | `arpan.mukherjee@adamasuniversity.ac.in` | `demo@1234` |
-| **8** | **Prof. Kavita Sharma** | Assistant Professor • Discrete Math & Structures | `kavita.sharma@adamasuniversity.ac.in` | `demo@1234` |
-| **9** | **Prof. Subhashis Roy** | Associate Professor • Blockchain & Security | `subhashis.roy@adamasuniversity.ac.in` | `demo@1234` |
-| **10** | **Prof. Ananya Sengupta** | Assistant Professor • IoT & Embedded Systems | `ananya.sengupta@adamasuniversity.ac.in` | `demo@1234` |
+| **1** | **Prof. Rajesh Banerjee** | Associate Professor • Algorithms & Data Structures | `rajesh.banerjee@edupilot.ai` | `demo@1234` |
+| **2** | **Prof. Priya Nair** | Assistant Professor • Database Systems & Mining | `priya.nair@edupilot.ai` | `demo@1234` |
+| **3** | **Prof. Amitava Chatterjee** | Professor • AI & Machine Learning | `amitava.chatterjee@edupilot.ai` | `demo@1234` |
+| **4** | **Prof. Sunita Devi** | Assistant Professor • Networks & Security | `sunita.devi@edupilot.ai` | `demo@1234` |
+| **5** | **Prof. Debashis Ghosh** | Associate Professor • OS & Cloud Computing | `debashis.ghosh@edupilot.ai` | `demo@1234` |
+| **6** | **Prof. Meenakshi Iyer** | Assistant Professor • Software Engineering & Web | `meenakshi.iyer@edupilot.ai` | `demo@1234` |
+| **7** | **Prof. Arpan Mukherjee** | Professor • Deep Learning & NLP | `arpan.mukherjee@edupilot.ai` | `demo@1234` |
+| **8** | **Prof. Kavita Sharma** | Assistant Professor • Discrete Math & Structures | `kavita.sharma@edupilot.ai` | `demo@1234` |
+| **9** | **Prof. Subhashis Roy** | Associate Professor • Blockchain & Security | `subhashis.roy@edupilot.ai` | `demo@1234` |
+| **10** | **Prof. Ananya Sengupta** | Assistant Professor • IoT & Embedded Systems | `ananya.sengupta@edupilot.ai` | `demo@1234` |
 
 ---
 
@@ -96,7 +96,7 @@ On the login screen, click any of the **Quick Demo Faculty Cards** to pre-fill c
 
 ## 🌟 Product Identity & Vision
 
-**EduPilot AI** is an intelligent academic operational layer designed for higher education institutions, tailored for **Adamas University, Kolkata, West Bengal, India**. 
+**EduPilot AI** is an intelligent academic operational layer designed for higher education institutions globally. 
 
 It unifies daily teaching workflows, institutional data, AI copilot intelligence, attendance automation, coursework generation, and communication into a single unified platform.
 
@@ -113,10 +113,10 @@ It unifies daily teaching workflows, institutional data, AI copilot intelligence
 - 📈 **Class Analytics**: Real-time grade distributions and attendance trends rendered via accessible charts with loading skeletons.
 - 🎓 **Teacher Profile Photos**: Teachers can upload JPG, PNG, or WebP profile photos up to 5 MB; the photo is stored by the backend and shared across the profile and dashboard.
 - 🎯 **Class-Linked Performance**: Attendance and assessment analytics are calculated only from records belonging to the selected class; classes without records show a clear empty state.
-- 📄 **Professional PDF Downloads (jsPDF)**: Generate and download professionally branded Adamas University PDFs for quizzes, assessment reports, class reports, and daily notes — all from the Document Studio.
+- 📄 **Professional PDF Downloads (jsPDF)**: Generate and download professionally branded university PDFs for quizzes, assessment reports, class reports, and daily notes — all from the Document Studio.
 - 📓 **Daily Topic Discussion Notes**: Teachers generate structured notes for topics discussed in class, then share to all students via email in one click.
 - 📧 **Student University Mail System**: Teacher-side communications hub with student email directory, template-based email composer, bulk send to all/selected students, and sent history.
-- 👥 **720 Unique Student Dataset**: Full B.Tech CSE dataset across 4 academic years and 3 sections per year with complete unique identities and `@student.adamasuniversity.ac.in` demo emails.
+- 👥 **720 Unique Student Dataset**: Full B.Tech CSE dataset across 4 academic years and 3 sections per year with complete unique identities and `@student.university.edu` demo emails.
 
 ---
 
@@ -125,7 +125,7 @@ It unifies daily teaching workflows, institutional data, AI copilot intelligence
 ### 🐍 Backend Architecture
 
 - **Framework**: Python 3.11+ & FastAPI 0.115
-- **Database**: SQLite with `aiosqlite` and WAL Mode enabled
+- **Database**: MongoDB / Atlas & PyMongo
 - **Security**: JWT Access/Refresh tokens + direct bcrypt password hashing
 - **AI Engine**: Groq API (Dual Primary Keys) & Google Gemini (Fallback)
 - **Communications**: Gmail SMTP Integration
@@ -133,10 +133,10 @@ It unifies daily teaching workflows, institutional data, AI copilot intelligence
 ### ⚛️ Frontend Architecture
 
 - **Framework**: React 18 + Vite 5 + TypeScript 5
-- **Styling**: Tailwind CSS (Adamas University Brand Blue `#0060B5` & Green `#8CC63F`)
+- **Styling**: Tailwind CSS (Brand Blue `#0060B5` & Green `#8CC63F`)
 - **UI Components**: Accessible Lucide React icons & Recharts visualizations
 - **Animations**: Framer Motion for page transitions, staggered card animations, and smooth class switching
-- **PDF Generation**: jsPDF + jspdf-autotable for client-side professional PDF creation with university branding
+- **PDF Generation**: jsPDF + jspdf-autotable for client-side professional PDF creation with institutional branding
 - **State & Data**: React Context API & Axios HTTP Client
 
 ---

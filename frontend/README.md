@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=20&duration=3000&pause=1000&color=8CC63F&center=true&vCenter=true&width=650&lines=React+18+%2B+Vite+%2B+TypeScript+5;Tailwind+CSS+Adamas+Branding;Interactive+Attendance+%26+Visual+Analytics" alt="Typing SVG" />
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=20&duration=3000&pause=1000&color=8CC63F&center=true&vCenter=true&width=650&lines=React+18+%2B+Vite+%2B+TypeScript+5;Tailwind+CSS+Universal+Branding;Interactive+Attendance+%26+Visual+Analytics" alt="Typing SVG" />
 </p>
 
 ---
@@ -19,7 +19,7 @@
 
 ## 💡 Overview
 
-The frontend portal is built for faculty members at Adamas University. It delivers a modern visual experience with dark/light mode persistence, dynamic class context switching, interactive attendance taking, class-linked Recharts performance analytics, teacher profile photo uploads, and an integrated EduPilot AI chat workspace.
+The frontend portal is built for university faculty members. It delivers a modern visual experience with dark/light mode persistence, dynamic class context switching, interactive attendance taking, class-linked Recharts performance analytics, teacher profile photo uploads, and an integrated EduPilot AI chat workspace.
 
 ---
 
@@ -28,7 +28,7 @@ The frontend portal is built for faculty members at Adamas University. It delive
 - ⚛️ **React 18**
 - ⚡ **Vite 5**
 - 🟦 **TypeScript 5**
-- 🎨 **Tailwind CSS 3** (Adamas Blue `#0060B5` & Green `#8CC63F`)
+- 🎨 **Tailwind CSS 3** (Brand Blue `#0060B5` & Green `#8CC63F`)
 - 🧩 **Lucide React** (accessible UI icons)
 - 📊 **Recharts**
 - 🌐 **Axios & TanStack Query**

@@ -87,11 +87,11 @@ Copy the generated 64-character strings and set them as `SECRET_KEY` and `JWT_SE
 - `App.tsx`: Top-level router routing authenticated routes through `MainLayout`.
 - `index.css`: Tailwind CSS directives and custom UI scrollbars.
 - `api/client.ts`: Axios client instance equipped with automatic Bearer token injection and 401 redirect handling.
-- `utils/pdfGenerator.ts`: Client-side jsPDF utility for professional Adamas-branded PDF exports (quizzes, reports, notes).
+- `utils/pdfGenerator.ts`: Client-side jsPDF utility for professional university-branded PDF exports (quizzes, reports, notes).
 - `context/AuthContext.tsx`: React Context managing token storage, current teacher profile, and active class selection.
 - `context/ThemeContext.tsx`: React Context managing dark/light theme toggling and localStorage persistence.
 - `components/MainLayout.tsx`: Responsive application shell with year-grouped dropdown, framer-motion page transitions, and theme toggle.
-- `pages/LoginPage.tsx`: Adamas-branded sign-in page with prefillable demo faculty cards.
+- `pages/LoginPage.tsx`: Next-gen sign-in page with prefillable demo faculty cards.
 - `pages/DashboardPage.tsx`: Teacher Command Center dashboard showing statistics, routine, and quick actions with skeleton loaders.
 - `pages/AttendancePage.tsx`: Attendance-taking interface supporting bulk selection and status updates.
 - `pages/AIPage.tsx`: EduPilot AI Assistant conversational interface.

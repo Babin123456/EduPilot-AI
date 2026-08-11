@@ -71,7 +71,7 @@ The database model `LessonPlan` exists at [`backend/app/models/lesson.py`](file:
 
 ### 🎯 Pending Tasks
 - [ ] Implement server-side document generators in a new service `backend/app/services/document_builder.py`:
-  - **PDF Builder**: Adamas-branded syllabus, lesson notes, and test papers using `reportlab`
+  - **PDF Builder**: Universal-branded syllabus, lesson notes, and test papers using `reportlab`
   - **PPTX Builder**: Multi-slide lecture presentation deck builder using `python-pptx`
   - **DOCX Builder**: Formatted assignment briefs and rubric sheets using `python-docx`
   - **Excel Builder**: Attendance ledger & semester gradebook exporter using `openpyxl`
@@ -169,7 +169,7 @@ Bulk operations (emailing 60–720 students, PDF rendering, background analytics
 - [ ] Add SMTP credentials to `.env.example` (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `EMAILS_FROM_EMAIL`)
 - [ ] Build robust mail delivery service `backend/app/services/email_service.py` using `aiosmtplib`:
   - Connection pooling with TLS/STARTTLS
-  - HTML email templates with Adamas University branding
+  - HTML email templates with university branding
   - Retry logic and bounce logging
   - Batching (chunks of 25 to respect SMTP rate limits)
 
@@ -223,6 +223,6 @@ Uploaded syllabus files and slides are parsed in-memory and discarded without fi
 
 
 <div align="center">
-  <sub>EduPilot-AI • Adamas University Intelligent Academic Operating System</sub>
+  <sub>EduPilot-AI • Universal Intelligent Academic Operating System</sub>
 </div>
 

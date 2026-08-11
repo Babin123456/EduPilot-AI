@@ -380,11 +380,11 @@ def run_seed():
 
                 for i in range(60):
                     first_name, last_name = STUDENT_NAMES[student_index]
-                    roll_num = f"AU{25 - yn + 1}{sec_name}{str(i + 1).zfill(3)}"
+                    roll_num = f"EP{25 - yn + 1}{sec_name}{str(i + 1).zfill(3)}"
                     reg_num = f"REG-{25 - yn + 1}-CSE-{str(student_index + 1).zfill(4)}"
-                    student_uid = f"AU{25 - yn + 1}CSE{str(student_index + 1).zfill(4)}"
+                    student_uid = f"EP{25 - yn + 1}CSE{str(student_index + 1).zfill(4)}"
                     email_name = f"{first_name.lower()}.{last_name.lower()}{rng.randint(1, 99)}"
-                    email = f"{email_name}@student.adamasuniversity.ac.in"
+                    email = f"{email_name}@student.university.edu"
 
                     att_pct = round(rng.gauss(82, 12), 1)
                     att_pct = max(40, min(100, att_pct))
