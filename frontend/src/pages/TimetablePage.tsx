@@ -41,7 +41,7 @@ export const TimetablePage: React.FC = () => {
               slots.map((s) => (
                 <div key={s.id} className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-700/50 space-y-1">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-adamas-blue dark:text-adamas-green flex items-center gap-1">
+                    <span className="text-[10px] font-bold text-brand-blue dark:text-brand-green flex items-center gap-1">
                       <Clock className="w-3 h-3" /> {s.start_time} - {s.end_time}
                     </span>
                     <span className="text-[10px] font-bold uppercase px-2 py-0.5 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded">

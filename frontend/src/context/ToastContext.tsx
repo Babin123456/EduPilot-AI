@@ -51,14 +51,14 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const icons = {
     success: <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />,
     error: <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />,
-    info: <Info className="w-5 h-5 text-adamas-blue dark:text-adamas-green flex-shrink-0" />,
+    info: <Info className="w-5 h-5 text-brand-blue dark:text-brand-green flex-shrink-0" />,
     warning: <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0" />,
   };
 
   const borders = {
     success: 'border-emerald-500/30 bg-emerald-50/90 dark:bg-emerald-950/90 text-emerald-950 dark:text-emerald-100',
     error: 'border-red-500/30 bg-red-50/90 dark:bg-red-950/90 text-red-950 dark:text-red-100',
-    info: 'border-adamas-blue/30 bg-blue-50/90 dark:bg-slate-900/90 text-slate-900 dark:text-white',
+    info: 'border-brand-blue/30 bg-blue-50/90 dark:bg-slate-900/90 text-slate-900 dark:text-white',
     warning: 'border-amber-500/30 bg-amber-50/90 dark:bg-amber-950/90 text-amber-950 dark:text-amber-100',
   };
 

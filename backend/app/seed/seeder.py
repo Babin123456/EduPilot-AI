@@ -219,7 +219,7 @@ def run_seed():
         db = get_db()
 
         if db.universities.count_documents({}) > 0:
-            print("[Seed] Database already seeded. Updating teacher records to clean edupilot.ai emails...")
+            print("[Seed] Database already seeded. Updating teacher & student records to clean emails...")
             # Update any existing teacher accounts that may still have old email domains in MongoDB
             for t_data in DEMO_TEACHERS:
                 old_email = t_data["email"].replace("@edupilot.ai", "@adamasuniversity.ac.in")
@@ -231,6 +231,15 @@ def run_seed():
                         "hashed_password": hash_password(t_data["password"]),
                     }}
                 )
+            # Update existing student records in MongoDB to ensure zero adamas emails
+            db.students.update_many(
+                {"email": {"$regex": "@adamasuniversity\\.ac\\.in$"}},
+                [{"$set": {"email": {"$replaceOne": {"input": "$email", "find": "@adamasuniversity.ac.in", "replacement": "@student.university.edu"}}}}],
+            )
+            # Fallback for MongoDB versions without pipeline updates
+            for student in db.students.find({"email": {"$regex": "@adamasuniversity"}}):
+                new_email = student["email"].replace("@adamasuniversity.ac.in", "@student.university.edu").replace("@adamas", "@university")
+                db.students.update_one({"_id": student["_id"]}, {"$set": {"email": new_email}})
             return
 
         print("[Seed] Starting database seed...")

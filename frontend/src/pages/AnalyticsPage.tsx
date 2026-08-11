@@ -97,7 +97,7 @@ export const AnalyticsPage: React.FC = () => {
                 className="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl"
               >
                 <span className="text-xs text-slate-400 font-bold uppercase">Average Assessment Score</span>
-                <p className="text-2xl font-black text-adamas-blue dark:text-adamas-green mt-1">{data.average_score}/100</p>
+                <p className="text-2xl font-black text-brand-blue dark:text-brand-green mt-1">{data.average_score}/100</p>
               </motion.div>
             </div>
           </div>

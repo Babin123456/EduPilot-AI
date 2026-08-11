@@ -220,21 +220,17 @@ export const StudentsPage: React.FC = () => {
                     <td className="px-5 py-3.5 font-bold text-slate-900 dark:text-white">{s.full_name}</td>
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-1.5">
-                        <span className="truncate max-w-[160px] text-adamas-blue dark:text-adamas-green">{s.email}</span>
+                        <span className="truncate max-w-[160px] text-brand-blue dark:text-brand-green">{s.email}</span>
                         <button
-                          onClick={(e) => handleCopyEmail(s.email, e)}
-                          className="p-1 text-slate-400 hover:text-adamas-blue transition-colors"
-                          title="Copy student email"
+                          onClick={() => handleSendStudentEmail(s.email)}
+                          className="p-1 text-slate-400 hover:text-brand-blue transition-colors"
+                          title="Send Email"
                         >
-                          {copiedEmail === s.email ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
+                          <Mail className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </td>
-                    <td className="px-5 py-3.5">
-                      <span className="flex items-center gap-1 text-slate-600 dark:text-slate-400 font-mono">
-                        <Phone className="w-3 h-3 text-slate-400" /> {s.phone}
-                      </span>
-                    </td>
+                    <td className="px-5 py-3.5 font-semibold text-slate-700 dark:text-slate-300">{s.phone}</td>
                     <td className="px-5 py-3.5 text-slate-500">{s.year_label} - Sec {s.section_name}</td>
                     <td className="px-5 py-3.5 font-semibold">
                       <span className={s.attendance_percentage < 75 ? 'text-red-600 dark:text-red-400' : ''}>
@@ -242,7 +238,7 @@ export const StudentsPage: React.FC = () => {
                       </span>
                     </td>
                     <td className="px-5 py-3.5 font-semibold">{s.average_score}</td>
-                    <td className="px-5 py-3.5 font-bold text-adamas-blue dark:text-adamas-green">{s.cgpa || 'N/A'}</td>
+                    <td className="px-5 py-3.5 font-bold text-brand-blue dark:text-brand-green">{s.cgpa || 'N/A'}</td>
                     <td className="px-5 py-3.5">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase ${
                         s.risk_level === 'high' ? 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400' :

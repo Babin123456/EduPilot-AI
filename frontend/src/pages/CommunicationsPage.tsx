@@ -146,7 +146,7 @@ export const CommunicationsPage: React.FC = () => {
         <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="font-extrabold text-slate-900 dark:text-white text-sm flex items-center gap-2">
-              <Users className="w-4 h-4 text-adamas-blue dark:text-adamas-green" />
+              <Users className="w-4 h-4 text-brand-blue dark:text-brand-green" />
               Student Directory ({students.length})
             </h3>
             <span className="text-[10px] font-bold px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-slate-500 uppercase">
@@ -159,7 +159,7 @@ export const CommunicationsPage: React.FC = () => {
             <button
               onClick={() => setSendMode('all')}
               className={`py-1.5 rounded-lg transition-colors ${
-                sendMode === 'all' ? 'bg-white dark:bg-slate-900 text-adamas-blue dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-900'
+                sendMode === 'all' ? 'bg-white dark:bg-slate-900 text-brand-blue dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-900'
               }`}
             >
               All Students ({students.length})
@@ -167,7 +167,7 @@ export const CommunicationsPage: React.FC = () => {
             <button
               onClick={() => setSendMode('selected')}
               className={`py-1.5 rounded-lg transition-colors ${
-                sendMode === 'selected' ? 'bg-white dark:bg-slate-900 text-adamas-blue dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-900'
+                sendMode === 'selected' ? 'bg-white dark:bg-slate-900 text-brand-blue dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-900'
               }`}
             >
               Selected ({selectedStudents.size})
@@ -182,13 +182,13 @@ export const CommunicationsPage: React.FC = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search by name, roll number, or email..."
-              className="w-full pl-9 pr-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-adamas-blue"
+              className="w-full pl-9 pr-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-blue"
             />
           </div>
 
           {sendMode === 'selected' && (
             <div className="flex items-center justify-between text-xs text-slate-500 px-1">
-              <button onClick={handleSelectAll} className="font-bold text-adamas-blue hover:underline">
+              <button onClick={handleSelectAll} className="font-bold text-brand-blue hover:underline">
                 {selectedStudents.size === filteredStudents.length ? 'Deselect All' : 'Select All'}
               </button>
               <span>{selectedStudents.size} of {filteredStudents.length} selected</span>
@@ -233,7 +233,7 @@ export const CommunicationsPage: React.FC = () => {
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
             <h3 className="font-extrabold text-slate-900 dark:text-white text-sm flex items-center gap-2">
-              <Send className="w-4 h-4 text-adamas-blue dark:text-adamas-green" />
+              <Send className="w-4 h-4 text-brand-blue dark:text-brand-green" />
               Compose Email Message
             </h3>
 
@@ -246,7 +246,7 @@ export const CommunicationsPage: React.FC = () => {
                 <select
                   value={selectedTemplate}
                   onChange={(e) => handleTemplateSelect(e.target.value)}
-                  className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-adamas-blue"
+                  className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-blue"
                 >
                   <option value="">-- Choose a Pre-formatted Template --</option>
                   {templates.map(t => (
@@ -266,7 +266,7 @@ export const CommunicationsPage: React.FC = () => {
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 placeholder="e.g. Attendance Alert / Assignment 2 Submission Reminder"
-                className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-adamas-blue"
+                className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-blue"
               />
             </div>
 
@@ -280,7 +280,7 @@ export const CommunicationsPage: React.FC = () => {
                 onChange={(e) => setBody(e.target.value)}
                 rows={6}
                 placeholder="Type your message content here..."
-                className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-adamas-blue"
+                className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-blue"
               />
             </div>
 
@@ -297,7 +297,7 @@ export const CommunicationsPage: React.FC = () => {
               <button
                 onClick={handleSendEmail}
                 disabled={!subject.trim() || !body.trim() || sending}
-                className="px-6 py-2.5 bg-adamas-blue hover:bg-adamas-blue-dark text-white text-xs font-bold rounded-xl shadow transition-all flex items-center gap-2 disabled:opacity-50"
+                className="px-6 py-2.5 bg-brand-blue hover:bg-brand-blue-dark text-white text-xs font-bold rounded-xl shadow transition-all flex items-center gap-2 disabled:opacity-50"
               >
                 {sending ? (
                   <><Loader2 className="w-4 h-4 animate-spin" /> Dispatching Emails...</>
@@ -311,7 +311,7 @@ export const CommunicationsPage: React.FC = () => {
           {/* History Section */}
           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
             <h3 className="font-extrabold text-slate-900 dark:text-white text-sm flex items-center gap-2">
-              <Inbox className="w-4 h-4 text-adamas-blue dark:text-adamas-green" />
+              <Inbox className="w-4 h-4 text-brand-blue dark:text-brand-green" />
               Sent Mail History ({history.length})
             </h3>
 

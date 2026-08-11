@@ -356,7 +356,7 @@ export const AssignmentsPage: React.FC = () => {
         ) : assignments.map((a) => (
           <div key={a.id} className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase px-2 py-0.5 bg-blue-50 text-adamas-blue rounded">
+              <span className="text-[10px] font-bold uppercase px-2 py-0.5 bg-blue-50 text-brand-blue rounded">
                 {a.topic || 'General'}
               </span>
               <span className="text-[10px] text-slate-400 font-bold">{a.difficulty}</span>

@@ -486,26 +486,24 @@ export const AIPage: React.FC = () => {
         <div className="flex-1 p-6 overflow-y-auto space-y-4">
           {messages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center max-w-lg mx-auto space-y-4">
-              <div className="w-14 h-14 rounded-2xl bg-adamas-blue/10 text-adamas-blue dark:text-adamas-green flex items-center justify-center shadow-inner">
+              <div className="w-14 h-14 rounded-2xl bg-brand-blue/10 text-brand-blue dark:text-brand-green flex items-center justify-center shadow-inner">
                 <Sparkles className="w-7 h-7" />
               </div>
               <div>
                 <h3 className="font-extrabold text-slate-900 dark:text-white text-lg">How can EduPilot assist your teaching today?</h3>
-                <p className="text-xs text-slate-500 mt-1">
-                  Ask about attendance metrics, timetable routines, student performance, or upload any PDF/DOCX for deep RAG analysis!
+              <div className="space-y-1">
+                <h3 className="text-base font-extrabold text-slate-900 dark:text-white">EduPilot AI Copilot</h3>
+                <p className="text-xs text-slate-500 max-w-md">
+                  Your intelligent academic copilot. Ask about your active class, student performance, syllabus topics, or upload course documents for RAG analysis.
                 </p>
-                {ragDocuments.length > 0 && (
-                  <p className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-1.5 font-semibold">
-                    📚 {ragDocuments.length} document{ragDocuments.length !== 1 ? 's' : ''} indexed — ask questions about your uploaded files!
-                  </p>
-                )}
               </div>
-              <div className="grid grid-cols-1 gap-2 w-full pt-2">
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full pt-2">
                 {samplePrompts.map((prompt, i) => (
                   <button
                     key={i}
                     onClick={() => handleSend(prompt)}
-                    className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:border-adamas-blue hover:bg-adamas-blue/5 text-left transition-all duration-200"
+                    className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:border-brand-blue hover:bg-brand-blue/5 text-left transition-all duration-200"
                   >
                     "{prompt}"
                   </button>
@@ -550,7 +548,7 @@ export const AIPage: React.FC = () => {
                           h1: ({ node, ...props }) => <h1 className="text-lg font-extrabold mb-2 mt-4 first:mt-0" {...props} />,
                           h2: ({ node, ...props }) => <h2 className="text-base font-extrabold mb-2 mt-4 first:mt-0" {...props} />,
                           h3: ({ node, ...props }) => <h3 className="text-sm font-bold mb-2 mt-3 first:mt-0" {...props} />,
-                          a: ({ node, ...props }) => <a className="text-adamas-blue dark:text-adamas-green hover:underline" target="_blank" rel="noopener noreferrer" {...props} />,
+                          a: ({ node, ...props }) => <a className="text-brand-blue dark:text-brand-green hover:underline" target="_blank" rel="noopener noreferrer" {...props} />,
                           strong: ({ node, ...props }) => <strong className="font-bold text-slate-900 dark:text-white" {...props} />,
                           table: ({ node, ...props }) => <div className="overflow-x-auto mb-2"><table className="min-w-full divide-y divide-slate-300 dark:divide-slate-700" {...props} /></div>,
                           thead: ({ node, ...props }) => <thead className="bg-slate-200 dark:bg-slate-800" {...props} />,

@@ -139,7 +139,7 @@ export const DailyNotesPage: React.FC = () => {
             initial={{ opacity: 0, y: -12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -12 }}
-            className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-adamas-blue/30 shadow-md space-y-4"
+            className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-brand-blue/30 shadow-md space-y-4"
           >
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <h3 className="font-extrabold text-slate-900 dark:text-white text-sm flex items-center gap-2">
@@ -191,7 +191,7 @@ export const DailyNotesPage: React.FC = () => {
                   value={topic}
                   onChange={(e) => setTopic(e.target.value)}
                   placeholder="Select a syllabus topic above or enter custom topic..."
-                  className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-adamas-blue focus:outline-none"
+                  className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
                 />
               </div>
 
@@ -203,7 +203,7 @@ export const DailyNotesPage: React.FC = () => {
                   type="number"
                   value={duration}
                   onChange={(e) => setDuration(Number(e.target.value))}
-                  className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-adamas-blue focus:outline-none"
+                  className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
                 />
               </div>
             </div>
@@ -217,14 +217,14 @@ export const DailyNotesPage: React.FC = () => {
                 onChange={(e) => setContext(e.target.value)}
                 placeholder="Mention specific examples, diagrams drawn on blackboard, or key textbook chapters..."
                 rows={2}
-                className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-adamas-blue focus:outline-none"
+                className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
               />
             </div>
             <div className="flex justify-end">
               <button
                 onClick={handleGenerate}
                 disabled={!topic.trim() || generating}
-                className="px-5 py-2.5 bg-adamas-blue hover:bg-adamas-blue-dark text-white text-xs font-bold rounded-lg shadow transition-all flex items-center gap-2 disabled:opacity-50"
+                className="px-5 py-2.5 bg-brand-blue hover:bg-brand-blue-dark text-white text-xs font-bold rounded-lg shadow transition-all flex items-center gap-2 disabled:opacity-50"
               >
                 {generating ? (
                   <><Loader2 className="w-4 h-4 animate-spin" /> Generating Notes...</>
@@ -289,7 +289,7 @@ export const DailyNotesPage: React.FC = () => {
                     <button
                       onClick={() => handleShare(note)}
                       disabled={sharing === note.id}
-                      className="px-3 py-2 bg-adamas-blue hover:bg-adamas-blue-dark text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 shadow transition-all disabled:opacity-50"
+                      className="px-3 py-2 bg-brand-blue hover:bg-brand-blue-dark text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 shadow transition-all disabled:opacity-50"
                     >
                       {sharing === note.id ? (
                         <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Sending...</>

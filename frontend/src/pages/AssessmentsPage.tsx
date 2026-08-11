@@ -375,7 +375,7 @@ export const AssessmentsPage: React.FC = () => {
                         {a.difficulty}
                       </span>
                       {a.is_ai_generated && (
-                        <span className="text-[10px] font-bold px-2 py-0.5 bg-adamas-blue/10 text-adamas-blue rounded">AI Generated</span>
+                        <span className="text-[10px] font-bold px-2 py-0.5 bg-brand-blue/10 text-brand-blue rounded">AI Generated</span>
                       )}
                     </div>
                     <h3 className="font-bold text-slate-900 dark:text-white text-sm">{a.title}</h3>
