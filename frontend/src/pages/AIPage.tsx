@@ -456,17 +456,8 @@ export const AIPage: React.FC = () => {
           </div>
 
 
-          {/* Model Switcher & Export Controls */}
+          {/* Export Controls */}
           <div className="flex items-center gap-2 relative z-10">
-            <select
-              value={selectedModel}
-              onChange={(e) => setSelectedModel(e.target.value)}
-              className="bg-slate-950/80 text-white text-xs font-extrabold px-3 py-1.5 rounded-xl border border-slate-700 focus:outline-none cursor-pointer"
-            >
-              <option value="Groq Llama-3.3-70B">Groq Llama-3.3 70B (Fast)</option>
-              <option value="Gemini 1.5 Flash">Gemini 1.5 Flash (Deep RAG)</option>
-            </select>
-
             {messages.length > 0 && (
               <button
                 onClick={handleExportChatTXT}
@@ -573,15 +564,9 @@ export const AIPage: React.FC = () => {
                   {/* Message Action Bar (Copy, Regenerate, Sources) */}
                   <div className="flex items-center justify-between text-[10px] text-slate-400 px-1 pt-1 opacity-80 group-hover:opacity-100 transition-opacity">
                     <div className="flex items-center gap-2">
-                      {msg.model_used && (
-                        <div className="flex items-center gap-1">
-                          <Cpu className="w-3 h-3 text-[#005BAC] dark:text-[#8CC63F]" />
-                          <span>Powered by {msg.model_used}</span>
-                        </div>
-                      )}
                       {/* RAG Source Badges */}
                       {msg.sources && msg.sources.length > 0 && (
-                        <div className="flex items-center gap-1 ml-1">
+                        <div className="flex items-center gap-1">
                           <Database className="w-3 h-3 text-emerald-500" />
                           {msg.sources.map((src: string, si: number) => (
                             <span key={si} className="px-1.5 py-0.5 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 rounded text-[9px] font-semibold border border-emerald-200 dark:border-emerald-800">
@@ -719,7 +704,7 @@ export const AIPage: React.FC = () => {
               onChange={(e) => setInput(e.target.value)}
               placeholder={ragDocuments.length > 0
                 ? "Ask about your documents or any academic topic..."
-                : "Message EduPilot AI (Groq Llama-3.3 & Gemini 1.5 Flash)..."
+                : "Message EduPilot AI..."
               }
               className="flex-1 px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#005BAC]"
             />
