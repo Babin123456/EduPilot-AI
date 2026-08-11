@@ -38,8 +38,13 @@ export const AIPage: React.FC = () => {
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [conversations, setConversations] = useState<any[]>([]);
   const [attachedFile, setAttachedFile] = useState<AttachedFile | null>(null);
-  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
-  const [selectedModel, setSelectedModel] = useState<string>('Groq Llama-3.3-70B');
+  const [copiedCodeId, setCopiedCodeId] = useState<string | null>(null);
+
+  const handleCopyCode = (codeText: string, codeId: string) => {
+    navigator.clipboard.writeText(codeText);
+    setCopiedCodeId(codeId);
+    setTimeout(() => setCopiedCodeId(null), 2000);
+  };
 
   // RAG Document Library state
   const [ragDocuments, setRagDocuments] = useState<RagDocument[]>([]);
@@ -548,12 +553,55 @@ export const AIPage: React.FC = () => {
                           tr: ({ node, ...props }) => <tr {...props} />,
                           th: ({ node, ...props }) => <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider" {...props} />,
                           td: ({ node, ...props }) => <td className="px-3 py-2 text-xs border-t border-slate-200 dark:border-slate-800" {...props} />,
-                          code: ({ node, inline, className, children, ...props }: any) =>
-                            inline ? (
-                              <code className="bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 rounded text-[11px] font-mono text-slate-800 dark:text-slate-200" {...props}>{children}</code>
-                            ) : (
-                              <pre className="bg-slate-800 dark:bg-slate-950 text-slate-100 p-3 rounded-xl overflow-x-auto text-[11px] font-mono my-2 shadow-inner"><code {...props}>{children}</code></pre>
-                            )
+                          code: ({ node, inline, className, children, ...props }: any) => {
+                            const match = /language-(\w+)/.exec(className || '');
+                            const rawCode = String(children).replace(/\n$/, '');
+                            const codeId = `${i}-${Math.random()}`;
+                            const isCopied = copiedCodeId === codeId;
+
+                            if (inline) {
+                              return (
+                                <code className="bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 rounded text-[11px] font-mono text-slate-800 dark:text-slate-200" {...props}>
+                                  {children}
+                                </code>
+                              );
+                            }
+
+                            return (
+                              <div className="relative my-3 rounded-xl overflow-hidden border border-slate-700/80 shadow-md bg-slate-900 dark:bg-slate-950">
+                                {/* Code Header Toolbar */}
+                                <div className="flex items-center justify-between px-3.5 py-1.5 bg-slate-800/90 text-slate-300 text-[10px] font-mono border-b border-slate-700/60">
+                                  <span className="font-bold text-[#8CC63F] uppercase tracking-wider">
+                                    {match ? match[1] : 'code'}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleCopyCode(rawCode, codeId)}
+                                    className="flex items-center gap-1.5 px-2 py-0.5 rounded-md hover:bg-slate-700/70 text-slate-300 hover:text-white transition-colors font-sans font-semibold text-[10px]"
+                                    title="Copy code snippet"
+                                  >
+                                    {isCopied ? (
+                                      <>
+                                        <Check className="w-3 h-3 text-emerald-400" />
+                                        <span className="text-emerald-400">Copied!</span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Copy className="w-3 h-3 text-slate-400" />
+                                        <span>Copy code</span>
+                                      </>
+                                    )}
+                                  </button>
+                                </div>
+                                {/* Code Content */}
+                                <pre className="p-3.5 overflow-x-auto text-[11px] font-mono text-slate-100 leading-relaxed">
+                                  <code className={className} {...props}>
+                                    {children}
+                                  </code>
+                                </pre>
+                              </div>
+                            );
+                          }
                         }}
                       >
                         {msg.content}
