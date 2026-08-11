@@ -30,9 +30,32 @@ This project was crafted for **VibeForge 1.0 Hackathon** by **Team Triangle**:
 
 ---
 
-## ⚡ Quick Start — Running in Browser Locally
+## 🐳 Quick Start — Docker Compose (Recommended)
 
-Follow these quick commands to launch EduPilot AI locally in your browser:
+The easiest way to run the entire EduPilot AI stack (Frontend, Backend, and Nginx proxy) is using Docker Compose.
+
+```bash
+# Build and start all services in detached mode
+docker compose up --build -d
+```
+
+> 🌐 **Application**: `http://localhost` (Port 80)
+> 📡 **Backend API Docs**: `http://localhost/api/docs`
+
+To view logs or stop the services:
+```bash
+# View logs
+docker compose logs -f
+
+# Stop and remove containers
+docker compose down
+```
+
+---
+
+## ⚡ Quick Start — Running in Browser Locally (Manual)
+
+Follow these quick commands to launch EduPilot AI locally in your browser without Docker:
 
 ### Step 1: Start Backend API (Terminal 1)
 ```bash
