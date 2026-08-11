@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { api } from '../api/client';
 import { motion } from 'framer-motion';
-import { Users, Search, Mail, Download, Phone, Copy, Check, FileSpreadsheet, ArrowUpDown } from 'lucide-react';
+import { Users, Search, Mail, Download, Phone, Copy, Check, FileSpreadsheet, ArrowUpDown, Send, AlertTriangle } from 'lucide-react';
 import { generateClassReportPDF } from '../utils/pdfGenerator';
 import { downloadExcelSheet } from '../utils/exportUtils';
 
@@ -18,6 +19,7 @@ const SkeletonRow: React.FC = () => (
 );
 
 export const StudentsPage: React.FC = () => {
+  const navigate = useNavigate();
   const { activeClass, user } = useAuth();
   const toast = useToast();
   const [students, setStudents] = useState<any[]>([]);
@@ -27,6 +29,18 @@ export const StudentsPage: React.FC = () => {
   const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'roll_number' | 'full_name' | 'attendance_percentage' | 'cgpa' | 'risk_level'>('roll_number');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+
+  const handleSendStudentEmail = (studentEmail: string, studentName?: string, attendancePct?: number) => {
+    // Direct navigate to Communications tab with recipient & context pre-selected
+    toast.info('Opening Communications Center', `Drafting message to ${studentName || studentEmail}`);
+    navigate('/communications', {
+      state: {
+        targetEmail: studentEmail,
+        targetName: studentName,
+        attendancePct: attendancePct,
+      }
+    });
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -222,9 +236,9 @@ export const StudentsPage: React.FC = () => {
                       <div className="flex items-center gap-1.5">
                         <span className="truncate max-w-[160px] text-brand-blue dark:text-brand-green">{s.email}</span>
                         <button
-                          onClick={() => handleSendStudentEmail(s.email)}
+                          onClick={() => handleSendStudentEmail(s.email, s.full_name, s.attendance_percentage)}
                           className="p-1 text-slate-400 hover:text-brand-blue transition-colors"
-                          title="Send Email"
+                          title={`Compose Email to ${s.full_name}`}
                         >
                           <Mail className="w-3.5 h-3.5" />
                         </button>
@@ -233,21 +247,33 @@ export const StudentsPage: React.FC = () => {
                     <td className="px-5 py-3.5 font-semibold text-slate-700 dark:text-slate-300">{s.phone}</td>
                     <td className="px-5 py-3.5 text-slate-500">{s.year_label} - Sec {s.section_name}</td>
                     <td className="px-5 py-3.5 font-semibold">
-                      <span className={s.attendance_percentage < 75 ? 'text-red-600 dark:text-red-400' : ''}>
+                      <span className={s.attendance_percentage < 75 ? 'text-red-600 dark:text-red-400 font-extrabold' : ''}>
                         {s.attendance_percentage}%
                       </span>
                     </td>
                     <td className="px-5 py-3.5 font-semibold">{s.average_score}</td>
                     <td className="px-5 py-3.5 font-bold text-brand-blue dark:text-brand-green">{s.cgpa || 'N/A'}</td>
                     <td className="px-5 py-3.5">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase ${
-                        s.risk_level === 'high' ? 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400' :
-                        s.risk_level === 'medium' ? 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400' :
-                        s.risk_level === 'low' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-400' :
-                        'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400'
-                      }`}>
-                        {s.risk_level}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase ${
+                          s.risk_level === 'high' ? 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400' :
+                          s.risk_level === 'medium' ? 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400' :
+                          s.risk_level === 'low' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-400' :
+                          'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400'
+                        }`}>
+                          {s.risk_level}
+                        </span>
+                        {s.risk_level !== 'normal' && (
+                          <button
+                            onClick={() => handleSendStudentEmail(s.email, s.full_name, s.attendance_percentage)}
+                            className="px-2 py-1 bg-red-50 hover:bg-red-100 dark:bg-red-950/60 dark:hover:bg-red-900/60 text-red-700 dark:text-red-300 rounded-lg text-[10px] font-bold border border-red-200 dark:border-red-800 flex items-center gap-1 transition-all shadow-sm active:scale-95"
+                            title={`Send direct attendance risk warning to ${s.full_name}`}
+                          >
+                            <Mail className="w-3 h-3 text-red-500" />
+                            <span>Notify</span>
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </motion.tr>
                 ))

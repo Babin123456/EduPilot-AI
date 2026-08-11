@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { api } from '../api/client';
@@ -8,6 +9,7 @@ import {
 } from 'lucide-react';
 
 export const CommunicationsPage: React.FC = () => {
+  const location = useLocation();
   const { activeClass, user } = useAuth();
   const toast = useToast();
   const [students, setStudents] = useState<any[]>([]);
@@ -37,9 +39,39 @@ export const CommunicationsPage: React.FC = () => {
         api.get('/communications/templates'),
         api.get('/communications', { params: { class_id: activeClass?.id } }),
       ]);
-      setStudents(studRes.data.students || []);
+      const fetchedStudents: any[] = studRes.data.students || [];
+      setStudents(fetchedStudents);
       setTemplates(tmplRes.data || []);
       setHistory(histRes.data || []);
+
+      // Check if navigated with pre-selected student target
+      const navState = location.state as { targetEmail?: string; targetName?: string; attendancePct?: number } | null;
+      if (navState?.targetEmail) {
+        const matched = fetchedStudents.find((s: any) => s.email === navState.targetEmail);
+        if (matched) {
+          setSelectedStudents(new Set([matched.id]));
+          setSendMode('selected');
+          
+          if (navState.attendancePct !== undefined && navState.attendancePct < 75) {
+            // Auto-load attendance warning template
+            const attTmpl = (tmplRes.data || []).find((t: any) => t.id === 'attendance-warning');
+            if (attTmpl) {
+              setSelectedTemplate(attTmpl.id);
+              setSubject(attTmpl.subject);
+              setBody(attTmpl.body
+                .replace('{teacher_name}', user?.full_name || '')
+                .replace('{designation}', user?.designation || 'Faculty')
+              );
+            } else {
+              setSubject(`Attendance Warning Notice — ${activeClass.course_code}`);
+              setBody(`Dear ${navState.targetName || 'Student'},\n\nYour current attendance in ${activeClass.course_name} (${activeClass.course_code}) is ${navState.attendancePct}%, which is below the required 75% threshold. Please meet me during office hours to discuss your attendance recovery plan.\n\nRegards,\n${user?.full_name || 'Faculty'}\n${user?.designation || 'Department of Computer Science'}`);
+            }
+          } else {
+            setSubject(`Academic Notice — ${activeClass.course_code}`);
+            setBody(`Dear ${navState.targetName || 'Student'},\n\n[Type your message here]\n\nRegards,\n${user?.full_name || 'Faculty'}`);
+          }
+        }
+      }
     } catch (err) {
       console.error('Failed to load communications data:', err);
     }
@@ -54,7 +86,7 @@ export const CommunicationsPage: React.FC = () => {
         .replace('{teacher_name}', user?.full_name || '')
         .replace('{designation}', user?.designation || 'Faculty')
       );
-      toast.info(`Loaded Template: "${tmpl.name}"`, 'Subject and body updated in composer.');
+      toast.info(`Loaded Template: "${tmpl.title || tmpl.name}"`, 'Subject and body updated in composer.');
     }
   };
 
@@ -250,7 +282,7 @@ export const CommunicationsPage: React.FC = () => {
                 >
                   <option value="">-- Choose a Pre-formatted Template --</option>
                   {templates.map(t => (
-                    <option key={t.id} value={t.id}>{t.name}</option>
+                    <option key={t.id} value={t.id}>{t.title || t.name}</option>
                   ))}
                 </select>
               </div>
