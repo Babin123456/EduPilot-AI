@@ -185,7 +185,11 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-slate-300 dark:bg-slate-700 rounded;
+  background-color: rgb(203 213 225);
+  border-radius: 0.25rem;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background-color: rgb(51 65 85);
 }
 
 /* ─── Reduced Motion Override ─── */
