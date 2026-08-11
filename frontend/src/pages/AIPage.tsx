@@ -297,8 +297,7 @@ export const AIPage: React.FC = () => {
       <div className="flex h-[calc(100vh-6.5rem)] bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-md overflow-hidden -my-3">
         {/* ─── Left Sidebar: Conversation History + Document Library ─── */}
         <div className="w-64 bg-slate-50 dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 p-3 hidden md:flex flex-col justify-between flex-shrink-0">
-
-        <div className="space-y-3 overflow-y-auto flex-1">
+          <div className="space-y-3 overflow-y-auto flex-1">
           <button
             onClick={handleNewChat}
             className="w-full py-2.5 px-3 bg-[#005BAC] hover:bg-[#0A6FD8] text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all"
@@ -436,21 +435,20 @@ export const AIPage: React.FC = () => {
               ))
             )}
           </div>
+
+          {conversationId && (
+            <button
+              onClick={handleNewChat}
+              className="w-full py-2 px-3 text-[11px] text-slate-500 hover:text-red-500 flex items-center justify-center gap-1.5 transition-colors border-t border-slate-200 dark:border-slate-800 pt-3"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Clear Active View</span>
+            </button>
+          )}
         </div>
 
-        {conversationId && (
-          <button
-            onClick={handleNewChat}
-            className="w-full py-2 px-3 text-[11px] text-slate-500 hover:text-red-500 flex items-center justify-center gap-1.5 transition-colors border-t border-slate-200 dark:border-slate-800 pt-3"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-            <span>Clear Active View</span>
-          </button>
-        )}
-      </div>
-
-      {/* ─── Main Chat Window ─── */}
-      <div className="flex-1 flex flex-col min-w-0">
+        {/* ─── Main Chat Window ─── */}
+        <div className="flex-1 flex flex-col min-w-0">
         {/* Header Banner */}
         <div className="bg-gradient-to-r from-[#005BAC] via-[#0A6FD8] to-[#8CC63F] p-3.5 sm:p-4 text-white shadow-md flex items-center justify-between gap-4 relative overflow-hidden flex-shrink-0">
           <div className="space-y-0.5 relative z-10">
