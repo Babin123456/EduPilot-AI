@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
-import { ChevronDown, ArrowLeft, HelpCircle, Sun, Moon, Search } from 'lucide-react';
+import { ChevronDown, ArrowLeft, HelpCircle, Sun, Moon, Search, BookOpen } from 'lucide-react';
 
 const faqData = [
   {
@@ -129,6 +129,7 @@ export const FAQPage: React.FC = () => {
   const [openIndex, setOpenIndex] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const { theme, toggleTheme } = useTheme();
+  const navigate = useNavigate();
 
   useEffect(() => {
     window.scrollTo(0, 0);
