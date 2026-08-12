@@ -20,6 +20,8 @@ export const AttendancePage: React.FC = () => {
     setLoading(true);
     setIsSubmitted(false);
     setIsEditing(false);
+    setStudents([]);
+    setRecords({});
     api.get(`/attendance/students/${activeClass.id}`)
       .then((res) => {
         setStudents(res.data);
@@ -33,7 +35,7 @@ export const AttendancePage: React.FC = () => {
         if (hasSavedRecords) setIsSubmitted(true);
       })
       .finally(() => setLoading(false));
-  }, [activeClass]);
+  }, [activeClass?.id]);
 
   // Weekend portal closure check (Saturday = 6, Sunday = 0)
   const todayDay = new Date().getDay();
