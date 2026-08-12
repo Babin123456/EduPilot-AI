@@ -208,6 +208,7 @@ It unifies daily teaching workflows, institutional data, AI copilot intelligence
 - **Image OCR Engine**: Local RapidOCR (`rapidocr-onnxruntime`) for pure Python offline text extraction (zero C++ / Tesseract setup)
 - **Vector RAG Engine**: HuggingFace `all-MiniLM-L6-v2` embeddings & MongoDB vector search / cosine similarity
 - **Communications**: Integrated Teacher-Student Mail Engine & Gmail SMTP Integration
+- **Keep-Alive Self-Ping**: Built-in background task pings `/api/health` every 13 minutes in production to prevent Render free tier cold starts
 
 ### ⚛️ Frontend Architecture
 

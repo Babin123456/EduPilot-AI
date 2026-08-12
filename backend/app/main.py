@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import asyncio
 import os
 import time
 import uuid
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 from pathlib import Path
 
+import httpx
 import structlog
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -35,6 +38,9 @@ structlog.configure(
 )
 
 log = structlog.get_logger()
+
+# ── Server start timestamp (for uptime tracking) ─────────────────────────────
+_server_start_time: datetime | None = None
 
 # ── Rate Limiter (shared instance) ────────────────────────────────────────────
 limiter = Limiter(key_func=get_remote_address, default_limits=["200/minute"])
@@ -77,10 +83,33 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         return response
 
 
+# ── Keep-Alive Self-Ping (prevents Render free tier cold starts) ─────────────
+KEEP_ALIVE_INTERVAL_SECONDS = 13 * 60  # 13 minutes (Render sleeps after 15)
+
+
+async def _keep_alive_ping(backend_url: str) -> None:
+    """Background task that pings /api/health every 13 minutes to keep
+    Render free tier services awake and eliminate cold-start delays."""
+    health_url = f"{backend_url.rstrip('/')}/api/health"
+    log.info("keep_alive_started", url=health_url, interval_s=KEEP_ALIVE_INTERVAL_SECONDS)
+
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        while True:
+            await asyncio.sleep(KEEP_ALIVE_INTERVAL_SECONDS)
+            try:
+                resp = await client.get(health_url)
+                log.info("keep_alive_ping", status=resp.status_code)
+            except Exception as exc:
+                log.warning("keep_alive_ping_failed", error=str(exc))
+
+
 # ── Lifespan ─────────────────────────────────────────────────────────────────
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan: startup and shutdown."""
+    global _server_start_time
+    _server_start_time = datetime.now(timezone.utc)
+
     settings = get_settings()
     try:
         ensure_indexes()
@@ -90,7 +119,21 @@ async def lifespan(app: FastAPI):
 
     # Ensure storage directory exists
     settings.storage_path
+
+    # Start keep-alive self-ping in production to prevent Render free tier cold starts
+    keep_alive_task = None
+    if settings.is_production and settings.backend_url != "http://localhost:8000":
+        keep_alive_task = asyncio.create_task(_keep_alive_ping(settings.backend_url))
+
     yield
+
+    # Cancel background task on shutdown
+    if keep_alive_task is not None:
+        keep_alive_task.cancel()
+        try:
+            await keep_alive_task
+        except asyncio.CancelledError:
+            pass
 
 
 # ── App Factory ───────────────────────────────────────────────────────────────
@@ -140,7 +183,16 @@ def create_app() -> FastAPI:
     # ── Health Check ──
     @app.get("/api/health")
     async def health():
-        return {"status": "healthy", "app": "EduPilot AI", "version": "1.0.0"}
+        uptime_seconds = None
+        if _server_start_time:
+            uptime_seconds = int((datetime.now(timezone.utc) - _server_start_time).total_seconds())
+        return {
+            "status": "healthy",
+            "app": "EduPilot AI",
+            "version": "1.0.0",
+            "uptime_seconds": uptime_seconds,
+            "started_at": _server_start_time.isoformat() if _server_start_time else None,
+        }
 
     return app
 

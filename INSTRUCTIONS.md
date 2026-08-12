@@ -48,7 +48,7 @@ Copy the generated 64-character strings and set them as `SECRET_KEY` and `JWT_SE
 
 ### 🐍 Backend Files (`backend/app/`)
 
-- `main.py`: Entry point for FastAPI application. Sets up CORS, mounts `/api/v1` routes, handles database index creation and automatic seeding on startup.
+- `main.py`: Entry point for FastAPI application. Sets up CORS, mounts `/api/v1` routes, handles database index creation, automatic seeding on startup, and a **background keep-alive self-ping** that prevents Render free tier cold starts in production.
 - `core/config.py`: Environment variable configuration loader built with `pydantic-settings`.
 - `core/database.py`: MongoDB client & database connection setup (`pymongo`) with index creation helpers.
 - `core/security.py`: Password hashing (bcrypt) and JWT access/refresh token generator and decoder.
@@ -231,7 +231,76 @@ docker compose down
    - `GEMINI_API_KEY` = `your_key_here`
    - `ALLOWED_ORIGINS` = `https://your-frontend-app.vercel.app`
    - `FRONTEND_URL` = `https://your-frontend-app.vercel.app`
-5. Click **Create Web Service**. Render will deploy your FastAPI backend with full `rapidocr-onnxruntime` OCR support!
+5. Add one more **critical** Environment Variable for the keep-alive self-ping:
+   - `BACKEND_URL` = `https://edupilot-backend.onrender.com` *(your Render service URL)*
+   - `APP_ENV` = `production`
+6. Click **Create Web Service**. Render will deploy your FastAPI backend with full `rapidocr-onnxruntime` OCR support!
+
+---
+
+## 🏓 5. Keep-Alive Self-Ping (Render Free Tier)
+
+Render's free tier **spins down** web services after 15 minutes of inactivity, causing 30–50 second cold-start delays on the next request. EduPilot AI includes a **built-in background self-ping** that eliminates this problem entirely.
+
+### How It Works
+
+When `APP_ENV=production` **and** `BACKEND_URL` is set to a non-localhost URL, the backend automatically starts a background task on startup that:
+
+1. Waits **13 minutes** (safely under Render's 15-minute idle threshold)
+2. Sends an HTTP GET to its own `/api/health` endpoint
+3. Repeats indefinitely, keeping the Render service permanently awake
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  FastAPI Server (Render)                                    │
+│                                                             │
+│  startup → _keep_alive_ping() background task started       │
+│           │                                                 │
+│           ├── sleep 13 min                                  │
+│           ├── GET /api/health → 200 OK                      │
+│           ├── sleep 13 min                                  │
+│           ├── GET /api/health → 200 OK                      │
+│           └── ... (repeats forever)                         │
+│                                                             │
+│  Render idle timer is reset on every ping → never sleeps!   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Required Environment Variables (on Render)
+
+| Variable | Value | Purpose |
+| :--- | :--- | :--- |
+| `APP_ENV` | `production` | Enables the keep-alive task |
+| `BACKEND_URL` | `https://edupilot-backend.onrender.com` | The URL the service pings itself at |
+
+> 💡 The keep-alive task is **automatically disabled** in local development (when `APP_ENV=development` or `BACKEND_URL=http://localhost:8000`).
+
+### Health Check Endpoint
+
+```
+GET /api/health
+```
+
+Response:
+```json
+{
+  "status": "healthy",
+  "app": "EduPilot AI",
+  "version": "1.0.0",
+  "uptime_seconds": 4523,
+  "started_at": "2026-08-12T18:00:00+00:00"
+}
+```
+
+### Optional: External Monitoring (Extra Reliability)
+
+For additional reliability, you can also set up a free external uptime monitor:
+
+1. Go to [UptimeRobot](https://uptimerobot.com/) (free, no credit card)
+2. Add a new **HTTP(s) Monitor**:
+   - **URL**: `https://edupilot-backend.onrender.com/api/health`
+   - **Monitoring Interval**: `5 minutes`
+3. UptimeRobot will ping your backend every 5 minutes — a second safety net alongside the built-in self-ping.
 
 ---
 
