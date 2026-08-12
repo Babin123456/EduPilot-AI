@@ -138,7 +138,7 @@ def parse_uploaded_file(file_bytes: bytes, filename: str, content_type: str) -> 
                 img = Image.open(io.BytesIO(file_bytes))
                 ocr_text = ""
                 try:
-                    from rapidocr_onnxruntime import RapidOCR
+                    from rapidocr_onnxruntime import RapidOCR  # type: ignore # pyright: ignore[reportMissingImports]
                     engine = RapidOCR()
                     result, _ = engine(file_bytes)
                     if result:
