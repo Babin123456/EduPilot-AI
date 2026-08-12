@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { AIPage } from '../pages/AIPage';
 import {
   LayoutDashboard,
   Calendar,
@@ -257,18 +258,26 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
         </header>
 
         {/* Dynamic Page Workspace with smooth transitions */}
-        <main className="flex-1 overflow-y-auto p-4 lg:p-8">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={location.pathname + classChangeKey}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.25, ease: 'easeOut' }}
-            >
-              {children}
-            </motion.div>
-          </AnimatePresence>
+        <main className="flex-1 overflow-y-auto p-4 lg:p-8 relative">
+          {/* Background Persistent EduPilot AI Page (Preserves text input, uploading, and active LLM streaming) */}
+          <div className={location.pathname === '/ai' ? 'block h-full' : 'hidden h-full'}>
+            <AIPage />
+          </div>
+
+          {/* Other Route Pages */}
+          {location.pathname !== '/ai' && (
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={location.pathname + classChangeKey}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.25, ease: 'easeOut' }}
+              >
+                {children}
+              </motion.div>
+            </AnimatePresence>
+          )}
         </main>
       </div>
     </div>
