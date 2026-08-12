@@ -19,6 +19,13 @@ export const EduPilotLoader: React.FC<EduPilotLoaderProps> = ({
   const logoRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (sessionStorage.getItem('edupilot_loader_shown') === 'true') {
+      setIsFinished(true);
+      if (onComplete) onComplete();
+      return;
+    }
+    sessionStorage.setItem('edupilot_loader_shown', 'true');
+
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const duration = prefersReducedMotion ? 400 : minDurationMs;
     const intervalTime = 30;

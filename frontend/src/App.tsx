@@ -43,7 +43,14 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { token, isLoading } = useAuth();
-  if (isLoading) return <div className="p-8 text-center text-xs">Loading...</div>;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center space-y-3">
+        <div className="w-8 h-8 border-3 border-slate-300 dark:border-slate-700 border-t-[#005BAC] dark:border-t-[#8CC63F] rounded-full animate-spin" />
+        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Loading workspace...</span>
+      </div>
+    );
+  }
   if (!token) return <Navigate to="/login" replace />;
   return <MainLayout>{children}</MainLayout>;
 };
