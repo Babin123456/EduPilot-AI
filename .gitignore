@@ -4,48 +4,28 @@
 
 # ---- Python & Virtual Environments ----
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
-*.egg-info/
-.venv/
-venv/
+*.pyc
+backend/edupilot_backend.egg-info/
+backend/.venv/
+backend/.ruff_cache/
 
 # ---- Node.js & Frontend Builds ----
-node_modules/
 frontend/node_modules/
 frontend/dist/
-frontend/.vite/
-*.tsbuildinfo
 
 # ---- Environment Secrets ----
 .env
-.env.local
-.env.*.local
 backend/.env
 frontend/.env
 !.env.example
 !backend/.env.example
 !frontend/.env.example
 
-# ---- Local Storage & Uploads ----
+# ---- Local Storage ----
 backend/storage/*
 !backend/storage/.gitkeep
-backend/app/storage/*
-!backend/app/storage/.gitkeep
-*.db
-*.db-shm
-*.db-wal
-*.sqlite
 
 # ---- Logs & Test Caches ----
 *.log
-logs/
 .pytest_cache/
 .coverage
-
-# ---- IDE & OS Artifacts ----
-.vscode/
-.idea/
-.DS_Store
-Thumbs.db
