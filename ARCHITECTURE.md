@@ -103,7 +103,7 @@ flowchart TD
     INSIGHTS --> COPILOT[EduPilot AI Chat & Query Assistant]
     COPILOT --> GENERATE[Generate Quiz / Assignment / Lesson Plan]
     GENERATE --> STUDIO[Document Studio & PDF/PPTX Export]
-    STUDIO --> COMM[Email / WhatsApp Distribution]
+    STUDIO --> COMM[Email Distribution]
 ```
 
 ---
