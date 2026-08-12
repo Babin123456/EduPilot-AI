@@ -142,15 +142,13 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
                 )}
               </Link>
 
-              {!sidebarCollapsed && (
-                <button
-                  onClick={logout}
-                  title="Logout"
-                  className="p-1.5 text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
-                >
-                  <LogOut className="w-4 h-4" />
-                </button>
-              )}
+              <button
+                onClick={logout}
+                title="Log Out of EduPilot AI"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 dark:hover:text-red-400 transition-colors flex-shrink-0"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
             </div>
           </div>
         </div>

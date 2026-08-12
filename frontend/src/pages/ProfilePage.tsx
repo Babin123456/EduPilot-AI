@@ -19,7 +19,8 @@ import {
   Trash2,
   FolderOpen,
   Clock,
-  HardDrive
+  HardDrive,
+  LogOut
 } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 
@@ -53,7 +54,7 @@ function formatDate(iso: string): string {
 }
 
 export const ProfilePage: React.FC = () => {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, logout } = useAuth();
   const toast = useToast();
   
   const [selectedAvatar, setSelectedAvatar] = useState<string>(user?.avatar_url || '/images/avatar.png');
@@ -184,7 +185,7 @@ export const ProfilePage: React.FC = () => {
     <div className="space-y-8 pb-12 max-w-6xl mx-auto">
       
       {/* ─── Header Banner ─── */}
-      <div className="bg-gradient-to-r from-[#005BAC] via-[#0A6FD8] to-[#8CC63F] p-6 sm:p-8 rounded-3xl text-white shadow-xl flex items-center justify-between gap-6 relative overflow-hidden">
+      <div className="bg-gradient-to-r from-[#005BAC] via-[#0A6FD8] to-[#8CC63F] p-6 sm:p-8 rounded-3xl text-white shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 relative overflow-hidden">
         <div className="space-y-2 relative z-10">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-extrabold text-white">
             <ShieldCheck className="w-3.5 h-3.5 text-[#8CC63F]" /> Faculty Identity Command
@@ -192,8 +193,19 @@ export const ProfilePage: React.FC = () => {
           <h1 className="text-2xl sm:text-3xl font-black">Personalized Teacher Profile</h1>
           <p className="text-xs text-slate-100 font-medium">Upload your profile photo, manage official contact info, and review teaching context portfolio.</p>
         </div>
-        <div className="w-24 h-24 flex items-center justify-center flex-shrink-0">
-          <img src="/images/avatar.png" alt="Teacher profile avatar" className="w-full h-full object-contain" />
+        
+        <div className="flex items-center gap-4 relative z-10 flex-shrink-0 self-end sm:self-center">
+          <button
+            onClick={logout}
+            className="px-4 py-2.5 rounded-2xl bg-white/15 hover:bg-red-500/90 text-white text-xs font-extrabold flex items-center gap-2 backdrop-blur-md border border-white/20 hover:border-red-400 transition-all duration-200 shadow-lg group"
+            title="Log Out of EduPilot AI"
+          >
+            <LogOut className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+            <span>Teacher Logout</span>
+          </button>
+          <div className="w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center flex-shrink-0">
+            <img src="/images/avatar.png" alt="Teacher profile avatar" className="w-full h-full object-contain" />
+          </div>
         </div>
       </div>
 
@@ -237,6 +249,16 @@ export const ProfilePage: React.FC = () => {
                 <p className="text-base font-black text-emerald-600 dark:text-emerald-400">94%</p>
                 <p className="text-[10px] text-slate-400 font-bold uppercase">Avg Attendance</p>
               </div>
+            </div>
+
+            <div className="pt-3 border-t border-slate-100 dark:border-slate-800">
+              <button
+                onClick={logout}
+                className="w-full py-2.5 rounded-xl border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-950/30 hover:bg-red-500 hover:text-white text-red-600 dark:text-red-400 text-xs font-bold flex items-center justify-center gap-2 transition-all duration-200"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Log Out of Session</span>
+              </button>
             </div>
           </div>
 
