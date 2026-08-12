@@ -32,7 +32,7 @@ const cardVariants = {
 };
 
 export const DashboardPage: React.FC = () => {
-  const { user, activeClass } = useAuth();
+  const { user, activeClass, setActiveClass } = useAuth();
   const [summary, setSummary] = useState<any>(null);
   const [todaySchedule, setTodaySchedule] = useState<any[]>([]);
   const [analyticsData, setAnalyticsData] = useState<any>(null);
@@ -409,6 +409,16 @@ export const DashboardPage: React.FC = () => {
                       ) : (
                         <Link
                           to="/attendance"
+                          onClick={() => {
+                            if (user?.classes) {
+                              const targetClass = user.classes.find(
+                                (c) => c.id === cls.teacher_course_assignment_id
+                              );
+                              if (targetClass) {
+                                setActiveClass(targetClass);
+                              }
+                            }
+                          }}
                           className="btn-magnetic px-4 py-2.5 rounded-xl text-xs font-extrabold bg-[#005BAC] text-white hover:bg-[#0A6FD8] transition-colors shadow-md inline-block"
                         >
                           Take Attendance
