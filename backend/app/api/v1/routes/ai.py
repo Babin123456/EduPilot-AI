@@ -590,7 +590,7 @@ def _generate_contextual_response(
     # If RAG context is available, present it
     if rag_context:
         return (
-            f"📄 **Document Analysis (from your uploaded files):**\n\n"
+            f"**Document Analysis (from your uploaded Knowledge Base):**\n\n"
             f"Based on your uploaded documents, here is the relevant information:\n\n"
             f"{rag_context[:2000]}\n\n"
             f"---\n"
@@ -600,7 +600,7 @@ def _generate_contextual_response(
 
     if file_context:
         return (
-            f"📄 **Analysis of Uploaded File:**\n\n"
+            f"**Analysis of Uploaded File:**\n\n"
             f"{file_context[:3000]}\n\n"
             f"--- \n"
             f"**Key Insights & Summary:**\n"
