@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -32,7 +32,13 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
   const { user, activeClass, setActiveClass, logout, classesByYear, classChangeKey } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
+  const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [classDropdownOpen, setClassDropdownOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -139,7 +145,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
                   <img src={user?.avatar_url || '/images/avatar.png'} alt={user?.full_name || 'Teacher avatar'} className="w-full h-full object-cover rounded-lg" />
                 </Link>
                 <button
-                  onClick={logout}
+                  onClick={handleLogout}
                   title="Log Out of EduPilot AI"
                   className="w-9 h-9 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-500 hover:bg-red-500 hover:text-white dark:hover:bg-red-600 transition-all duration-200 flex items-center justify-center shadow-sm"
                 >
@@ -159,7 +165,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
                 </Link>
 
                 <button
-                  onClick={logout}
+                  onClick={handleLogout}
                   title="Log Out of EduPilot AI"
                   className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50 dark:hover:text-red-400 transition-all duration-200 flex-shrink-0"
                 >

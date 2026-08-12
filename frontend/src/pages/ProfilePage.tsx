@@ -45,7 +45,8 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 }
 
-function formatDate(iso: string): string {
+function formatDate(iso: string | null): string {
+  if (!iso) return 'N/A';
   try {
     const d = new Date(iso);
     return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) +
@@ -56,6 +57,12 @@ function formatDate(iso: string): string {
 export const ProfilePage: React.FC = () => {
   const { user, updateUser, logout } = useAuth();
   const toast = useToast();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
   
   const [selectedAvatar, setSelectedAvatar] = useState<string>(user?.avatar_url || '/images/avatar.png');
   const [phone, setPhone] = useState(user?.phone || '+91 98301 23456');
@@ -196,7 +203,7 @@ export const ProfilePage: React.FC = () => {
         
         <div className="flex items-center gap-4 relative z-10 flex-shrink-0 self-end sm:self-center">
           <button
-            onClick={logout}
+            onClick={handleLogout}
             className="px-4 py-2.5 rounded-2xl bg-white/15 hover:bg-red-500/90 text-white text-xs font-extrabold flex items-center gap-2 backdrop-blur-md border border-white/20 hover:border-red-400 transition-all duration-200 shadow-lg group"
             title="Log Out of EduPilot AI"
           >
@@ -253,7 +260,7 @@ export const ProfilePage: React.FC = () => {
 
             <div className="pt-3 border-t border-slate-100 dark:border-slate-800">
               <button
-                onClick={logout}
+                onClick={handleLogout}
                 className="w-full py-2.5 rounded-xl border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-950/30 hover:bg-red-500 hover:text-white text-red-600 dark:text-red-400 text-xs font-bold flex items-center justify-center gap-2 transition-all duration-200"
               >
                 <LogOut className="w-4 h-4" />
