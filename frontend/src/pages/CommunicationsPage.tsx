@@ -230,6 +230,7 @@ export const CommunicationsPage: React.FC = () => {
           {/* Student List */}
           <div className="max-h-96 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800 pr-1">
             {filteredStudents.map((student) => {
+              if (!student || !student.id) return null;
               const isSelected = selectedStudents.has(student.id);
               return (
                 <div
@@ -254,8 +255,6 @@ export const CommunicationsPage: React.FC = () => {
                     className="w-4 h-4 rounded text-[#005BAC] focus:ring-[#005BAC] cursor-pointer"
                   />
                 </div>
-
-
               );
             })}
           </div>
@@ -378,6 +377,7 @@ export const CommunicationsPage: React.FC = () => {
             ) : (
               <div className="divide-y divide-slate-100 dark:divide-slate-800">
                 {history.map((item) => {
+                  if (!item || !item.id) return null;
                   const isExpanded = expandedHistory === item.id;
                   return (
                     <div key={item.id} className="py-3.5 space-y-2">
