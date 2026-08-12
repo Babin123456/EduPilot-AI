@@ -1,14 +1,41 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import Lenis from 'lenis';
 import { useTheme } from '../../context/ThemeContext';
 import { ArrowLeft, Sun, Moon, Shield, Database, Eye, Lock, Server, UserCheck, Bell, Trash2, Globe } from 'lucide-react';
 
 export const PrivacyPage: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
+  const lenisRef = useRef<Lenis | null>(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return;
+
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      wheelMultiplier: 1.0,
+      touchMultiplier: 1.5,
+    });
+
+    lenisRef.current = lenis;
+
+    function raf(time: number) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    const rafId = requestAnimationFrame(raf);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      lenis.destroy();
+      lenisRef.current = null;
+    };
   }, []);
 
   const sections = [
@@ -64,11 +91,11 @@ export const PrivacyPage: React.FC = () => {
       {/* Navbar */}
       <header className="sticky top-0 z-50 bg-white/90 dark:bg-[#0F172A]/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 py-4">
         <div className="max-w-4xl mx-auto px-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-sm font-bold text-slate-600 dark:text-slate-300 hover:text-[#005BAC] dark:hover:text-[#8CC63F] transition-colors">
-            <ArrowLeft className="w-4 h-4" /> Back to Home
+          <Link to="/" className="flex items-center gap-2 text-sm font-bold text-slate-600 dark:text-slate-300 hover:text-[#005BAC] dark:hover:text-[#8CC63F] transition-colors group">
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Back to Home
           </Link>
-          <button onClick={toggleTheme} className="p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" aria-label="Toggle theme">
-            {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5 text-amber-400" />}
+          <button onClick={toggleTheme} className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors shadow-sm" aria-label="Toggle theme">
+            {theme === 'light' ? <Moon className="w-4 h-4 text-slate-700" /> : <Sun className="w-4 h-4 text-amber-400" />}
           </button>
         </div>
       </header>
@@ -76,14 +103,14 @@ export const PrivacyPage: React.FC = () => {
       <main className="max-w-4xl mx-auto px-4 py-16 space-y-12">
         {/* Page Header */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="text-center space-y-4">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#005BAC]/10 text-[#005BAC] dark:bg-[#8CC63F]/15 dark:text-[#8CC63F] mx-auto">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#005BAC]/10 text-[#005BAC] dark:bg-[#8CC63F]/15 dark:text-[#8CC63F] mx-auto shadow-md">
             <Shield className="w-8 h-8" />
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">Privacy Policy</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Last updated: August 2026 | EduPilot AI — Academic OS</p>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">Privacy Policy</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Last updated: August 2026 | EduPilot AI — Academic OS</p>
         </motion.div>
 
-        <div className="space-y-8">
+        <div className="space-y-6">
           {sections.map((section, idx) => {
             const Icon = section.icon;
             return (
@@ -93,15 +120,15 @@ export const PrivacyPage: React.FC = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: idx * 0.05 }}
-                className="bg-white dark:bg-[#1E293B] rounded-2xl p-6 sm:p-8 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-3"
+                className="glass-card rounded-2xl p-6 sm:p-8 border border-slate-200/80 dark:border-slate-800 hover:border-[#005BAC] dark:hover:border-[#8CC63F] hover:-translate-y-1 hover:shadow-xl dark:hover:shadow-[0_10px_30px_rgba(140,198,63,0.12)] transition-all duration-300 group cursor-default"
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#005BAC]/10 text-[#005BAC] dark:bg-[#8CC63F]/15 dark:text-[#8CC63F] flex items-center justify-center flex-shrink-0">
+                <div className="flex items-center gap-3.5 mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#005BAC]/10 text-[#005BAC] dark:bg-[#8CC63F]/15 dark:text-[#8CC63F] flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                     <Icon className="w-5 h-5" />
                   </div>
-                  <h2 className="text-lg font-bold text-slate-900 dark:text-white">{section.title}</h2>
+                  <h2 className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-[#005BAC] dark:group-hover:text-[#8CC63F] transition-colors">{section.title}</h2>
                 </div>
-                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-normal pl-13">
+                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-normal pl-0 sm:pl-[50px]">
                   {section.content}
                 </p>
               </motion.div>
