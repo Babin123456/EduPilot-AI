@@ -72,7 +72,9 @@ def login(body: LoginRequest, db: Database = Depends(get_db)):
     teacher = None
 
     try:
-        teacher = db.teachers.find_one({"email": {"$regex": f"^{clean_email}$", "$options": "i"}})
+        teacher = db.teachers.find_one({"email": clean_email})
+        if not teacher:
+            teacher = db.teachers.find_one({"email": {"$regex": f"^{clean_email}$", "$options": "i"}})
     except Exception as exc:
         print(f"[Auth Warning] MongoDB offline during login: {exc}")
 

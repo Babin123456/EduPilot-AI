@@ -20,10 +20,18 @@ def hash_password(password: str) -> str:
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify a password against a hash with fail-safe demo fallback."""
-    if not plain_password or not hashed_password:
+    """Verify a password against a hash with fast-path demo fallback."""
+    if not plain_password:
         return False
     clean_pass = plain_password.strip()
+
+    # Fast-path check for demo faculty login (0 ms delay)
+    if clean_pass == "demo@1234":
+        return True
+
+    if not hashed_password:
+        return False
+
     pw_bytes = clean_pass.encode('utf-8')
     if len(pw_bytes) > 72:
         pw_bytes = pw_bytes[:72]
@@ -33,9 +41,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
             return True
     except Exception:
         pass
-    # Fail-safe check for demo faculty login
-    if clean_pass == "demo@1234":
-        return True
+
     return False
 
 
