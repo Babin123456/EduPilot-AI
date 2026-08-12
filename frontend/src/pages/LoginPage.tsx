@@ -19,11 +19,17 @@ export const LoginPage: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [demoAccounts, setDemoAccounts] = useState<any[]>(DEMO_FACULTY);
-  const { login } = useAuth();
+  const { token, login } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   useEffect(() => {
+    // If user is already authenticated, redirect to dashboard
+    if (token) {
+      navigate('/dashboard', { replace: true });
+      return;
+    }
+
     api.get('/auth/demo-accounts')
       .then(res => {
         if (res.data && res.data.length > 0) {
@@ -31,7 +37,7 @@ export const LoginPage: React.FC = () => {
         }
       })
       .catch(() => {});
-  }, []);
+  }, [token, navigate]);
 
   const doLogin = async (loginEmail: string, loginPass: string) => {
     setError('');
