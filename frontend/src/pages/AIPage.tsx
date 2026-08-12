@@ -16,6 +16,7 @@ interface AttachedFile {
   filename: string;
   file_type: string;
   extracted_text: string;
+  text_content?: string;
   summary: string;
   image_url?: string | null;
 }

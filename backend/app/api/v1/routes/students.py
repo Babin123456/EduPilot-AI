@@ -85,10 +85,16 @@ def list_students(
         .limit(limit)
     )
 
+    # Batch lookup years and sections to eliminate N+1 database queries
+    year_ids = list(set(s["year_id"] for s in students if "year_id" in s))
+    section_ids = list(set(s["section_id"] for s in students if "section_id" in s))
+    years_map = {y["id"]: y for y in db.years.find({"id": {"$in": year_ids}})}
+    sections_map = {sec["id"]: sec for sec in db.sections.find({"id": {"$in": section_ids}})}
+
     result = []
     for s in students:
-        year = db.years.find_one({"id": s["year_id"]})
-        section = db.sections.find_one({"id": s["section_id"]})
+        year = years_map.get(s.get("year_id"))
+        section = sections_map.get(s.get("section_id"))
         result.append({
             "id": s["id"],
             "student_uid": s["student_uid"],
