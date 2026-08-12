@@ -164,7 +164,7 @@ export const CommunicationsPage: React.FC = () => {
             {activeClass ? `${activeClass.course_name} (${activeClass.course_code}) • ${activeClass.year_label} Sec ${activeClass.section_name}` : 'Send official announcements, warning alerts, and course materials.'}
           </p>
         </div>
-        <div className="w-36 h-24 flex items-center justify-center hidden sm:flex flex-shrink-0 relative z-10">
+        <div className="w-36 h-24 hidden sm:flex items-center justify-center flex-shrink-0 relative z-10">
           <img src="/images/communication.png" alt="Student Mail & Communications Hub Banner" className="w-full h-auto max-h-24 object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.4)]" />
         </div>
 

@@ -147,7 +147,7 @@ export const LoginPage: React.FC = () => {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-1">
                   <Mail className="w-3.5 h-3.5 text-[#005BAC] dark:text-[#8CC63F]" />
                   <span>Institutional Email</span>
                 </label>
@@ -162,7 +162,7 @@ export const LoginPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-1">
                   <Lock className="w-3.5 h-3.5 text-[#005BAC] dark:text-[#8CC63F]" />
                   <span>Password</span>
                 </label>

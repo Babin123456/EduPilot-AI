@@ -329,7 +329,7 @@ export const AssessmentsPage: React.FC = () => {
             <Sparkles className="w-4 h-4 text-[#8CC63F]" />
             <span>Generate MCQ Quiz (10-20 Qs)</span>
           </button>
-          <div className="w-36 h-24 flex items-center justify-center hidden sm:flex flex-shrink-0">
+          <div className="w-36 h-24 hidden sm:flex items-center justify-center flex-shrink-0">
             <img src="/images/features_ai_planning.png" alt="Quiz Studio Illustration" className="w-full h-auto max-h-24 object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.4)]" />
           </div>
         </div>

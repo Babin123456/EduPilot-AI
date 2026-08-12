@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { api } from '../api/client';
-import { Check, AlertCircle, CheckCircle2, XCircle, Send, Edit3, Lock } from 'lucide-react';
+import { Check, AlertCircle, CheckCircle2, XCircle, Send, Edit3 } from 'lucide-react';
 
 
 export const AttendancePage: React.FC = () => {
@@ -145,7 +145,7 @@ export const AttendancePage: React.FC = () => {
 
 
 
-        <div className="w-36 h-24 flex items-center justify-center hidden sm:flex flex-shrink-0 relative z-10">
+        <div className="w-36 h-24 hidden sm:flex items-center justify-center flex-shrink-0 relative z-10">
           <img src="/images/attendance_tracking.png" alt="Attendance Tracking Banner" className="w-full h-auto max-h-24 object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.4)]" />
         </div>
       </div>
