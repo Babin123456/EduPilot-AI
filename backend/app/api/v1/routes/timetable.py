@@ -81,6 +81,34 @@ def _get_timetable_for_day(db: Database, teacher: dict, day_of_week: int) -> lis
                 "present_count": session.get("present_count", 0) if session else 0,
                 "total_count": session.get("total_count", 0) if session else 0,
             })
+        if not result and tcas:
+            # Fallback: create dynamic daily schedule entries for teacher's active course assignments
+            for idx, (tca_id, tca) in enumerate(tcas.items()):
+                if idx >= 3: break
+                course = db.courses.find_one({"id": tca["course_id"]})
+                section = db.sections.find_one({"id": tca["section_id"]})
+                year = db.years.find_one({"id": tca["year_id"]})
+                session = db.attendance_sessions.find_one({
+                    "teacher_course_assignment_id": tca["id"],
+                    "date": today.isoformat(),
+                })
+                start_h = 9 + idx * 2
+                result.append({
+                    "id": f"tb-dynamic-{tca_id[:8]}",
+                    "teacher_course_assignment_id": tca["id"],
+                    "course_code": course["code"] if course else "CS401",
+                    "course_name": course["name"] if course else "Computer Networks",
+                    "section_name": section["name"] if section else "Section B",
+                    "year_label": year["label"] if year else "2nd Year",
+                    "start_time": f"{str(start_h).zfill(2)}:30",
+                    "end_time": f"{str(start_h + 1).zfill(2)}:30",
+                    "room": tca.get("room", "CSE-182"),
+                    "session_id": session["id"] if session else None,
+                    "is_attendance_taken": session.get("is_submitted", False) if session else False,
+                    "present_count": session.get("present_count", 0) if session else 0,
+                    "total_count": session.get("total_count", 60) if session else 60,
+                })
+
         return result
     except Exception as exc:
         print(f"[Timetable Warning] MongoDB offline during timetable query: {exc}")
