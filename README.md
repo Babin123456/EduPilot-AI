@@ -35,7 +35,11 @@ This project was crafted for **VibeForge 1.0 Hackathon** by **Team Triangle**:
 The easiest way to run the entire EduPilot AI stack (Frontend, Backend, and Nginx proxy) is using Docker Compose.
 
 ```bash
-# Build and start all services in detached mode
+# 1. Copy the root environment template
+cp .env.example .env
+# Fill in your actual secrets in .env
+
+# 2. Build and start all services in detached mode
 docker compose up --build -d
 ```
 
@@ -50,6 +54,54 @@ docker compose logs -f
 # Stop and remove containers
 docker compose down
 ```
+
+---
+
+## 🔐 Environment Configuration
+
+EduPilot AI uses **separate `.env` files** for Backend and Frontend so each component only sees the variables it needs.
+
+### Quick Setup
+
+```bash
+# 1. Backend environment
+cp backend/.env.example backend/.env
+#    → Edit backend/.env with your MongoDB URI, API keys, and secrets
+
+# 2. Frontend environment
+cp frontend/.env.example frontend/.env
+#    → Edit frontend/.env with your backend API URL
+```
+
+### Environment Files Overview
+
+| File | Tracked in Git? | Purpose |
+| :--- | :---: | :--- |
+| `.env.example` | ✅ Yes | Root-level master reference & Docker Compose template |
+| `backend/.env.example` | ✅ Yes | Backend environment template with all FastAPI variables |
+| `frontend/.env.example` | ✅ Yes | Frontend environment template (`VITE_API_URL` only) |
+| `.env` | ❌ No | Root secrets for Docker Compose (copy from `.env.example`) |
+| `backend/.env` | ❌ No | Backend secrets (copy from `backend/.env.example`) |
+| `frontend/.env` | ❌ No | Frontend secrets (copy from `frontend/.env.example`) |
+
+> ⚠️ **Never commit `.env` files** — they contain real credentials. Only `.env.example` templates are tracked.
+
+### Key Variables
+
+**Backend** (`backend/.env`):
+| Variable | Description | How to Get |
+| :--- | :--- | :--- |
+| `MONGODB_URI` | MongoDB Atlas connection string | [MongoDB Atlas](https://cloud.mongodb.com) |
+| `SECRET_KEY` | 64-char app secret | `python -c "import secrets; print(secrets.token_hex(32))"` |
+| `JWT_SECRET_KEY` | 64-char JWT signing key | Same command as above |
+| `GROQ_API_KEY_1` | Primary Groq LLM key | [Groq Console](https://console.groq.com) |
+| `GROQ_API_KEY_2` | Backup Groq LLM key | Same console |
+| `GEMINI_API_KEY` | Fallback Gemini key | [Google AI Studio](https://aistudio.google.com) |
+
+**Frontend** (`frontend/.env`):
+| Variable | Description | Example |
+| :--- | :--- | :--- |
+| `VITE_API_URL` | Backend API base URL | `http://localhost:8000/api/v1` (local) or `https://your-app.onrender.com/api/v1` (production) |
 
 ---
 

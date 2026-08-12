@@ -22,7 +22,11 @@ frontend/.vite/
 .env
 .env.local
 .env.*.local
+backend/.env
+frontend/.env
 !.env.example
+!backend/.env.example
+!frontend/.env.example
 
 # ---- Local Storage & Uploads ----
 backend/storage/*

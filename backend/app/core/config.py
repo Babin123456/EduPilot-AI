@@ -16,8 +16,9 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(
         env_file=(
-            str(PROJECT_ROOT / ".env"),
             ".env",
+            str(PROJECT_ROOT / "backend" / ".env"),
+            str(PROJECT_ROOT / ".env"),
             "../.env",
             "../../.env",
         ),

@@ -113,20 +113,83 @@ Copy the generated 64-character strings and set them as `SECRET_KEY` and `JWT_SE
 
 ---
 
-## 🌐 3. Deployment Process & Environment Setup
+## 🌐 3. Environment File Structure
+
+EduPilot AI uses **separate `.env` files** for each component so the backend and frontend each load only their own configuration.
+
+### 📁 File Layout
+
+```
+EduPilot-AI/
+├── .env.example            ← Master reference & Docker Compose template (tracked)
+├── .env                    ← Root secrets for Docker Compose (NOT tracked)
+│
+├── backend/
+│   ├── .env.example        ← Backend env template (tracked)
+│   └── .env                ← Backend secrets: MongoDB, JWT, LLM keys (NOT tracked)
+│
+└── frontend/
+    ├── .env.example        ← Frontend env template (tracked)
+    └── .env                ← Frontend secrets: VITE_API_URL (NOT tracked)
+```
+
+### ⚡ Quick Setup
+
+```bash
+# Backend
+cp backend/.env.example backend/.env
+# Edit backend/.env → fill in MONGODB_URI, SECRET_KEY, JWT_SECRET_KEY, GROQ/GEMINI keys
+
+# Frontend
+cp frontend/.env.example frontend/.env
+# Edit frontend/.env → set VITE_API_URL to your backend URL
+
+# Docker Compose (optional)
+cp .env.example .env
+# Edit .env → fill in all values (Docker reads from root .env)
+```
+
+### 🔍 Variable Lookup Order (Backend)
+
+The backend `pydantic-settings` loader checks env files in this order (first match wins):
+
+1. `backend/.env` (working directory)
+2. `<project_root>/backend/.env`
+3. `<project_root>/.env` (root fallback for Docker Compose)
+4. `../.env`, `../../.env` (parent fallbacks)
+
+System environment variables (e.g., set in Render/Vercel dashboard) always take **highest priority** over any `.env` file.
+
+### 🔍 Variable Lookup (Frontend — Vite)
+
+Vite automatically loads `frontend/.env` during `npm run dev` and `npm run build`. Only variables prefixed with `VITE_` are exposed to client-side code.
+
+| Variable | Purpose | Example |
+| :--- | :--- | :--- |
+| `VITE_API_URL` | Backend API base URL | `http://localhost:8000/api/v1` |
+
+> 💡 **For Vercel deployment**: Set `VITE_API_URL` in the Vercel Dashboard → Project Settings → Environment Variables. Vite bakes this value into the production JS bundle at build time.
+
+---
+
+## 🚀 4. Deployment Process
 
 ### 🐳 Option A: Single-Command Docker Deployment (Recommended)
 
 To run the entire EduPilot AI stack (Frontend, Backend, Nginx Proxy) locally or on a VPS:
 
 ```bash
-# 1. Build and start all services in detached mode
+# 1. Copy and configure environment
+cp .env.example .env
+# Edit .env with your actual secrets
+
+# 2. Build and start all services in detached mode
 docker compose up --build -d
 
-# 2. View live logs across all containers
+# 3. View live logs across all containers
 docker compose logs -f
 
-# 3. Stop all containers
+# 4. Stop all containers
 docker compose down
 ```
 
@@ -146,9 +209,9 @@ docker compose down
    - `VITE_API_URL` = `https://your-backend-render-url.onrender.com/api/v1`
 7. Click **Deploy**.
 
-### 🐍 Backend Deployment (Render.com Web Service)
+### 🐍 Option C: Backend Deployment (Render.com Web Service)
 
-1. Go to [Render Dashboard](https://render.com/) $\to$ **New +** $\to$ **Web Service**.
+1. Go to [Render Dashboard](https://render.com/) → **New +** → **Web Service**.
 2. Select your repository: **`Babin123456/EduPilot-AI`**.
 3. Fill in the exact Render configuration fields:
    - **Name**: `edupilot-backend`
@@ -158,14 +221,16 @@ docker compose down
    - **Root Directory**: `backend`
    - **Build Command**: `pip install -e .`
    - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-4. Add Environment Variables under the **Environment** tab:
+4. Add Environment Variables under the **Environment** tab (same keys as `backend/.env.example`):
    - `MONGODB_URI` = `mongodb+srv://user:pass@cluster.mongodb.net/?appName=Cluster0`
    - `MONGODB_DB_NAME` = `edupilot`
-   - `SECRET_KEY` = `e4a8b9f71c3d5e2a9b0f1c4d8e7a6b5c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a`
-   - `JWT_SECRET_KEY` = `8f7e6d5c4b3a2f1e0d9c8b7a6f5e4d3c2b1a0f9e8d7c6b5a4f3e2d1c0b9a8f7e`
+   - `SECRET_KEY` = *(generate with `python -c "import secrets; print(secrets.token_hex(32))"`)*
+   - `JWT_SECRET_KEY` = *(generate with same command)*
    - `GROQ_API_KEY_1` = `gsk_...`
    - `GROQ_API_KEY_2` = `gsk_...`
-   - `GEMINI_API_KEY` = `AQ.Ab...`
+   - `GEMINI_API_KEY` = `your_key_here`
+   - `ALLOWED_ORIGINS` = `https://your-frontend-app.vercel.app`
+   - `FRONTEND_URL` = `https://your-frontend-app.vercel.app`
 5. Click **Create Web Service**. Render will deploy your FastAPI backend with full `rapidocr-onnxruntime` OCR support!
 
 ---
