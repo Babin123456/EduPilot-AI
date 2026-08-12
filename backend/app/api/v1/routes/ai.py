@@ -175,7 +175,7 @@ def parse_uploaded_file(file_bytes: bytes, filename: str, content_type: str) -> 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 def _call_groq_llm(messages: list[dict], api_key: str, model: str) -> str | None:
-    """Call Groq API directly using httpx with 15.0s timeout."""
+    """Call Groq API directly using httpx with 5.0s timeout."""
     api_key = (api_key or "").strip()
     if not api_key or "your_" in api_key or len(api_key) < 25:
         return None
@@ -191,7 +191,7 @@ def _call_groq_llm(messages: list[dict], api_key: str, model: str) -> str | None
             "temperature": 0.7,
             "max_tokens": 1024,
         }
-        with httpx.Client(timeout=15.0) as client:
+        with httpx.Client(timeout=5.0) as client:
             response = client.post(url, json=payload, headers=headers)
             if response.status_code == 200:
                 data = response.json()
@@ -204,7 +204,7 @@ def _call_groq_llm(messages: list[dict], api_key: str, model: str) -> str | None
 
 
 def _call_gemini_llm(prompt: str, api_key: str, model: str) -> str | None:
-    """Call Gemini API directly using httpx with 15.0s timeout."""
+    """Call Gemini API directly using httpx with 5.0s timeout."""
     api_key = (api_key or "").strip()
     if not api_key or "your_" in api_key or len(api_key) < 25:
         return None
@@ -215,7 +215,7 @@ def _call_gemini_llm(prompt: str, api_key: str, model: str) -> str | None:
         payload = {
             "contents": [{"parts": [{"text": prompt}]}]
         }
-        with httpx.Client(timeout=15.0) as client:
+        with httpx.Client(timeout=5.0) as client:
             response = client.post(url, json=payload, headers=headers)
             if response.status_code == 200:
                 data = response.json()
