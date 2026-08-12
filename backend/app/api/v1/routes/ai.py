@@ -196,8 +196,10 @@ def _call_groq_llm(messages: list[dict], api_key: str, model: str) -> str | None
             if response.status_code == 200:
                 data = response.json()
                 return data["choices"][0]["message"]["content"]
-    except Exception:
-        pass
+            else:
+                print(f"[LLM Error] Groq API returned status {response.status_code}: {response.text}")
+    except Exception as exc:
+        print(f"[LLM Exception] Groq API call failed: {exc}")
     return None
 
 
@@ -218,8 +220,10 @@ def _call_gemini_llm(prompt: str, api_key: str, model: str) -> str | None:
             if response.status_code == 200:
                 data = response.json()
                 return data["candidates"][0]["content"]["parts"][0]["text"]
-    except Exception:
-        pass
+            else:
+                print(f"[LLM Error] Gemini API returned status {response.status_code}: {response.text}")
+    except Exception as exc:
+        print(f"[LLM Exception] Gemini API call failed: {exc}")
     return None
 
 
@@ -617,7 +621,7 @@ def _generate_contextual_response(
     if msg_lower in {"hello", "hi", "hey", "good morning", "good afternoon", "good evening", "greetings", "hey there", "hello there"}:
         return (
             f"Hello Professor {teacher.get('last_name', '')}! Good to see you.\n\n"
-            f"How can I assist you with your classes, student metrics, or academic materials today?"
+            f"How can I assist you with your active class, student attendance, or academic materials today?"
         )
 
     if "attendance" in msg_lower and any(kw in msg_lower for kw in ["below", "risk", "<", "75", "less", "shortage"]):
