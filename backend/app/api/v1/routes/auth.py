@@ -168,6 +168,15 @@ def get_me(teacher: dict = Depends(get_current_teacher), db: Database = Depends(
                 "room": tca.get("room"),
             })
 
+    # Verify avatar file exists on disk if stored locally
+    avatar_url = teacher.get("avatar_url")
+    if avatar_url and "/media/" in avatar_url:
+        settings = get_settings()
+        fname = avatar_url.split("/media/")[-1]
+        local_file = Path(settings.storage_local_path).resolve() / fname
+        if not local_file.exists():
+            avatar_url = None
+
     return {
         "id": teacher["id"],
         "faculty_id": teacher["faculty_id"],
@@ -181,7 +190,7 @@ def get_me(teacher: dict = Depends(get_current_teacher), db: Database = Depends(
         "department": dept["name"] if dept else "CSE",
         "department_short": dept.get("short_name", "CSE") if dept else "CSE",
         "is_demo": teacher.get("is_demo", False),
-        "avatar_url": teacher.get("avatar_url"),
+        "avatar_url": avatar_url,
         "classes": classes,
     }
 
