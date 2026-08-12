@@ -608,15 +608,27 @@ def _generate_contextual_response(
         )
 
     if file_context:
-        return (
-            f"**Analysis of Uploaded File:**\n\n"
-            f"{file_context[:3000]}\n\n"
-            f"--- \n"
-            f"**Key Insights & Summary:**\n"
-            f"- File uploaded and parsed successfully by EduPilot AI.\n"
-            f"- Extracted content details, text structure, and layout properties.\n"
-            f"- You can use this content across **Daily Notes**, **Document Studio**, or **Communications**."
-        )
+        is_image = "Image File:" in file_context or any(kw in file_context.lower() for kw in ["png", "jpg", "jpeg", "webp", "gif"])
+        if is_image:
+            return (
+                f"### Image Analysis & Extracted Content\n\n"
+                f"**File Received**: {file_context.splitlines()[0] if file_context.splitlines() else 'Uploaded Image'}\n\n"
+                f"{file_context}\n\n"
+                f"---\n"
+                f"**Summary & Visual Insights:**\n"
+                f"- EduPilot AI successfully ingested and processed your uploaded image file.\n"
+                f"- Text content and OCR text layers (if present) were extracted for your teaching context.\n"
+                f"- You can reference this image across your **Knowledge Base**, **Daily Notes**, or **Document Studio**."
+            )
+        else:
+            return (
+                f"### Document Analysis & Extracted Text\n\n"
+                f"{file_context[:3000]}\n\n"
+                f"---\n"
+                f"**Key Insights & Educational Relevance:**\n"
+                f"- Document parsed successfully into readable text context.\n"
+                f"- You can ask direct questions about this document or dispatch it to students in **Communications** or **Document Studio**."
+            )
 
     if msg_lower in {"hello", "hi", "hey", "good morning", "good afternoon", "good evening", "greetings", "hey there", "hello there"}:
         return (
