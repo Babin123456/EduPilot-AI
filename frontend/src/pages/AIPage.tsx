@@ -236,7 +236,7 @@ export const AIPage: React.FC = () => {
     if (!textToSend) setInput('');
     setLoading(true);
 
-    const fileContext = currentAttached ? currentAttached.extracted_text : null;
+    const fileContext = currentAttached ? (currentAttached.text_content || currentAttached.extracted_text) : null;
     setAttachedFile(null);
 
     try {
