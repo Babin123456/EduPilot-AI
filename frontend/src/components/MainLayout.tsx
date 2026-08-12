@@ -23,6 +23,7 @@ import {
   User,
   PanelLeftClose,
   PanelLeftOpen,
+  Clock,
 } from 'lucide-react';
 
 
@@ -33,7 +34,13 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [classDropdownOpen, setClassDropdownOpen] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -226,6 +233,18 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Live Running Clock, Date, and Day Ticker (Dark & Light Mode Compatible) */}
+            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/80 text-slate-800 dark:text-slate-200 shadow-inner">
+              <Clock className="w-3.5 h-3.5 text-[#005BAC] dark:text-[#8CC63F] animate-pulse flex-shrink-0" />
+              <span className="font-mono text-xs font-black text-[#005BAC] dark:text-[#8CC63F]">
+                {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+              </span>
+              <span className="text-[10px] text-slate-400 font-bold opacity-60">•</span>
+              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                {currentTime.toLocaleDateString([], { weekday: 'short', day: '2-digit', month: 'short' })}
+              </span>
+            </div>
+
             <button
               onClick={toggleTheme}
               className="p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"

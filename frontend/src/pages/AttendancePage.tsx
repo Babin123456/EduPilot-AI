@@ -166,7 +166,7 @@ export const AttendancePage: React.FC = () => {
         <div className="p-3.5 bg-emerald-50 dark:bg-emerald-950/70 border border-emerald-300 dark:border-emerald-700/80 rounded-2xl flex items-center justify-between gap-3 text-emerald-900 dark:text-emerald-200 text-xs font-semibold">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
-            <span>Attendance for today has been submitted to the portal. Click <strong>"Edit Submitted Entry"</strong> if you need to correct any student's record.</span>
+            <span>Attendance for today has been submitted to the portal. You can click <strong>"Edit Submitted Entry"</strong> anytime until <strong>11:59 PM today</strong> if you need to correct student records.</span>
           </div>
           <button
             onClick={() => setIsEditing(true)}
@@ -181,7 +181,7 @@ export const AttendancePage: React.FC = () => {
         <div className="p-3.5 bg-amber-50 dark:bg-amber-950/70 border border-amber-300 dark:border-amber-700/80 rounded-2xl flex items-center justify-between gap-3 text-amber-900 dark:text-amber-200 text-xs font-semibold">
           <div className="flex items-center gap-2">
             <Edit3 className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
-            <span><strong>Edit Mode Active:</strong> Modify any student's present/absent status and click <strong>"Update & Re-submit"</strong> to sync with portal.</span>
+            <span><strong>Same-Day Edit Mode Active (Available until 11:59 PM):</strong> Modify any student's present/absent status and click <strong>"Update & Re-submit"</strong> to sync with the portal.</span>
           </div>
           <button
             onClick={() => setIsEditing(false)}
