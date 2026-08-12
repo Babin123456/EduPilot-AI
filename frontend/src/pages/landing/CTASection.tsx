@@ -35,7 +35,7 @@ export const CTASection: React.FC = () => {
           <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-[#8CC63F]/25 blur-3xl animate-glow pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full bg-blue-400/20 blur-3xl animate-glow pointer-events-none" />
 
-          <div className="relative z-10 p-10 sm:p-16 lg:p-20 text-center max-w-4xl mx-auto space-y-8">
+          <div className="cta-content relative z-10 p-10 sm:p-16 lg:p-20 text-center max-w-4xl mx-auto space-y-8">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md text-xs font-bold text-white border border-white/20">
               <Rocket className="w-4 h-4 text-[#8CC63F]" />
               <span>Empower Faculty Today</span>
