@@ -464,8 +464,13 @@ def chat(
         body.message, chat_history_for_rewrite, settings
     )
 
-    # ── RAG: Retrieve relevant document chunks ──
-    rag_context = retrieve_context(standalone_query, teacher["id"], db)
+    # ── RAG: Retrieve relevant document chunks (skip for casual greetings like "hello", "hi") ──
+    casual_greetings = {"hello", "hi", "hey", "good morning", "good afternoon", "good evening", "greetings", "hey there", "hello there"}
+    is_casual = body.message.strip().lower().rstrip("!.,") in casual_greetings
+
+    rag_context = ""
+    if not is_casual:
+        rag_context = retrieve_context(standalone_query, teacher["id"], db)
 
     # ── Build the full user input ──
     full_user_input = body.message
@@ -607,6 +612,12 @@ def _generate_contextual_response(
             f"- File uploaded and parsed successfully by EduPilot AI.\n"
             f"- Extracted content details, text structure, and layout properties.\n"
             f"- You can use this content across **Daily Notes**, **Document Studio**, or **Communications**."
+        )
+
+    if msg_lower in {"hello", "hi", "hey", "good morning", "good afternoon", "good evening", "greetings", "hey there", "hello there"}:
+        return (
+            f"Hello Professor {teacher.get('last_name', '')}! Good to see you.\n\n"
+            f"How can I assist you with your classes, student metrics, or academic materials today?"
         )
 
     if "attendance" in msg_lower and any(kw in msg_lower for kw in ["below", "risk", "<", "75", "less", "shortage"]):
