@@ -146,24 +146,27 @@ docker compose down
    - `VITE_API_URL` = `https://your-backend-render-url.onrender.com/api/v1`
 7. Click **Deploy**.
 
-### 🐍 Backend Deployment (Render)
+### 🐍 Backend Deployment (Render.com Web Service)
 
-1. Go to [Render Dashboard](https://render.com/) and create a **Web Service**.
-2. Connect your GitHub repository `EduPilot-AI`.
-3. Set **Root Directory** to `backend`.
-4. Set **Runtime** to `Python 3`.
-5. Set **Build Command** to `pip install -e .`.
-6. Set **Start Command** to `uvicorn app.main:app --host 0.0.0.0 --port $PORT`.
-7. Add Environment Variables in Render:
-   - `MONGODB_URI` = `mongodb+srv://user:pass@cluster.mongodb.net/` (or local `mongodb://localhost:27017`)
-   - `MONGODB_DB_NAME` = `edupilot_db`
-   - `JWT_SECRET_KEY` = your secret
-   - `GROQ_API_KEY_1` = your key
-   - `GROQ_API_KEY_2` = your key
-   - `GEMINI_API_KEY` = your key
-   - `SMTP_USERNAME` = your email
-   - `SMTP_PASSWORD` = your app password
-8. Click **Create Web Service**.
+1. Go to [Render Dashboard](https://render.com/) $\to$ **New +** $\to$ **Web Service**.
+2. Select your repository: **`Babin123456/EduPilot-AI`**.
+3. Fill in the exact Render configuration fields:
+   - **Name**: `edupilot-backend`
+   - **Language / Environment**: `Python 3`
+   - **Branch**: `main`
+   - **Region**: `Oregon (US West)` (or any preferred region)
+   - **Root Directory**: `backend`
+   - **Build Command**: `pip install -e .`
+   - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+4. Add Environment Variables under the **Environment** tab:
+   - `MONGODB_URI` = `mongodb+srv://user:pass@cluster.mongodb.net/?appName=Cluster0`
+   - `MONGODB_DB_NAME` = `edupilot`
+   - `SECRET_KEY` = `e4a8b9f71c3d5e2a9b0f1c4d8e7a6b5c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a`
+   - `JWT_SECRET_KEY` = `8f7e6d5c4b3a2f1e0d9c8b7a6f5e4d3c2b1a0f9e8d7c6b5a4f3e2d1c0b9a8f7e`
+   - `GROQ_API_KEY_1` = `gsk_...`
+   - `GROQ_API_KEY_2` = `gsk_...`
+   - `GEMINI_API_KEY` = `AQ.Ab...`
+5. Click **Create Web Service**. Render will deploy your FastAPI backend with full `rapidocr-onnxruntime` OCR support!
 
 ---
 
