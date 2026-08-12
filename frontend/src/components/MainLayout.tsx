@@ -127,29 +127,46 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
             })}
           </nav>
 
-          {/* Footer User Profile */}
-          <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-            <div className="flex items-center justify-between">
-              <Link to="/profile" className="flex items-center gap-3 overflow-hidden group">
-                <div className="w-8 h-8 rounded-full bg-[#005BAC]/10 text-[#005BAC] dark:bg-[#8CC63F]/20 dark:text-[#8CC63F] flex items-center justify-center font-bold text-xs flex-shrink-0 group-hover:scale-105 transition-transform overflow-hidden">
-                  <img src={user?.avatar_url || '/images/avatar.png'} alt={user?.full_name || 'Teacher avatar'} className="w-full h-full object-cover" />
-                </div>
-                {!sidebarCollapsed && (
-                  <div className="truncate">
-                    <p className="text-xs font-bold text-slate-900 dark:text-white truncate group-hover:text-[#005BAC] dark:group-hover:text-[#8CC63F] transition-colors">{user?.full_name}</p>
-                    <p className="text-[10px] text-slate-500 truncate">{user?.designation}</p>
+          {/* Footer User Profile & Logout */}
+          <div className="p-3.5 border-t border-slate-200/80 dark:border-slate-800/80 bg-slate-50/70 dark:bg-slate-900/70 backdrop-blur-md">
+            {sidebarCollapsed ? (
+              <div className="flex flex-col items-center gap-2">
+                <Link
+                  to="/profile"
+                  title={`${user?.full_name} — Faculty Profile`}
+                  className="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-700/80 p-0.5 overflow-hidden group transition-transform hover:scale-105 shadow-sm"
+                >
+                  <img src={user?.avatar_url || '/images/avatar.png'} alt={user?.full_name || 'Teacher avatar'} className="w-full h-full object-cover rounded-lg" />
+                </Link>
+                <button
+                  onClick={logout}
+                  title="Log Out of EduPilot AI"
+                  className="w-9 h-9 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-500 hover:bg-red-500 hover:text-white dark:hover:bg-red-600 transition-all duration-200 flex items-center justify-center shadow-sm"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between gap-2 p-1.5 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/50 shadow-sm">
+                <Link to="/profile" className="flex items-center gap-2.5 min-w-0 flex-1 group">
+                  <div className="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-700 p-0.5 overflow-hidden flex-shrink-0 group-hover:scale-105 transition-transform">
+                    <img src={user?.avatar_url || '/images/avatar.png'} alt={user?.full_name || 'Teacher avatar'} className="w-full h-full object-cover rounded-lg" />
                   </div>
-                )}
-              </Link>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-bold text-slate-900 dark:text-white truncate group-hover:text-[#005BAC] dark:group-hover:text-[#8CC63F] transition-colors">{user?.full_name}</p>
+                    <p className="text-[10px] text-slate-400 font-semibold truncate">{user?.designation}</p>
+                  </div>
+                </Link>
 
-              <button
-                onClick={logout}
-                title="Log Out of EduPilot AI"
-                className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 dark:hover:text-red-400 transition-colors flex-shrink-0"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
-            </div>
+                <button
+                  onClick={logout}
+                  title="Log Out of EduPilot AI"
+                  className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50 dark:hover:text-red-400 transition-all duration-200 flex-shrink-0"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </aside>
