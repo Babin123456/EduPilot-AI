@@ -87,7 +87,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
               <img
                 src="/brand_logo.png"
                 alt="EduPilot AI Logo"
-                className="w-9 h-9 object-contain flex-shrink-0"
+                className="w-11 h-11 object-contain flex-shrink-0"
               />
               {!sidebarCollapsed && (
                 <div className="truncate">

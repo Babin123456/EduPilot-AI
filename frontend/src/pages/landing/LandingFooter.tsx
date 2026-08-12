@@ -84,7 +84,7 @@ export const LandingFooter: React.FC<LandingFooterProps> = ({ onNavigate }) => {
             <img
               src="/brand_logo.png"
               alt="EduPilot AI Logo"
-              className="w-10 h-10 object-contain"
+              className="w-12 h-12 object-contain"
             />
 
             <div>
@@ -181,10 +181,15 @@ export const LandingFooter: React.FC<LandingFooterProps> = ({ onNavigate }) => {
                 </Link>
               </li>
               <li>
-                <Link to="/docs" className="hover:text-[#005BAC] dark:hover:text-[#8CC63F] transition-colors flex items-center gap-2 group">
+                <a
+                  href="https://github.com/Babin123456/EduPilot-AI"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-[#005BAC] dark:hover:text-[#8CC63F] transition-colors flex items-center gap-2 group"
+                >
                   <Globe className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#005BAC] dark:group-hover:text-[#8CC63F] transition-colors" />
-                  <span>Platform Portal</span>
-                </Link>
+                  <span>GitHub Repository</span>
+                </a>
               </li>
             </ul>
           </div>

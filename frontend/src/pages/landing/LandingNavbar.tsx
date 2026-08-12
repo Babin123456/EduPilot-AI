@@ -53,7 +53,7 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ onNavigate }) => {
           <img
             src="/brand_logo.png"
             alt="EduPilot AI Logo"
-            className="w-10 h-10 object-contain group-hover:scale-105 transition-transform duration-200"
+            className="w-12 h-12 object-contain group-hover:scale-105 transition-transform duration-200"
           />
 
           <div>

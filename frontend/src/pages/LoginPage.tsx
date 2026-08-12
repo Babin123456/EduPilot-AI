@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { api } from '../api/client';
-import { ShieldCheck, GraduationCap, ArrowRight, Lock, Mail, Sparkles, CheckCircle2, UserCheck } from 'lucide-react';
+import { ShieldCheck, GraduationCap, ArrowRight, Lock, Mail, Sparkles, CheckCircle2, UserCheck, Sun, Moon, ArrowLeft } from 'lucide-react';
 
 const DEMO_FACULTY = [
   { faculty_id: 'FAC-UNIV-001', name: 'Prof. Rajesh Banerjee', email: 'rajesh.banerjee@edupilot.ai', password: 'demo@1234', designation: 'Associate Professor', specialization: 'Algorithms & Data Structures' },
@@ -19,6 +20,7 @@ export const LoginPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [demoAccounts, setDemoAccounts] = useState<any[]>(DEMO_FACULTY);
   const { login } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -73,10 +75,29 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#071426] flex items-center justify-center p-4 sm:p-6 lg:p-8 transition-colors duration-200">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#071426] flex flex-col justify-between p-4 sm:p-6 lg:p-8 transition-colors duration-200">
       
+      {/* Top Header Bar with Back to Home & Theme Toggle */}
+      <div className="w-full max-w-5xl mx-auto flex items-center justify-between py-2">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:text-[#005BAC] dark:hover:text-[#8CC63F] text-xs font-bold shadow-sm transition-all hover:scale-105 active:scale-95"
+        >
+          <ArrowLeft className="w-4 h-4 text-[#005BAC] dark:text-[#8CC63F]" />
+          <span>Back to Home</span>
+        </Link>
+
+        <button
+          onClick={toggleTheme}
+          className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shadow-sm"
+          aria-label="Toggle light and dark mode"
+        >
+          {theme === 'light' ? <Moon className="w-4 h-4 text-slate-700" /> : <Sun className="w-4 h-4 text-amber-400" />}
+        </button>
+      </div>
+
       {/* 2-Column Split Card (One Half Hero Image Visual, One Half Login Form) */}
-      <div className="w-full max-w-5xl rounded-3xl overflow-hidden glass-card border border-slate-200 dark:border-slate-800 shadow-2xl grid grid-cols-1 lg:grid-cols-12 bg-white dark:bg-slate-900">
+      <div className="w-full max-w-5xl mx-auto my-auto rounded-3xl overflow-hidden glass-card border border-slate-200 dark:border-slate-800 shadow-2xl grid grid-cols-1 lg:grid-cols-12 bg-white dark:bg-slate-900">
         
         {/* ─── LEFT HALF: BRAND VISUAL & ILLUSTRATION ─── */}
         <div className="lg:col-span-6 relative p-8 sm:p-12 bg-gradient-to-br from-[#005BAC] via-[#0A6FD8] to-[#071426] text-white flex flex-col justify-between overflow-hidden">
