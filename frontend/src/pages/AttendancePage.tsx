@@ -199,6 +199,12 @@ export const AttendancePage: React.FC = () => {
         <div className="p-8 text-center text-xs font-semibold text-slate-400">
           Loading student roster...
         </div>
+      ) : students.length === 0 ? (
+        <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+          <AlertCircle className="w-8 h-8 text-amber-500 mx-auto mb-2 opacity-80" />
+          <h3 className="font-extrabold text-sm text-slate-900 dark:text-white">No Students Enrolled</h3>
+          <p className="text-xs text-slate-500 mt-1">There are currently no active students enrolled in {activeClass.course_name} ({activeClass.year_label} Section {activeClass.section_name}).</p>
+        </div>
       ) : (
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
