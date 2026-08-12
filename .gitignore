@@ -34,6 +34,8 @@ backend/storage/*
 backend/app/storage/*
 !backend/app/storage/.gitkeep
 *.db
+*.db-shm
+*.db-wal
 *.sqlite
 
 # ---- Logs & Test Caches ----
