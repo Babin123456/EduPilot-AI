@@ -310,7 +310,8 @@ def retrieve_context(
 
         # Sort by highest similarity
         scored_chunks.sort(key=lambda x: x["score"], reverse=True)
-        results = scored_chunks[:k]
+        # Apply relevance threshold: only keep chunks with similarity score >= 0.62
+        results = [c for c in scored_chunks[:k] if c["score"] >= 0.62]
 
     if not results:
         return ""
