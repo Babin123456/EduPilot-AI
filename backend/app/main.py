@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import time
 import uuid
 from contextlib import asynccontextmanager
@@ -118,7 +119,7 @@ def create_app() -> FastAPI:
     # ── CORS ──
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.cors_origins,
+        allow_origins=["*"],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -127,9 +128,12 @@ def create_app() -> FastAPI:
     # ── API Routes ──
     from app.api.v1.router import api_router
     app.include_router(api_router, prefix="/api/v1")
-    storage_path = Path(settings.storage_local_path).resolve()
-    storage_path.mkdir(parents=True, exist_ok=True)
-    app.mount("/media", StaticFiles(directory=storage_path), name="media")
+    try:
+        storage_path = Path("/tmp/storage" if os.environ.get("VERCEL") else settings.storage_local_path).resolve()
+        storage_path.mkdir(parents=True, exist_ok=True)
+        app.mount("/media", StaticFiles(directory=storage_path), name="media")
+    except Exception as e:
+        print(f"[Storage Warning] Could not mount media directory: {e}")
 
     # ── Health Check ──
     @app.get("/api/health")
