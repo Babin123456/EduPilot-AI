@@ -90,10 +90,10 @@ Copy the generated 64-character strings and set them as `SECRET_KEY` and `JWT_SE
 - `.oxlintrc.json`: High-performance Rust-based Oxlint configuration enforcing React Hooks and component export rules.
 - `api/client.ts`: Axios client instance equipped with automatic Bearer token injection and 401 redirect handling.
 - `utils/pdfGenerator.ts`: Client-side jsPDF utility for professional university-branded PDF exports (quizzes, reports, notes).
-- `context/AuthContext.tsx`: React Context managing token storage, current teacher profile, and active class selection.
-- `context/ThemeContext.tsx`: React Context managing dark/light theme toggling and localStorage persistence.
-- `components/MainLayout.tsx`: Responsive application shell with year-grouped dropdown, framer-motion page transitions, and theme toggle.
-- `pages/LoginPage.tsx`: Next-gen sign-in page with prefillable demo faculty cards.
+- `context/AuthContext.tsx`: React Context managing token storage, current teacher profile, active class selection, and instant `/login` redirection upon logout.
+- `context/ThemeContext.tsx`: React Context managing dark/light theme toggling and localStorage persistence across all views including the login page.
+- `components/MainLayout.tsx`: Responsive application shell with enlarged brand logo, year-grouped dropdown, framer-motion page transitions, and theme toggle.
+- `pages/LoginPage.tsx`: Next-gen sign-in page with prefillable demo faculty cards, dark/light mode toggle button, and "Back to Home" navigation button.
 - `pages/DashboardPage.tsx`: Teacher Command Center dashboard showing statistics, routine, and quick actions with skeleton loaders.
 - `pages/AttendancePage.tsx`: Attendance-taking interface supporting bulk selection and status updates.
 - `pages/AIPage.tsx`: EduPilot AI Assistant conversational interface.
