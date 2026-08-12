@@ -46,7 +46,7 @@ export const LoginPage: React.FC = () => {
       navigate('/dashboard');
     } catch (err: any) {
       if (!err.response) {
-        setError('Unable to connect to server. Please ensure backend is running at http://localhost:8000.');
+        setError('Unable to connect to EduPilot backend server. If using Render free tier, please wait 30 seconds while the server spins up and try again.');
       } else {
         setError(err.response.data?.detail || 'Invalid email or password');
       }
