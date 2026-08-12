@@ -37,12 +37,6 @@ export const DashboardPage: React.FC = () => {
   const [todaySchedule, setTodaySchedule] = useState<any[]>([]);
   const [analyticsData, setAnalyticsData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [currentTime, setCurrentTime] = useState(new Date());
-
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -109,16 +103,6 @@ export const DashboardPage: React.FC = () => {
               <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-extrabold border border-white/20">
                 <Sparkles className="w-4 h-4 text-[#8CC63F]" />
                 <span>Faculty Command Center • Academic OS</span>
-              </div>
-
-              {/* Live Running Date, Time, and Day Badge */}
-              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-slate-950/40 backdrop-blur-md text-xs font-bold text-white border border-white/20 shadow-inner">
-                <Clock className="w-3.5 h-3.5 text-[#8CC63F] animate-pulse" />
-                <span className="font-mono text-[#8CC63F] font-extrabold">
-                  {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                </span>
-                <span className="opacity-40">•</span>
-                <span>{currentTime.toLocaleDateString([], { weekday: 'long', day: '2-digit', month: 'short', year: 'numeric' })}</span>
               </div>
             </div>
             
