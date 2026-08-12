@@ -140,8 +140,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
           </div>
 
           {/* ─── Right Column Floating Image (No Background Box) ─── */}
-          <div className="lg:col-span-5 relative flex items-center justify-center">
-            <div className="floating-hero-asset relative w-full max-w-lg">
+          <div className="lg:col-span-5 relative flex items-center justify-center mt-6 lg:mt-0 px-4 sm:px-0">
+            <div className="floating-hero-asset relative w-full max-w-sm sm:max-w-md lg:max-w-lg">
               {/* Isolated transparent floating image without any container box */}
               <img
                 src="/images/login_hero_illustration.png"
@@ -155,14 +155,14 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 1.4, duration: 0.6 }}
-                className="absolute -bottom-4 -left-4 glass-card p-3.5 rounded-2xl flex items-center gap-3 shadow-2xl border border-slate-200 dark:border-slate-800"
+                className="absolute -bottom-2 left-0 sm:-bottom-4 sm:-left-4 glass-card p-2.5 sm:p-3.5 rounded-2xl flex items-center gap-2.5 sm:gap-3 shadow-2xl border border-slate-200 dark:border-slate-800"
               >
-                <div className="w-10 h-10 rounded-xl bg-[#8CC63F]/20 text-[#8CC63F] flex items-center justify-center font-extrabold text-sm">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-[#8CC63F]/20 text-[#8CC63F] flex items-center justify-center font-extrabold text-xs sm:text-sm">
                   98%
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase">Admin Time Saved</p>
-                  <p className="text-xs font-extrabold text-slate-900 dark:text-white">5+ Hrs / Week</p>
+                  <p className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase">Admin Time Saved</p>
+                  <p className="text-[11px] sm:text-xs font-extrabold text-slate-900 dark:text-white">5+ Hrs / Week</p>
                 </div>
               </motion.div>
 
@@ -171,12 +171,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 1.6, duration: 0.6 }}
-                className="absolute -top-4 -right-4 glass-card p-3 rounded-xl flex items-center gap-2 shadow-xl border border-slate-200 dark:border-slate-800"
+                className="absolute -top-2 right-0 sm:-top-4 sm:-right-4 glass-card p-2 sm:p-3 rounded-xl flex items-center gap-2 shadow-xl border border-slate-200 dark:border-slate-800"
               >
-                <div className="w-7 h-7 rounded-lg bg-[#005BAC]/15 text-[#005BAC] dark:text-[#8CC63F] flex items-center justify-center">
-                  <Sparkles className="w-3.5 h-3.5" />
+                <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-[#005BAC]/15 text-[#005BAC] dark:text-[#8CC63F] flex items-center justify-center">
+                  <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                 </div>
-                <span className="text-[10px] font-bold text-slate-800 dark:text-slate-200">AI-Powered OS</span>
+                <span className="text-[9px] sm:text-[10px] font-bold text-slate-800 dark:text-slate-200">AI-Powered OS</span>
               </motion.div>
             </div>
           </div>
