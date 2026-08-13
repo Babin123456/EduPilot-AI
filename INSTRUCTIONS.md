@@ -33,12 +33,13 @@ Copy the generated 64-character strings and set them as `SECRET_KEY` and `JWT_SE
 4. Click **Create API Key** and copy the string (starts with `gsk_`). Put this as `GROQ_API_KEY_1`.
 5. Repeat the step to generate a second key for `GROQ_API_KEY_2` to serve as a high-volume key backup.
 
-### 🧠 Step 3: Google Gemini API Key (Fallback LLM)
+### 🧠 Step 3: Google Gemini API Keys (Vision & Fallback LLM with Multi-Key Failover)
 
 1. Visit [Google AI Studio](https://aistudio.google.com/).
 2. Log in with your Google account.
 3. Click **Get API Key** -> **Create API key in new project**.
 4. Copy the generated key string and set it as `GEMINI_API_KEY`.
+5. Optionally add backup keys as `GEMINI_API_KEY_1` and `GEMINI_API_KEY_2` to enable automatic multi-key quota failover.
 
 > 💡 **Note on Email & Communications**: In demo mode, all email dispatching (student lecture notes, attendance alerts, announcements) is handled natively inside the teacher communications portal without requiring external SMTP configuration.
 
@@ -219,7 +220,9 @@ Deploying both the React frontend and FastAPI backend together on **Vercel** pro
    - `JWT_SECRET_KEY` = *(generate with same command)*
    - `GROQ_API_KEY_1` = `gsk_...`
    - `GROQ_API_KEY_2` = `gsk_...`
-   - `GEMINI_API_KEY` = `AQ.Ab...`
+   - `GEMINI_API_KEY` = `AIzaSy_...`
+   - `GEMINI_API_KEY_1` = `AIzaSy_...` *(optional backup)*
+   - `GEMINI_API_KEY_2` = `AIzaSy_...` *(optional backup)*
 6. Click **Deploy**. Vercel will build both the React frontend and Python FastAPI serverless backend simultaneously!
 
 ---
