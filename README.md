@@ -148,16 +148,16 @@ On the login screen, click any of the **Quick Demo Faculty Cards** to pre-fill c
 
 | # | Faculty Name | Designation & Specialization | Institutional Email | Demo Password |
 | :--- | :--- | :--- | :--- | :--- |
-| **1** | **Prof. Rajesh Banerjee** | Associate Professor • Algorithms & Data Structures | `rajesh.banerjee@edupilot.ai` | `demo@1234` |
-| **2** | **Prof. Priya Nair** | Assistant Professor • Database Systems & Mining | `priya.nair@edupilot.ai` | `demo@1234` |
-| **3** | **Prof. Amitava Chatterjee** | Professor • AI & Machine Learning | `amitava.chatterjee@edupilot.ai` | `demo@1234` |
-| **4** | **Prof. Sunita Devi** | Assistant Professor • Networks & Security | `sunita.devi@edupilot.ai` | `demo@1234` |
-| **5** | **Prof. Debashis Ghosh** | Associate Professor • OS & Cloud Computing | `debashis.ghosh@edupilot.ai` | `demo@1234` |
-| **6** | **Prof. Meenakshi Iyer** | Assistant Professor • Software Engineering & Web | `meenakshi.iyer@edupilot.ai` | `demo@1234` |
-| **7** | **Prof. Arpan Mukherjee** | Professor • Deep Learning & NLP | `arpan.mukherjee@edupilot.ai` | `demo@1234` |
-| **8** | **Prof. Kavita Sharma** | Assistant Professor • Discrete Math & Structures | `kavita.sharma@edupilot.ai` | `demo@1234` |
-| **9** | **Prof. Subhashis Roy** | Associate Professor • Blockchain & Security | `subhashis.roy@edupilot.ai` | `demo@1234` |
-| **10** | **Prof. Ananya Sengupta** | Assistant Professor • IoT & Embedded Systems | `ananya.sengupta@edupilot.ai` | `demo@1234` |
+| **1** | **Sunita Devi** | Assistant Professor • Networks & Security | `sunita.devi@edupilot.ai` | `demo@1234` |
+| **2** | **Rajesh Banerjee** | Associate Professor • Algorithms & Data Structures | `rajesh.banerjee@edupilot.ai` | `demo@1234` |
+| **3** | **Priya Nair** | Assistant Professor • Database Systems & Mining | `priya.nair@edupilot.ai` | `demo@1234` |
+| **4** | **Amitava Chatterjee** | Professor • AI & Machine Learning | `amitava.chatterjee@edupilot.ai` | `demo@1234` |
+| **5** | **Debashis Ghosh** | Associate Professor • OS & Cloud Computing | `debashis.ghosh@edupilot.ai` | `demo@1234` |
+| **6** | **Meenakshi Iyer** | Assistant Professor • Software Engineering & Web | `meenakshi.iyer@edupilot.ai` | `demo@1234` |
+| **7** | **Arpan Mukherjee** | Professor • Deep Learning & NLP | `arpan.mukherjee@edupilot.ai` | `demo@1234` |
+| **8** | **Kavita Sharma** | Assistant Professor • Discrete Math & Structures | `kavita.sharma@edupilot.ai` | `demo@1234` |
+| **9** | **Subhashis Roy** | Associate Professor • Blockchain & Security | `subhashis.roy@edupilot.ai` | `demo@1234` |
+| **10** | **Ananya Sengupta** | Assistant Professor • IoT & Embedded Systems | `ananya.sengupta@edupilot.ai` | `demo@1234` |
 
 ---
 
