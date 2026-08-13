@@ -1,11 +1,10 @@
 import React from 'react';
 
 interface SkeletonPageLoaderProps {
-  type?: 'cards' | 'table' | 'notes' | 'documents' | 'dashboard';
   count?: number;
 }
 
-export const SkeletonPageLoader: React.FC<SkeletonPageLoaderProps> = ({ type = 'cards', count = 6 }) => {
+export const SkeletonPageLoader: React.FC<SkeletonPageLoaderProps> = ({ count = 6 }) => {
   return (
     <div className="w-full space-y-6 animate-pulse p-1">
       {/* Header Skeleton Banner */}

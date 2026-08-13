@@ -26,6 +26,7 @@ from app.core.config import get_settings
 from app.core.database import get_db
 from app.core.exceptions import http_400, http_404
 from app.models.ai_models import new_ai_conversation, new_ai_message
+from app.models.rag_models import new_rag_document
 from app.models.student import student_full_name
 from app.services.rag_service import (
     delete_rag_document,
