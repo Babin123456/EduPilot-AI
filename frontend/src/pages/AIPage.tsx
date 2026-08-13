@@ -30,6 +30,10 @@ interface RagDocument {
   chunk_count: number;
   file_size_bytes: number;
   status: string;
+  image_url?: string | null;
+  image_b64?: string | null;
+  mime_type?: string | null;
+  extracted_text?: string | null;
   created_at: string;
 }
 
@@ -44,9 +48,9 @@ export const AIPage: React.FC = () => {
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [conversations, setConversations] = useState<any[]>([]);
   const [attachedFile, setAttachedFile] = useState<AttachedFile | null>(null);
+  const [copiedCodeId, setCopiedCodeId] = useState<string | null>(null);
   const [previewImage, setPreviewImage] = useState<{ url: string; title: string } | null>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
-  const [copiedCodeId, setCopiedCodeId] = useState<string | null>(null);
 
   const handleCopyCode = (codeText: string, codeId: string) => {
     navigator.clipboard.writeText(codeText);
@@ -130,19 +134,13 @@ export const AIPage: React.FC = () => {
     URL.revokeObjectURL(url);
   };
 
-  // ── RAG Document Upload (PDF/DOCX → ingestion pipeline) ──
+  // ── Universal Knowledge Base Upload (Images, PDFs, DOCX, PPT, Excel) ──
   const handleRagUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const ext = file.name.split('.').pop()?.toLowerCase();
-    if (!['pdf', 'docx'].includes(ext || '')) {
-      toast.error('Unsupported File', 'Only PDF and DOCX files are supported for RAG indexing.');
-      return;
-    }
-
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error('File Too Large', 'File size exceeds the 10MB limit.');
+    if (file.size > 15 * 1024 * 1024) {
+      toast.error('File Too Large', 'File size exceeds the 15MB limit.');
       return;
     }
 
@@ -151,26 +149,26 @@ export const AIPage: React.FC = () => {
     formData.append('file', file);
 
     try {
-      const res = await api.post('/ai/rag/upload', formData, {
+      const res = await api.post('/ai/upload-file', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
-        timeout: 120000, // 2 min timeout for large documents
+        timeout: 120000,
       });
-      if (res.data.success) {
-        fetchRagDocuments();
-        // Auto-send a message about the uploaded document
-        const docName = res.data.document.filename;
-        const chunkCount = res.data.document.chunk_count;
-        setMessages(prev => [...prev, {
-          role: 'assistant',
-          content: `**Document Indexed Successfully**\n\n**${docName}** has been processed and indexed into **${chunkCount} searchable chunks**.\n\nYou can now ask me questions about this document. For example:\n- *"Summarize the key points of ${docName}"*\n- *"What does this document say about [topic]?"*\n- *"Explain the main concepts covered in this file"*`,
-          model_used: 'RAG Engine',
-          content_type: 'rag',
-        }]);
-        toast.success('Document Indexed Successfully', `Parsed and indexed "${docName}" into ${chunkCount} chunks.`);
+
+      const fileData = res.data;
+      if (fileData && fileData.image_url && fileData.image_url.startsWith('/media')) {
+        const baseURL = import.meta.env.VITE_API_URL || '';
+        if (baseURL.startsWith('http')) {
+          const serverOrigin = baseURL.replace(/\/api\/v1\/?$/, '');
+          fileData.image_url = `${serverOrigin}${fileData.image_url}`;
+        }
       }
+
+      setAttachedFile(fileData);
+      fetchRagDocuments();
+      toast.success('Stored in Knowledge Base & Attached', `Successfully stored "${file.name}" in Knowledge Base.`);
     } catch (err: any) {
-      const detail = err?.response?.data?.detail || 'Failed to upload document for RAG indexing.';
-      toast.error('RAG Indexing Failed', detail);
+      const detail = err?.response?.data?.detail || 'Failed to upload document to Knowledge Base.';
+      toast.error('Upload Failed', detail);
     } finally {
       setRagUploading(false);
       if (ragFileInputRef.current) ragFileInputRef.current.value = '';
@@ -407,13 +405,16 @@ export const AIPage: React.FC = () => {
                             setAttachedFile({
                               filename: doc.filename,
                               file_type: doc.file_type,
-                              extracted_text: `Knowledge Base Document: ${doc.filename}`,
+                              image_url: doc.image_url || null,
+                              image_b64: doc.image_b64 || null,
+                              mime_type: doc.mime_type || null,
+                              extracted_text: doc.extracted_text || `Knowledge Base Document: ${doc.filename}`,
                               summary: `Attached from Knowledge Base: ${doc.filename}`,
                             });
-                            toast.success('File Attached', `Attached "${doc.filename}" from Knowledge Base for chat context.`);
+                            toast.success('Attached to Prompt', `Attached "${doc.filename}" from Knowledge Base for chat analysis.`);
                           }}
                           className="px-1.5 py-0.5 bg-emerald-50 dark:bg-emerald-950 hover:bg-emerald-500 text-emerald-700 dark:text-emerald-300 hover:text-white rounded text-[9px] font-bold border border-emerald-200 dark:border-emerald-800 transition-all flex items-center gap-0.5"
-                          title="Attach this file to current chat prompt"
+                          title="Attach this file/image to current chat prompt"
                         >
                           <Paperclip className="w-2.5 h-2.5" /> Attach
                         </button>
@@ -714,30 +715,51 @@ export const AIPage: React.FC = () => {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Attached File Preview Bar */}
+        {/* Attached File & Image Preview Bar */}
         <AnimatePresence>
           {attachedFile && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="px-6 py-2.5 bg-blue-50/80 dark:bg-slate-800/90 border-t border-blue-200 dark:border-slate-700 flex items-center justify-between shadow-inner"
+              className="px-6 py-2.5 bg-blue-50/90 dark:bg-slate-800/90 border-t border-blue-200 dark:border-slate-700 flex items-center justify-between shadow-inner"
             >
-              <div className="flex items-center gap-2.5 text-xs font-bold text-slate-800 dark:text-slate-100">
-                <div className="p-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-center shadow-xs">
-                  {getFileIcon(attachedFile.file_type)}
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="truncate max-w-xs">{attachedFile.filename}</span>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 dark:bg-slate-700 text-[#005BAC] dark:text-[#8CC63F] font-mono font-bold uppercase">
-                    {attachedFile.file_type}
-                  </span>
+              <div className="flex items-center gap-3 text-xs font-bold text-slate-800 dark:text-slate-100">
+                {(attachedFile.file_type === 'image' || attachedFile.image_url || attachedFile.image_b64) ? (
+                  <div className="relative group/thumb cursor-pointer">
+                    <img
+                      src={attachedFile.image_url || (attachedFile.image_b64 ? `data:${attachedFile.mime_type || 'image/png'};base64,${attachedFile.image_b64}` : '/images/avatar.png')}
+                      alt={attachedFile.filename}
+                      onClick={() => setPreviewImage({
+                        url: attachedFile.image_url || `data:${attachedFile.mime_type || 'image/png'};base64,${attachedFile.image_b64}`,
+                        title: attachedFile.filename
+                      })}
+                      className="w-12 h-12 object-cover rounded-xl border border-slate-300 dark:border-slate-600 shadow-md group-hover/thumb:scale-105 transition-transform"
+                    />
+                  </div>
+                ) : (
+                  <div className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-center shadow-xs">
+                    {getFileIcon(attachedFile.file_type)}
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="truncate max-w-xs font-extrabold">{attachedFile.filename}</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 dark:bg-slate-700 text-[#005BAC] dark:text-[#8CC63F] font-mono font-bold uppercase">
+                      {attachedFile.file_type}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 font-normal">
+                    {(attachedFile.file_type === 'image' || attachedFile.image_url || attachedFile.image_b64)
+                      ? 'Image Attached — Gemini 2.5 Flash Vision Ready'
+                      : 'File Attached — Stored in Knowledge Base for AI Context'}
+                  </p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setAttachedFile(null)}
-                className="p-1 text-slate-400 hover:text-red-500 hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-all"
+                className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-all"
                 title="Remove attached file"
               >
                 <X className="w-4 h-4" />

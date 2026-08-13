@@ -491,6 +491,10 @@ def get_rag_documents(
             "chunk_count": d.get("chunk_count", 0),
             "file_size_bytes": d.get("file_size_bytes", 0),
             "status": d.get("status", "unknown"),
+            "image_url": d.get("image_url"),
+            "image_b64": d.get("image_b64"),
+            "mime_type": d.get("mime_type"),
+            "extracted_text": d.get("extracted_text"),
             "created_at": d["created_at"].isoformat()
             if hasattr(d.get("created_at"), "isoformat")
             else d.get("created_at"),
@@ -550,8 +554,24 @@ async def upload_file_for_ai(
             db=db,
         )
 
+    # Persist document record into Knowledge Base (db.rag_documents) for all file types
+    doc_record = new_rag_document(
+        teacher_id=teacher["id"],
+        filename=filename,
+        file_type=parsed["file_type"],
+        chunk_count=1,
+        file_size_bytes=len(file_bytes),
+        status="indexed",
+    )
+    doc_record["image_url"] = image_url
+    doc_record["image_b64"] = parsed.get("image_b64")
+    doc_record["mime_type"] = parsed.get("mime_type")
+    doc_record["extracted_text"] = parsed.get("text_content")
+    db.rag_documents.insert_one(doc_record)
+
     return {
         "success": True,
+        "id": doc_record["id"],
         "filename": parsed["filename"],
         "file_type": parsed["file_type"],
         "size_bytes": parsed["size_bytes"],
