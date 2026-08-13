@@ -96,7 +96,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
             {/* Main Headline with Original Cursive Font */}
             <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] xl:text-6xl font-extrabold tracking-tight leading-[1.1]">
               <span className="hero-title-line block text-slate-900 dark:text-white">
-                EduPilot AI –
+                <span className="text-gradient font-extrabold">EduPilot</span> AI –
               </span>
               <span className="hero-title-line block text-gradient font-cursive text-5xl sm:text-6xl lg:text-[4rem] xl:text-7xl mt-1 tracking-normal py-1">
                 Academic Operating System

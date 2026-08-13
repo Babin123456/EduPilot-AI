@@ -74,7 +74,9 @@
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
-  background-image: linear-gradient(135deg, #005BAC 0%, #0A6FD8 40%, #8CC63F 100%);
+  background-image: linear-gradient(90deg, #005BAC 0%, #0A6FD8 30%, #8CC63F 65%, #005BAC 100%);
+  background-size: 200% auto;
+  animation: gradient-shift 2.2s linear infinite;
 }
 
 .font-cursive {
@@ -112,7 +114,7 @@
 .animate-float-slow { animation: float-slow 9s ease-in-out infinite; }
 .animate-float-delay { animation: float-delay 7s ease-in-out 2s infinite; }
 .animate-glow { animation: pulse-glow 4s ease-in-out infinite; }
-.animate-gradient { animation: gradient-shift 6s ease infinite; background-size: 200% 200%; }
+.animate-gradient { animation: gradient-shift 2.2s linear infinite; background-size: 200% auto; }
 .animate-spin-slow { animation: spin-slow 25s linear infinite; }
 
 /* ─── Parallax Layer Utilities ─── */

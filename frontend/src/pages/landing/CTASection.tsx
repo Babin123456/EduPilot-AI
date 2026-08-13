@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -6,61 +6,20 @@ import { ArrowRight, CheckCircle2, Rocket, GraduationCap } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const TYPING_PHRASES = [
-  'Automate Class Attendance',
-  'Generate AI Lesson Plans',
-  'Export Branded PDF Quizzes',
-  'Track At-Risk Students',
-  'Streamline Classroom Operations',
-];
-
 export const CTASection: React.FC = () => {
   const navigate = useNavigate();
   const sectionRef = useRef<HTMLElement>(null);
 
-  // Fast Typographic Animation State
-  const [phraseIndex, setPhraseIndex] = useState(0);
-  const [displayText, setDisplayText] = useState('');
-  const [isDeleting, setIsDeleting] = useState(false);
-
   useEffect(() => {
     if (!sectionRef.current) return;
     const ctx = gsap.context(() => {
-      // Fast GSAP entrance animation (0.4s)
       gsap.from('.cta-content', {
-        y: 30, opacity: 0, duration: 0.4, ease: 'power2.out',
-        scrollTrigger: { trigger: sectionRef.current, start: 'top 85%', toggleActions: 'play none none reverse' },
+        y: 50, opacity: 0, duration: 1, ease: 'power3.out',
+        scrollTrigger: { trigger: sectionRef.current, start: 'top 75%', toggleActions: 'play none none reverse' },
       });
     }, sectionRef);
     return () => ctx.revert();
   }, []);
-
-  // Fast typing effect loop
-  useEffect(() => {
-    const currentPhrase = TYPING_PHRASES[phraseIndex];
-    let timer: NodeJS.Timeout;
-
-    if (!isDeleting && displayText === currentPhrase) {
-      // Pause at full phrase for 1.2s before fast deleting
-      timer = setTimeout(() => setIsDeleting(true), 1200);
-    } else if (isDeleting && displayText === '') {
-      // Move to next phrase instantly
-      setIsDeleting(false);
-      setPhraseIndex((prev) => (prev + 1) % TYPING_PHRASES.length);
-    } else {
-      // Fast typing speed (30ms per char), ultra-fast delete (15ms per char)
-      const speed = isDeleting ? 15 : 30;
-      timer = setTimeout(() => {
-        setDisplayText(
-          isDeleting
-            ? currentPhrase.substring(0, displayText.length - 1)
-            : currentPhrase.substring(0, displayText.length + 1)
-        );
-      }, speed);
-    }
-
-    return () => clearTimeout(timer);
-  }, [displayText, isDeleting, phraseIndex]);
 
   return (
     <section id="cta" ref={sectionRef} className="py-24 bg-slate-50 dark:bg-[#0F172A] relative overflow-hidden transition-colors duration-200">
@@ -82,12 +41,8 @@ export const CTASection: React.FC = () => {
               <span>Empower Faculty Today</span>
             </div>
             
-            <h2 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight min-h-[120px] sm:min-h-[140px] flex flex-col justify-center items-center">
-              <span>Transform Your Classroom Today</span>
-              <span className="text-[#8CC63F] font-cursive text-3xl sm:text-5xl lg:text-6xl font-normal mt-2 tracking-normal min-h-[60px] inline-flex items-center">
-                {displayText}
-                <span className="inline-block w-1 h-8 sm:h-10 bg-[#8CC63F] ml-1 animate-pulse" />
-              </span>
+            <h2 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight">
+              Transform Your Classroom Management Today
             </h2>
             
             <p className="text-base sm:text-xl text-slate-200 max-w-2xl mx-auto font-normal leading-relaxed">
