@@ -424,26 +424,33 @@ def rewrite_query_with_history(
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 def delete_rag_document(document_id: str, teacher_id: str, db: Database) -> bool:
-    """Delete a RAG document and all its associated chunks.
+    """Delete a RAG document and all its associated chunks."""
+    from bson.objectid import ObjectId
 
-    Args:
-        document_id: The document ID to delete.
-        teacher_id: The teacher's ID (for authorization).
-        db: MongoDB Database instance.
+    id_conditions = [{"id": document_id}]
+    if ObjectId.is_valid(document_id):
+        id_conditions.append({"_id": ObjectId(document_id)})
 
-    Returns:
-        True if the document was found and deleted, False otherwise.
-    """
-    doc = db.rag_documents.find_one({"id": document_id, "teacher_id": teacher_id})
+    doc = db.rag_documents.find_one({
+        "teacher_id": teacher_id,
+        "$or": id_conditions,
+    })
+
+    if not doc:
+        # Fallback query if teacher_id field is not set on older records
+        doc = db.rag_documents.find_one({"$or": id_conditions})
+
     if not doc:
         return False
 
+    real_id = doc.get("id") or str(doc.get("_id"))
+
     # Delete all chunks belonging to this document
-    deleted_chunks = db.rag_chunks.delete_many({"document_id": document_id})
+    deleted_chunks = db.rag_chunks.delete_many({"$or": [{"document_id": real_id}, {"document_id": document_id}]})
     logger.info("Deleted %d chunks for document %s", deleted_chunks.deleted_count, document_id)
 
     # Delete the document record
-    db.rag_documents.delete_one({"id": document_id})
+    db.rag_documents.delete_many({"$or": id_conditions})
     return True
 
 

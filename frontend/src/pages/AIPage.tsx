@@ -177,12 +177,14 @@ export const AIPage: React.FC = () => {
 
   const handleDeleteRagDocument = async (docId: string, e: React.MouseEvent) => {
     e.stopPropagation();
+    setRagDocuments((prev) => prev.filter((d) => d.id !== docId));
     try {
       await api.delete(`/ai/rag/documents/${docId}`);
+      toast.success('Document Removed', 'File removed from Knowledge Base.');
       fetchRagDocuments();
-      toast.success('Document Removed', 'Document and indexed vector chunks deleted.');
     } catch (err) {
-      toast.error('Failed to delete document');
+      toast.error('Failed to delete document from Knowledge Base');
+      fetchRagDocuments();
     }
   };
 
@@ -421,10 +423,10 @@ export const AIPage: React.FC = () => {
 
                         <button
                           onClick={(e) => handleDeleteRagDocument(doc.id, e)}
-                          className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 transition-opacity"
+                          className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-md transition-colors"
                           title="Delete document from Knowledge Base"
                         >
-                          <Trash2 className="w-3 h-3" />
+                          <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </div>
