@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
+import base64
+import io
 import os
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
-from fastapi.responses import FileResponse
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, Response
+from fastapi.responses import FileResponse, StreamingResponse
 from pymongo.database import Database
 
 from app.api.deps import get_current_teacher
@@ -17,15 +19,11 @@ from app.core.database import get_db
 
 router = APIRouter()
 
-ALLOWED_EXTENSIONS = {".pdf", ".docx", ".csv"}
-ALLOWED_CONTENT_TYPES = {
-    "application/pdf",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    "text/csv",
-    "application/csv",
-    "application/vnd.ms-excel",
+ALLOWED_EXTENSIONS = {
+    ".pdf", ".docx", ".doc", ".csv", ".xlsx", ".xls",
+    ".ppt", ".pptx", ".txt", ".png", ".jpg", ".jpeg", ".webp", ".gif"
 }
-MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
+MAX_FILE_SIZE = 15 * 1024 * 1024  # 15 MB
 
 
 def _personal_files_dir(teacher_id: str) -> Path:
@@ -42,7 +40,7 @@ async def upload_personal_file(
     teacher: dict = Depends(get_current_teacher),
     db: Database = Depends(get_db),
 ):
-    """Upload a personal file (PDF, DOCX, or CSV) to the teacher's private vault."""
+    """Upload a personal file to the teacher's private vault."""
     if not file.filename:
         raise HTTPException(status_code=400, detail="No filename provided.")
 
@@ -50,20 +48,26 @@ async def upload_personal_file(
     if ext not in ALLOWED_EXTENSIONS:
         raise HTTPException(
             status_code=400,
-            detail=f"Unsupported file type '{ext}'. Allowed: PDF, DOCX, CSV.",
+            detail=f"Unsupported file type '{ext}'. Allowed: PDF, DOCX, CSV, XLSX, PPT, TXT, Images.",
         )
 
     content = await file.read()
     if len(content) > MAX_FILE_SIZE:
-        raise HTTPException(status_code=400, detail="File must be smaller than 10 MB.")
+        raise HTTPException(status_code=400, detail="File must be smaller than 15 MB.")
 
-    # Save to disk
     file_id = uuid.uuid4().hex
     safe_filename = f"{file_id}{ext}"
-    dest = _personal_files_dir(teacher["id"]) / safe_filename
-    dest.write_bytes(content)
 
-    # Build download URL
+    # Try saving to disk
+    try:
+        dest = _personal_files_dir(teacher["id"]) / safe_filename
+        dest.write_bytes(content)
+    except Exception as exc:
+        print(f"[PersonalFiles] Disk write warning: {exc}")
+
+    # Base64 encode for database fallback (ensures availability in serverless environments)
+    file_b64 = base64.b64encode(content).decode("utf-8")
+
     settings = get_settings()
     download_url = f"{settings.backend_url}/api/v1/personal-files/download/{file_id}"
 
@@ -76,11 +80,12 @@ async def upload_personal_file(
         "file_type": ext.lstrip("."),
         "file_size_bytes": len(content),
         "download_url": download_url,
+        "file_b64": file_b64,
         "created_at": datetime.now(timezone.utc),
     }
     db.teacher_personal_files.insert_one(doc)
 
-    # Auto-ingest profile file into RAG Knowledge Base
+    # Auto-ingest profile file into RAG Knowledge Base if PDF or DOCX
     if ext in (".pdf", ".docx"):
         from app.services.rag_service import ingest_document
         try:
@@ -112,10 +117,9 @@ def list_personal_files(
     files = list(
         db.teacher_personal_files.find(
             {"teacher_id": teacher["id"]},
-            {"_id": 0},
+            {"file_b64": 0, "_id": 0},
         ).sort("created_at", -1).limit(100)
     )
-    # Serialize datetime to ISO string
     for f in files:
         if isinstance(f.get("created_at"), datetime):
             f["created_at"] = f["created_at"].isoformat()
@@ -136,15 +140,27 @@ def download_personal_file(
     if not doc:
         raise HTTPException(status_code=404, detail="File not found.")
 
-    file_path = _personal_files_dir(teacher["id"]) / doc["stored_filename"]
-    if not file_path.exists():
-        raise HTTPException(status_code=404, detail="File no longer exists on disk.")
+    filename = doc.get("original_filename", "downloaded_file")
 
-    return FileResponse(
-        path=str(file_path),
-        filename=doc["original_filename"],
-        media_type="application/octet-stream",
-    )
+    # 1. Serve from MongoDB Base64 if available
+    if doc.get("file_b64"):
+        raw_bytes = base64.b64decode(doc["file_b64"])
+        return Response(
+            content=raw_bytes,
+            media_type="application/octet-stream",
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        )
+
+    # 2. Serve from local disk fallback
+    file_path = _personal_files_dir(teacher["id"]) / doc["stored_filename"]
+    if file_path.exists():
+        return FileResponse(
+            path=str(file_path),
+            filename=filename,
+            media_type="application/octet-stream",
+        )
+
+    raise HTTPException(status_code=404, detail="File data is unavailable.")
 
 
 @router.delete("/{file_id}")
@@ -161,10 +177,13 @@ def delete_personal_file(
     if not doc:
         raise HTTPException(status_code=404, detail="File not found.")
 
-    # Remove from disk
-    file_path = _personal_files_dir(teacher["id"]) / doc["stored_filename"]
-    if file_path.exists():
-        os.unlink(file_path)
+    # Remove from disk if exists
+    try:
+        file_path = _personal_files_dir(teacher["id"]) / doc["stored_filename"]
+        if file_path.exists():
+            os.unlink(file_path)
+    except Exception:
+        pass
 
     # Remove from DB
     db.teacher_personal_files.delete_one({"id": file_id})

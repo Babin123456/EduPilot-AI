@@ -189,13 +189,14 @@ export const ProfilePage: React.FC = () => {
     if (!file) return;
 
     const ext = file.name.split('.').pop()?.toLowerCase();
-    if (!ext || !['pdf', 'docx', 'csv'].includes(ext)) {
-      toast.error('Unsupported file type. Please upload a PDF, DOCX, or CSV file.');
+    const allowed = ['pdf', 'docx', 'doc', 'csv', 'xlsx', 'xls', 'ppt', 'pptx', 'txt', 'png', 'jpg', 'jpeg', 'webp', 'gif'];
+    if (!ext || !allowed.includes(ext)) {
+      toast.error('Unsupported file type. Please upload a PDF, DOCX, Excel, PPT, TXT, or Image file.');
       event.target.value = '';
       return;
     }
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error('File is too large. Maximum allowed size is 10 MB.');
+    if (file.size > 15 * 1024 * 1024) {
+      toast.error('File is too large. Maximum allowed size is 15 MB.');
       event.target.value = '';
       return;
     }
@@ -452,7 +453,7 @@ export const ProfilePage: React.FC = () => {
                  <span>{fileUploading ? 'Uploading...' : 'Upload File'}</span>
                  <input
                    type="file"
-                   accept=".pdf,.docx,.csv"
+                   accept=".pdf,.docx,.doc,.csv,.xlsx,.xls,.ppt,.pptx,.txt,.png,.jpg,.jpeg,.webp,.gif"
                    onChange={handleFileUpload}
                    disabled={fileUploading}
                    className="sr-only"
@@ -463,7 +464,7 @@ export const ProfilePage: React.FC = () => {
              {/* Upload hint */}
              <div className="flex items-center gap-2 px-3 py-2 bg-[#005BAC]/5 dark:bg-[#005BAC]/15 rounded-xl border border-[#005BAC]/15 text-[11px] font-medium text-slate-600 dark:text-slate-300">
                <HardDrive className="w-3.5 h-3.5 text-[#005BAC] dark:text-[#8CC63F] flex-shrink-0" />
-               <span>Supported: <strong>PDF</strong>, <strong>DOCX</strong>, <strong>CSV</strong> — Max 10 MB per file. Files are private to your account.</span>
+               <span>Supported: <strong>PDF</strong>, <strong>DOCX</strong>, <strong>Excel</strong>, <strong>PPT</strong>, <strong>TXT</strong>, <strong>Images</strong> — Max 15 MB per file. Files are stored securely in your private vault.</span>
              </div>
 
              {/* File List */}

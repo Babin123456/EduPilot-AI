@@ -221,14 +221,10 @@ async def upload_avatar(
     teacher: dict = Depends(get_current_teacher),
     db: Database = Depends(get_db),
 ):
-    """Store a teacher-uploaded profile image as base64 data URI (works everywhere including Vercel serverless)."""
-    allowed_types = {"image/jpeg", "image/jpg", "image/png", "image/webp"}
-    if image.content_type not in allowed_types and not any((image.filename or "").lower().endswith(ext) for ext in [".jpg", ".jpeg", ".png", ".webp"]):
-        raise HTTPException(status_code=400, detail="Upload a JPG, PNG, or WebP image.")
-
+    """Store a teacher-uploaded profile image as base64 data URI."""
     content = await image.read()
-    if len(content) > 10 * 1024 * 1024:
-        raise HTTPException(status_code=400, detail="Image must be smaller than 10 MB.")
+    if len(content) > 15 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Image must be smaller than 15 MB.")
 
     try:
         from PIL import Image
