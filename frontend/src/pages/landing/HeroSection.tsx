@@ -1,12 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import {
-  ArrowRight, Sparkles, CheckCircle2, ChevronDown, Bot, BarChart3,
-  FileText, ShieldCheck, Zap, Award
-} from 'lucide-react';
+import { ArrowRight, Sparkles, CheckCircle2, ChevronDown, Zap, Award } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -17,12 +14,11 @@ interface HeroSectionProps {
 export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
   const navigate = useNavigate();
   const heroRef = useRef<HTMLElement>(null);
-  const [activeTab, setActiveTab] = useState<'chat' | 'analytics' | 'quiz'>('chat');
 
   useEffect(() => {
     if (!heroRef.current) return;
     const ctx = gsap.context(() => {
-      // Hero title entrance
+      // Hero title entrance (in-out GSAP effect)
       gsap.from('.hero-title-line', {
         y: 80, opacity: 0, duration: 1.2,
         stagger: 0.15, ease: 'power4.out', delay: 0.3,
@@ -40,7 +36,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
         y: 30, opacity: 0, duration: 0.8,
         stagger: 0.12, ease: 'power3.out', delay: 1.2,
       });
-      // Floating animation for the hero image
+      // Floating zero-gravity graphic animation
       gsap.to('.floating-hero-asset', {
         y: -25,
         duration: 3,
@@ -79,10 +75,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 my-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-10 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           
-          {/* ─── Left Column: Original Cursive Font Headline & CTAs ─── */}
-          <div className="lg:col-span-6 space-y-7 text-center lg:text-left">
+          {/* ─── Left Column: Title & Entrance Text Effects ─── */}
+          <div className="lg:col-span-7 space-y-7 text-center lg:text-left">
             {/* Pill Badge */}
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
@@ -97,7 +93,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
               <span className="w-2 h-2 rounded-full bg-[#8CC63F] animate-pulse" />
             </motion.div>
 
-            {/* Main Headline with Original Cursive Font Design */}
+            {/* Main Headline with Original Cursive Font */}
             <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] xl:text-6xl font-extrabold tracking-tight leading-[1.1]">
               <span className="hero-title-line block text-slate-900 dark:text-white">
                 EduPilot AI –
@@ -143,11 +139,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
             </div>
           </div>
 
-          {/* ─── Right Column: Zero-Gravity Image + Interactive Live System Preview ─── */}
-          <div className="lg:col-span-6 relative flex flex-col items-center justify-center mt-6 lg:mt-0 space-y-6">
-            
-            {/* Zero-Gravity Landing Page Hero Illustration */}
-            <div className="floating-hero-asset relative w-full max-w-md lg:max-w-lg">
+          {/* ─── Right Column Floating Image (Clean Zero-Gravity Illustration) ─── */}
+          <div className="lg:col-span-5 relative flex items-center justify-center mt-6 lg:mt-0 px-4 sm:px-0">
+            <div className="floating-hero-asset relative w-full max-w-sm sm:max-w-md lg:max-w-lg">
               <img
                 src="/images/login_hero_illustration.png"
                 alt="EduPilot AI Zero-Gravity Academic Operating System Graphic"
@@ -160,15 +154,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 1.4, duration: 0.6 }}
-                className="absolute -top-2 right-0 sm:-top-4 sm:-right-4 glass-card p-2.5 sm:p-3 rounded-2xl flex items-center gap-2.5 shadow-xl border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md"
+                className="absolute -top-2 right-0 sm:-top-4 sm:-right-4 glass-card p-2 sm:p-3 rounded-xl flex items-center gap-2 shadow-xl border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md"
               >
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-                  <Zap className="w-4 h-4" />
+                <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-[#005BAC]/15 text-[#005BAC] dark:text-[#8CC63F] flex items-center justify-center">
+                  <Zap className="w-3.5 h-3.5" />
                 </div>
-                <div>
-                  <p className="text-[9px] text-slate-400 font-bold uppercase">RAG Grounded</p>
-                  <p className="text-xs font-black text-slate-900 dark:text-white">100% Verified</p>
-                </div>
+                <span className="text-[9px] sm:text-[10px] font-bold text-slate-800 dark:text-slate-200">AI-Powered OS</span>
               </motion.div>
 
               {/* Floating Stat Badge — Bottom Left */}
@@ -176,115 +167,17 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 1.6, duration: 0.6 }}
-                className="absolute -bottom-2 left-0 sm:-bottom-4 sm:-left-4 glass-card p-2.5 sm:p-3 rounded-2xl flex items-center gap-2.5 shadow-xl border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md"
+                className="absolute -bottom-2 left-0 sm:-bottom-4 sm:-left-4 glass-card p-2.5 sm:p-3.5 rounded-2xl flex items-center gap-2.5 sm:gap-3 shadow-2xl border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md"
               >
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-[#005BAC]/20 text-[#005BAC] dark:text-[#8CC63F] flex items-center justify-center">
-                  <Award className="w-4 h-4" />
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-[#8CC63F]/20 text-[#8CC63F] flex items-center justify-center font-extrabold text-xs sm:text-sm">
+                  98%
                 </div>
                 <div>
-                  <p className="text-[9px] text-slate-400 font-bold uppercase">Time Saved</p>
-                  <p className="text-xs font-black text-slate-900 dark:text-white">5+ Hrs / Week</p>
+                  <p className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase">Admin Time Saved</p>
+                  <p className="text-[11px] sm:text-xs font-extrabold text-slate-900 dark:text-white">5+ Hrs / Week</p>
                 </div>
               </motion.div>
             </div>
-
-            {/* Interactive Live System Showcase Bar (Below Image) */}
-            <div className="w-full max-w-md lg:max-w-lg bg-white/90 dark:bg-slate-900/90 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden backdrop-blur-md">
-              {/* Tab Switcher */}
-              <div className="p-1.5 bg-slate-100 dark:bg-slate-950 flex items-center gap-1.5">
-                <button
-                  onClick={() => setActiveTab('chat')}
-                  className={`flex-1 py-1.5 px-2.5 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 ${
-                    activeTab === 'chat'
-                      ? 'bg-[#005BAC] text-white shadow-sm'
-                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-800'
-                  }`}
-                >
-                  <Bot className="w-3.5 h-3.5" /> AI Chat
-                </button>
-                <button
-                  onClick={() => setActiveTab('analytics')}
-                  className={`flex-1 py-1.5 px-2.5 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 ${
-                    activeTab === 'analytics'
-                      ? 'bg-[#005BAC] text-white shadow-sm'
-                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-800'
-                  }`}
-                >
-                  <BarChart3 className="w-3.5 h-3.5" /> Analytics
-                </button>
-                <button
-                  onClick={() => setActiveTab('quiz')}
-                  className={`flex-1 py-1.5 px-2.5 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 ${
-                    activeTab === 'quiz'
-                      ? 'bg-[#005BAC] text-white shadow-sm'
-                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-800'
-                  }`}
-                >
-                  <FileText className="w-3.5 h-3.5" /> Quiz Studio
-                </button>
-              </div>
-
-              {/* Interactive Content Box */}
-              <div className="p-3.5 min-h-[140px]">
-                <AnimatePresence mode="wait">
-                  {activeTab === 'chat' && (
-                    <motion.div
-                      key="chat"
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -6 }}
-                      className="space-y-2 text-xs"
-                    >
-                      <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-xl font-medium text-slate-800 dark:text-slate-200">
-                        <span className="text-[#005BAC] dark:text-[#8CC63F] font-bold">Query:</span> Which students have attendance below 75%?
-                      </div>
-                      <div className="p-2 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-[11px]">
-                        <strong>RAG Response:</strong> 3 students found (Rahul S. 68%, Ananya S. 71%, Vikram S. 69%). 1-Click warning email ready.
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {activeTab === 'analytics' && (
-                    <motion.div
-                      key="analytics"
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -6 }}
-                      className="space-y-2 text-xs"
-                    >
-                      <div className="flex justify-between items-center text-[11px] font-bold text-slate-700 dark:text-slate-200">
-                        <span>Class Attendance Average</span>
-                        <span className="text-emerald-600 dark:text-emerald-400">92.4%</span>
-                      </div>
-                      <div className="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                        <div className="h-full bg-emerald-500 w-[92.4%]" />
-                      </div>
-                      <div className="flex justify-between items-center text-[11px] font-bold text-slate-700 dark:text-slate-200 pt-1">
-                        <span>Average Exam Score</span>
-                        <span className="text-[#005BAC] dark:text-sky-400">84.6 / 100</span>
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {activeTab === 'quiz' && (
-                    <motion.div
-                      key="quiz"
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -6 }}
-                      className="space-y-2 text-xs"
-                    >
-                      <div className="p-2 bg-purple-50 dark:bg-purple-950/40 rounded-xl border border-purple-200 dark:border-purple-800 flex justify-between items-center">
-                        <span className="font-extrabold text-slate-900 dark:text-white">Computer Networks — Quiz 3</span>
-                        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">15 MCQs Ready</span>
-                      </div>
-                      <p className="text-[10px] text-slate-500 font-mono">Instant PDF & Answer Rubric Generation</p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
-
           </div>
 
         </div>
