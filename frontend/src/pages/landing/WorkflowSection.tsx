@@ -99,17 +99,13 @@ export const WorkflowSection: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Left: Workflow Image */}
           <div className="lg:col-span-5 relative">
-            <div className="workflow-image relative">
-              <div className="absolute -inset-3 rounded-3xl bg-gradient-to-r from-[#005BAC]/35 via-[#0A6FD8]/25 to-[#8CC63F]/35 blur-2xl animate-pulse opacity-90" />
-              <div className="relative p-2 flex justify-center">
-                <img
-                  src="/images/workflow_diagram.webp"
-                  alt="EduPilot AI Workflow Architecture"
-                  className="w-full h-auto object-contain drop-shadow-[0_15px_35px_rgba(0,0,0,0.25)]"
-                  loading="lazy"
-                />
-              </div>
-
+            <div className="workflow-image relative flex justify-center">
+              <img
+                src="/images/workflow_diagram.webp"
+                alt="EduPilot AI Workflow Architecture"
+                className="w-full h-auto object-contain drop-shadow-[0_15px_35px_rgba(0,0,0,0.25)]"
+                loading="lazy"
+              />
             </div>
           </div>
 
