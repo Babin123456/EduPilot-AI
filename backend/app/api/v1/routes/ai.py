@@ -546,19 +546,39 @@ def chat(
     model_used = ""
     ai_response = None
 
+    # Helper for multi-key Gemini failover
+    def _gemini_with_failover(prompt_text: str, b64_img: str | None = None, mime: str | None = None) -> str | None:
+        keys_to_try = [
+            settings.gemini_api_key,
+            settings.gemini_api_key_1,
+            settings.gemini_api_key_2,
+        ]
+        # Filter non-empty unique keys
+        valid_keys = []
+        for k in keys_to_try:
+            k_clean = (k or "").strip()
+            if k_clean and "your_" not in k_clean and len(k_clean) >= 25 and k_clean not in valid_keys:
+                valid_keys.append(k_clean)
+
+        for key in valid_keys:
+            res = _call_gemini_llm(
+                prompt=prompt_text,
+                api_key=key,
+                model=settings.gemini_model,
+                image_b64=b64_img,
+                mime_type=mime or "image/png",
+            )
+            if res:
+                return res
+        return None
+
     if has_attachment:
-        # Attachment detected (Image or Document) -> Smart Route to Gemini Vision / Flash first
+        # Attachment detected (Image or Document) -> Smart Route to Gemini Vision / Flash first with Multi-Key Failover
         model_used = "Gemini 1.5 Flash (Vision & Attachment Route)"
         gemini_prompt = f"{system_prompt}\n\nUser Question: {full_user_input}"
-        ai_response = _call_gemini_llm(
-            prompt=gemini_prompt,
-            api_key=settings.gemini_api_key,
-            model=settings.gemini_model,
-            image_b64=body.image_b64,
-            mime_type=body.mime_type or "image/png",
-        )
+        ai_response = _gemini_with_failover(gemini_prompt, body.image_b64, body.mime_type)
 
-        # Fallback to Groq if Gemini fails
+        # Fallback to Groq if Gemini fails across all keys
         if not ai_response:
             model_used = "Groq Llama-3.3-70B (Attachment Fallback)"
             ai_response = _call_groq_llm(llm_messages, settings.groq_api_key_1, settings.groq_model)
@@ -571,11 +591,11 @@ def chat(
         if not ai_response:
             ai_response = _call_groq_llm(llm_messages, settings.groq_api_key_2, settings.groq_model)
 
-        # Fallback to Gemini if Groq fails
+        # Fallback to Gemini with Multi-Key Failover if Groq fails
         if not ai_response:
             model_used = "Gemini 1.5 Flash (Fallback)"
             gemini_prompt = f"{system_prompt}\n\nUser Question: {full_user_input}"
-            ai_response = _call_gemini_llm(gemini_prompt, settings.gemini_api_key, settings.gemini_model)
+            ai_response = _gemini_with_failover(gemini_prompt, None, None)
 
     # ── Fallback to Smart Contextual Response Generator ──
     if not ai_response:

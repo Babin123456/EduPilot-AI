@@ -55,8 +55,10 @@ class Settings(BaseSettings):
     groq_api_key_2: str = ""
     groq_model: str = "llama-3.3-70b-versatile"
 
-    # ---- LLM: Fallback (Gemini) ----
+    # ---- LLM: Fallback / Vision (Gemini) ----
     gemini_api_key: str = ""
+    gemini_api_key_1: str = ""
+    gemini_api_key_2: str = ""
     gemini_model: str = "gemini-1.5-flash"
 
     # ---- Email (Gmail SMTP) ----
