@@ -9,6 +9,8 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+import { SkeletonPageLoader } from '../components/SkeletonPageLoader';
+
 export const CommunicationsPage: React.FC = () => {
   const location = useLocation();
   const { activeClass, user } = useAuth();
@@ -16,6 +18,7 @@ export const CommunicationsPage: React.FC = () => {
   const [students, setStudents] = useState<any[]>([]);
   const [templates, setTemplates] = useState<any[]>([]);
   const [history, setHistory] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStudents, setSelectedStudents] = useState<Set<string>>(new Set());
@@ -34,6 +37,7 @@ export const CommunicationsPage: React.FC = () => {
   }, [activeClass]);
 
   const fetchData = async () => {
+    setLoading(true);
     try {
       const [studRes, tmplRes, histRes] = await Promise.all([
         api.get('/communications/student-emails', { params: { class_id: activeClass?.id } }),
@@ -75,6 +79,8 @@ export const CommunicationsPage: React.FC = () => {
       }
     } catch (err) {
       console.error('Failed to load communications data:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -152,6 +158,10 @@ export const CommunicationsPage: React.FC = () => {
     const query = (searchTerm || '').toLowerCase();
     return sName.includes(query) || sRoll.includes(query) || sEmail.includes(query);
   });
+
+  if (loading) {
+    return <SkeletonPageLoader count={6} />;
+  }
 
   return (
     <div className="space-y-6">

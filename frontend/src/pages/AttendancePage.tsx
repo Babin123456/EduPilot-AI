@@ -137,7 +137,7 @@ export const AttendancePage: React.FC = () => {
             <button
               onClick={handleSubmit}
               disabled={saving || isWeekendClosed}
-              className="px-5 py-2 bg-slate-950 hover:bg-slate-900 text-white text-xs font-black rounded-xl transition-all shadow-lg active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5 border border-slate-700"
+              className="px-5 py-2 bg-[#005BAC] hover:bg-[#0A6FD8] text-white text-xs font-black rounded-xl transition-all shadow-md active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5 border border-blue-400/40 shadow-sm"
             >
               <Send className="w-4 h-4 text-[#8CC63F]" />
               {saving ? 'Transmitting...' : isEditing ? 'Update & Re-submit' : 'Submit Attendance'}

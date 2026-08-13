@@ -109,14 +109,68 @@ export const ProfilePage: React.FC = () => {
     }
   };
 
+  const compressImageFile = (file: File, maxDim = 400, quality = 0.85): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (e) => {
+        const img = new Image();
+        img.src = e.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          if (width > height) {
+            if (width > maxDim) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            }
+          } else {
+            if (height > maxDim) {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            canvas.toBlob(
+              (blob) => {
+                if (blob) resolve(blob);
+                else reject(new Error('Canvas to Blob failed'));
+              },
+              'image/jpeg',
+              quality
+            );
+          } else {
+            reject(new Error('Canvas context failed'));
+          }
+        };
+        img.onerror = (err) => reject(err);
+      };
+      reader.onerror = (err) => reject(err);
+    });
+  };
+
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
     setUploading(true);
     try {
+      let uploadPayload: Blob = file;
+      try {
+        uploadPayload = await compressImageFile(file, 400, 0.85);
+      } catch (cErr) {
+        console.warn('Client compression fallback to raw file:', cErr);
+      }
+
       const formData = new FormData();
-      formData.append('image', file);
-      const response = await api.post('/auth/me/avatar', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+      formData.append('image', uploadPayload, 'avatar.jpg');
+      const response = await api.post('/auth/me/avatar', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
       const newAvatar = response.data.avatar_url;
       setSelectedAvatar(newAvatar);
       updateUser({ avatar_url: newAvatar });
