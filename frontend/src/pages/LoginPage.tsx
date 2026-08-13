@@ -6,10 +6,10 @@ import { api } from '../api/client';
 import { ShieldCheck, GraduationCap, ArrowRight, Lock, Mail, Sparkles, CheckCircle2, UserCheck, Sun, Moon, ArrowLeft } from 'lucide-react';
 
 const DEMO_FACULTY = [
+  { faculty_id: 'FAC-UNIV-004', name: 'Prof. Sunita Devi', email: 'sunita.devi@edupilot.ai', password: 'demo@1234', designation: 'Assistant Professor', specialization: 'Networks & Security' },
   { faculty_id: 'FAC-UNIV-001', name: 'Prof. Rajesh Banerjee', email: 'rajesh.banerjee@edupilot.ai', password: 'demo@1234', designation: 'Associate Professor', specialization: 'Algorithms & Data Structures' },
   { faculty_id: 'FAC-UNIV-002', name: 'Prof. Priya Nair', email: 'priya.nair@edupilot.ai', password: 'demo@1234', designation: 'Assistant Professor', specialization: 'Database Systems & Mining' },
   { faculty_id: 'FAC-UNIV-003', name: 'Prof. Amitava Chatterjee', email: 'amitava.chatterjee@edupilot.ai', password: 'demo@1234', designation: 'Professor', specialization: 'AI & Machine Learning' },
-  { faculty_id: 'FAC-UNIV-004', name: 'Prof. Sunita Devi', email: 'sunita.devi@edupilot.ai', password: 'demo@1234', designation: 'Assistant Professor', specialization: 'Networks & Security' },
   { faculty_id: 'FAC-UNIV-005', name: 'Prof. Debashis Ghosh', email: 'debashis.ghosh@edupilot.ai', password: 'demo@1234', designation: 'Associate Professor', specialization: 'OS & Cloud Computing' },
   { faculty_id: 'FAC-UNIV-006', name: 'Prof. Meenakshi Iyer', email: 'meenakshi.iyer@edupilot.ai', password: 'demo@1234', designation: 'Assistant Professor', specialization: 'Software Engineering & Web Technologies' },
   { faculty_id: 'FAC-UNIV-007', name: 'Prof. Arpan Mukherjee', email: 'arpan.mukherjee@edupilot.ai', password: 'demo@1234', designation: 'Professor', specialization: 'Deep Learning & NLP' },

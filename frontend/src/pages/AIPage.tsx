@@ -137,12 +137,12 @@ export const AIPage: React.FC = () => {
 
     const ext = file.name.split('.').pop()?.toLowerCase();
     if (!['pdf', 'docx'].includes(ext || '')) {
-      alert('Only PDF and DOCX files are supported for RAG indexing.');
+      toast.error('Unsupported File', 'Only PDF and DOCX files are supported for RAG indexing.');
       return;
     }
 
     if (file.size > 10 * 1024 * 1024) {
-      alert('File size exceeds the 10MB limit.');
+      toast.error('File Too Large', 'File size exceeds the 10MB limit.');
       return;
     }
 
@@ -166,10 +166,11 @@ export const AIPage: React.FC = () => {
           model_used: 'RAG Engine',
           content_type: 'rag',
         }]);
+        toast.success('Document Indexed Successfully', `Parsed and indexed "${docName}" into ${chunkCount} chunks.`);
       }
     } catch (err: any) {
       const detail = err?.response?.data?.detail || 'Failed to upload document for RAG indexing.';
-      alert(detail);
+      toast.error('RAG Indexing Failed', detail);
     } finally {
       setRagUploading(false);
       if (ragFileInputRef.current) ragFileInputRef.current.value = '';
@@ -178,12 +179,12 @@ export const AIPage: React.FC = () => {
 
   const handleDeleteRagDocument = async (docId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!confirm('Delete this document and all its indexed chunks?')) return;
     try {
       await api.delete(`/ai/rag/documents/${docId}`);
       fetchRagDocuments();
+      toast.success('Document Removed', 'Document and indexed vector chunks deleted.');
     } catch (err) {
-      console.error('Delete RAG document error:', err);
+      toast.error('Failed to delete document');
     }
   };
 

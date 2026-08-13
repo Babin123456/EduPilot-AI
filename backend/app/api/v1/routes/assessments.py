@@ -548,3 +548,25 @@ def publish_assessment(
         "message": "Assessment published successfully. Students can now access it.",
     }
 
+
+@router.delete("/{assessment_id}")
+def delete_assessment(
+    assessment_id: str,
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
+):
+    """Delete a quiz/assessment permanently."""
+    assessment = db.assessments.find_one({"id": assessment_id})
+    if not assessment:
+        raise http_404("Assessment not found")
+
+    tca = db.teacher_course_assignments.find_one(
+        {"id": assessment["teacher_course_assignment_id"], "teacher_id": teacher["id"]}
+    )
+    if not tca:
+        raise http_403("Not authorized")
+
+    db.assessments.delete_one({"id": assessment_id})
+    db.assessment_results.delete_many({"assessment_id": assessment_id})
+    return {"message": "Quiz deleted successfully", "assessment_id": assessment_id}
+

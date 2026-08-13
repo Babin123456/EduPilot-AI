@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { api } from '../api/client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { HelpCircle, Download, ChevronDown, ChevronUp, Award, Clock, Target, Send, Sparkles, X, Loader2, BookOpen } from 'lucide-react';
+import { HelpCircle, Download, ChevronDown, ChevronUp, Award, Clock, Target, Send, Sparkles, X, Loader2, BookOpen, Trash2, AlertTriangle } from 'lucide-react';
 import { generateQuizPDF, generateAssessmentReportPDF } from '../utils/pdfGenerator';
 
 export const AssessmentsPage: React.FC = () => {
@@ -15,6 +15,8 @@ export const AssessmentsPage: React.FC = () => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [results, setResults] = useState<Record<string, any[]>>({});
   const [loadingResults, setLoadingResults] = useState<string | null>(null);
+  const [deleteConfirmQuiz, setDeleteConfirmQuiz] = useState<{ id: string; title: string } | null>(null);
+  const [deletingQuiz, setDeletingQuiz] = useState(false);
 
   // MCQ Quiz Modal State
   const [showGenModal, setShowGenModal] = useState(false);
@@ -198,6 +200,21 @@ export const AssessmentsPage: React.FC = () => {
     api.get(`/assessments?class_id=${activeClass?.id}`)
       .then(res => setAssessments(res.data || []))
       .finally(() => setLoading(false));
+  };
+
+  const handleDeleteQuiz = async () => {
+    if (!deleteConfirmQuiz) return;
+    setDeletingQuiz(true);
+    try {
+      await api.delete(`/assessments/${deleteConfirmQuiz.id}`);
+      toast.success('Quiz Deleted Successfully', `Removed "${deleteConfirmQuiz.title}" and its associated records.`);
+      setDeleteConfirmQuiz(null);
+      fetchAssessments();
+    } catch (err) {
+      toast.error('Failed to delete quiz');
+    } finally {
+      setDeletingQuiz(false);
+    }
   };
 
   const handleGenerateMCQQuiz = async () => {
@@ -430,6 +447,13 @@ export const AssessmentsPage: React.FC = () => {
                     >
                       {expandedId === a.id ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                       Results
+                    </button>
+                    <button
+                      onClick={() => setDeleteConfirmQuiz({ id: a.id, title: a.title })}
+                      className="px-3 py-1.5 bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 hover:bg-red-500 hover:text-white dark:hover:bg-red-600 dark:hover:text-white text-xs font-bold rounded-lg flex items-center gap-1 transition-all duration-150 border border-red-200/80 dark:border-red-900/50"
+                      title="Delete this quiz"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" /> Delete
                     </button>
                   </div>
                 </div>
@@ -678,6 +702,50 @@ export const AssessmentsPage: React.FC = () => {
                   ) : (
                     <><Sparkles className="w-4 h-4 text-[#8CC63F]" /> Generate & Publish ({numQuestions} MCQs)</>
                   )}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ─── Delete Quiz Confirmation Modal ─── */}
+      <AnimatePresence>
+        {deleteConfirmQuiz && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4"
+            >
+              <div className="flex items-center gap-3 text-red-600 dark:text-red-400">
+                <div className="p-2.5 bg-red-100 dark:bg-red-950/50 rounded-2xl">
+                  <AlertTriangle className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-black text-slate-900 dark:text-white text-base">Delete Quiz Confirmation</h3>
+                  <p className="text-xs text-slate-500">This action cannot be undone.</p>
+                </div>
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-300">
+                Are you sure you want to permanently delete <strong className="text-slate-900 dark:text-white">"{deleteConfirmQuiz.title}"</strong>?
+              </p>
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  onClick={() => setDeleteConfirmQuiz(null)}
+                  disabled={deletingQuiz}
+                  className="px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteQuiz}
+                  disabled={deletingQuiz}
+                  className="px-5 py-2 text-xs font-black bg-red-600 hover:bg-red-700 text-white rounded-xl shadow-md transition-colors flex items-center gap-2"
+                >
+                  {deletingQuiz ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                  <span>{deletingQuiz ? 'Deleting...' : 'Delete Quiz'}</span>
                 </button>
               </div>
             </motion.div>

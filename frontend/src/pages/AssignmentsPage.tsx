@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { api } from '../api/client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FileText, Sparkles, Download, Send, Eye, X, Loader2, ClipboardList, Trash2 } from 'lucide-react';
+import { FileText, Sparkles, Download, Send, Eye, X, Loader2, ClipboardList, Trash2, AlertTriangle } from 'lucide-react';
 
 import { generateQuizPDF } from '../utils/pdfGenerator';
 
@@ -13,6 +13,8 @@ export const AssignmentsPage: React.FC = () => {
   const { activeClass, user } = useAuth();
   const toast = useToast();
   const [assignments, setAssignments] = useState<any[]>([]);
+  const [deleteConfirmAssignment, setDeleteConfirmAssignment] = useState<{ id: string; title: string } | null>(null);
+  const [deletingAssignment, setDeletingAssignment] = useState(false);
 
   // AI Generator Modal State
   const [showGenModal, setShowGenModal] = useState(false);
@@ -206,19 +208,23 @@ export const AssignmentsPage: React.FC = () => {
       .catch(() => {});
   };
 
-  const handleDeleteAssignment = async (assignmentId: string, assignmentTitle: string) => {
-    if (!window.confirm(`Are you sure you want to delete "${assignmentTitle}"?`)) return;
+  const handleDeleteAssignment = async () => {
+    if (!deleteConfirmAssignment) return;
+    setDeletingAssignment(true);
     try {
-      await api.delete(`/assignments/${assignmentId}`);
-      toast.success('Assignment Deleted', `Successfully removed "${assignmentTitle}".`);
-      if (activeTitle === assignmentTitle) {
+      await api.delete(`/assignments/${deleteConfirmAssignment.id}`);
+      toast.success('Assignment Deleted', `Successfully removed "${deleteConfirmAssignment.title}".`);
+      if (activeTitle === deleteConfirmAssignment.title) {
         setGeneratedMarkdown(null);
         setGeneratedQuestionsData([]);
         setActiveTitle('');
       }
+      setDeleteConfirmAssignment(null);
       fetchAssignments();
     } catch (err) {
       toast.error('Failed to Delete Assignment');
+    } finally {
+      setDeletingAssignment(false);
     }
   };
 
@@ -436,7 +442,7 @@ export const AssignmentsPage: React.FC = () => {
                 <span>View Material & PDF</span>
               </button>
               <button
-                onClick={() => handleDeleteAssignment(a.id, a.title)}
+                onClick={() => setDeleteConfirmAssignment({ id: a.id, title: a.title })}
                 className="p-2 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-600 hover:text-white text-rose-600 dark:text-rose-400 rounded-xl transition-colors"
                 title="Delete Assignment"
               >
@@ -559,6 +565,50 @@ export const AssignmentsPage: React.FC = () => {
                 >
                   {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 text-[#8CC63F]" />}
                   <span>Generate Questions</span>
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ─── Delete Assignment Confirmation Modal ─── */}
+      <AnimatePresence>
+        {deleteConfirmAssignment && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4"
+            >
+              <div className="flex items-center gap-3 text-rose-600 dark:text-rose-400">
+                <div className="p-2.5 bg-rose-100 dark:bg-rose-950/50 rounded-2xl">
+                  <AlertTriangle className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-black text-slate-900 dark:text-white text-base">Delete Assignment Confirmation</h3>
+                  <p className="text-xs text-slate-500">This action cannot be undone.</p>
+                </div>
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-300">
+                Are you sure you want to permanently delete <strong className="text-slate-900 dark:text-white">"{deleteConfirmAssignment.title}"</strong>?
+              </p>
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  onClick={() => setDeleteConfirmAssignment(null)}
+                  disabled={deletingAssignment}
+                  className="px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteAssignment}
+                  disabled={deletingAssignment}
+                  className="px-5 py-2 text-xs font-black bg-rose-600 hover:bg-rose-700 text-white rounded-xl shadow-md transition-colors flex items-center gap-2"
+                >
+                  {deletingAssignment ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                  <span>{deletingAssignment ? 'Deleting...' : 'Delete Assignment'}</span>
                 </button>
               </div>
             </motion.div>

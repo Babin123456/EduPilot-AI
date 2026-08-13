@@ -203,14 +203,6 @@ export const ProfilePage: React.FC = () => {
         </div>
         
         <div className="flex items-center gap-4 relative z-10 flex-shrink-0 self-end sm:self-center">
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2.5 rounded-2xl bg-white/15 hover:bg-red-500/90 text-white text-xs font-extrabold flex items-center gap-2 backdrop-blur-md border border-white/20 hover:border-red-400 transition-all duration-200 shadow-lg group"
-            title="Log Out of EduPilot AI"
-          >
-            <LogOut className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-            <span>Teacher Logout</span>
-          </button>
           <div className="w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center flex-shrink-0">
             <img src="/images/avatar.png" alt="Teacher profile avatar" className="w-full h-full object-contain" />
           </div>
@@ -262,7 +254,7 @@ export const ProfilePage: React.FC = () => {
             <div className="pt-3 border-t border-slate-100 dark:border-slate-800">
               <button
                 onClick={handleLogout}
-                className="w-full py-2.5 rounded-xl border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-950/30 hover:bg-red-500 hover:text-white text-red-600 dark:text-red-400 text-xs font-bold flex items-center justify-center gap-2 transition-all duration-200"
+                className="w-full py-2.5 rounded-xl border border-red-200 dark:border-red-800/60 bg-red-50 dark:bg-red-950/40 hover:bg-red-600 dark:hover:bg-red-600 hover:text-white dark:hover:text-white text-red-600 dark:text-red-400 text-xs font-bold flex items-center justify-center gap-2 transition-all duration-200 shadow-sm hover:shadow-md hover:border-red-600 dark:hover:border-red-600"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Log Out of Session</span>

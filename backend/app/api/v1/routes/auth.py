@@ -261,10 +261,10 @@ def get_demo_accounts(db: Database = Depends(get_db)):
 
     # Fallback default demo accounts when MongoDB is offline
     return [
+        DemoTeacherCard(faculty_id="FAC-UNIV-004", name="Prof. Sunita Devi", email="sunita.devi@edupilot.ai", password="demo@1234", designation="Assistant Professor", specialization="Networks & Security"),
         DemoTeacherCard(faculty_id="FAC-UNIV-001", name="Prof. Rajesh Banerjee", email="rajesh.banerjee@edupilot.ai", password="demo@1234", designation="Associate Professor", specialization="Algorithms & Data Structures"),
         DemoTeacherCard(faculty_id="FAC-UNIV-002", name="Prof. Priya Nair", email="priya.nair@edupilot.ai", password="demo@1234", designation="Assistant Professor", specialization="Database Systems & Mining"),
         DemoTeacherCard(faculty_id="FAC-UNIV-003", name="Prof. Amitava Chatterjee", email="amitava.chatterjee@edupilot.ai", password="demo@1234", designation="Professor", specialization="AI & Machine Learning"),
-        DemoTeacherCard(faculty_id="FAC-UNIV-004", name="Prof. Sunita Devi", email="sunita.devi@edupilot.ai", password="demo@1234", designation="Assistant Professor", specialization="Networks & Security"),
         DemoTeacherCard(faculty_id="FAC-UNIV-005", name="Prof. Debashis Ghosh", email="debashis.ghosh@edupilot.ai", password="demo@1234", designation="Associate Professor", specialization="OS & Cloud Computing"),
         DemoTeacherCard(faculty_id="FAC-UNIV-006", name="Prof. Meenakshi Iyer", email="meenakshi.iyer@edupilot.ai", password="demo@1234", designation="Assistant Professor", specialization="Software Engineering & Web Technologies"),
         DemoTeacherCard(faculty_id="FAC-UNIV-007", name="Prof. Arpan Mukherjee", email="arpan.mukherjee@edupilot.ai", password="demo@1234", designation="Professor", specialization="Deep Learning & NLP"),
