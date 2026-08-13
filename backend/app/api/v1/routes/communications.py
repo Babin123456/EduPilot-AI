@@ -62,6 +62,15 @@ def list_communications(
         year = years.get(tca["year_id"]) if tca and tca.get("year_id") else None
         section = sections.get(tca["section_id"]) if tca and tca.get("section_id") else None
 
+        recipient_names = []
+        if c.get("recipients"):
+            try:
+                rec_list = json.loads(c["recipients"]) if isinstance(c["recipients"], str) else c["recipients"]
+                if isinstance(rec_list, list):
+                    recipient_names = [r.get("name") or r.get("email") for r in rec_list if isinstance(r, dict) and (r.get("name") or r.get("email"))]
+            except Exception:
+                recipient_names = []
+
         sent_at = c.get("sent_at")
         created_at = c.get("created_at")
         result.append({
@@ -72,6 +81,8 @@ def list_communications(
             "body": c.get("body"),
             "total_recipients": c.get("total_recipients", 0),
             "sent_count": c.get("sent_count", 0),
+            "recipient_count": c.get("total_recipients", 0),
+            "recipient_names": recipient_names,
             "status": c.get("status", "draft"),
             "course_name": course["name"] if course else "",
             "course_code": course["code"] if course else "",

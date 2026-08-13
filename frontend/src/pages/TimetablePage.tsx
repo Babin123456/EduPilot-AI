@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { api } from '../api/client';
+import { api, cachedGet } from '../api/client';
 import { Clock, MapPin } from 'lucide-react';
 
 import { SkeletonPageLoader } from '../components/SkeletonPageLoader';
@@ -9,7 +9,7 @@ export const TimetablePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/timetable/week')
+    cachedGet('/timetable/week')
       .then(res => setWeek(res.data))
       .finally(() => setLoading(false));
   }, []);

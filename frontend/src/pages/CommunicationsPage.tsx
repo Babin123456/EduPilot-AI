@@ -40,9 +40,9 @@ export const CommunicationsPage: React.FC = () => {
     setLoading(true);
     try {
       const [studRes, tmplRes, histRes] = await Promise.all([
-        api.get('/communications/student-emails', { params: { class_id: activeClass?.id } }),
-        api.get('/communications/templates'),
-        api.get('/communications', { params: { class_id: activeClass?.id } }),
+        cachedGet(`/communications/student-emails?class_id=${activeClass?.id}`),
+        cachedGet('/communications/templates'),
+        cachedGet(`/communications?class_id=${activeClass?.id}`),
       ]);
       const fetchedStudents: any[] = studRes.data.students || [];
       setStudents(fetchedStudents);
@@ -396,11 +396,27 @@ export const CommunicationsPage: React.FC = () => {
                   return (
                     <div key={item.id} className="py-3.5 space-y-2">
                       <div className="flex items-center justify-between">
-                        <div>
+                        <div className="space-y-1">
                           <p className="text-xs font-bold text-slate-900 dark:text-white">{item.subject}</p>
+                          
+                          {/* Student Recipient Names */}
+                          {item.recipient_names && item.recipient_names.length > 0 ? (
+                            <div className="flex items-center gap-1.5 flex-wrap text-[11px] text-slate-600 dark:text-slate-300">
+                              <span className="font-bold text-[#005BAC] dark:text-[#8CC63F]">Recipients ({item.recipient_names.length}):</span>
+                              <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md font-medium text-slate-800 dark:text-slate-200">
+                                {item.recipient_names.slice(0, 4).join(', ')}
+                                {item.recipient_names.length > 4 ? ` + ${item.recipient_names.length - 4} more` : ''}
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="text-[11px] font-semibold text-slate-500">
+                              Recipients: Enrolled Class Section Students ({item.recipient_count || item.total_recipients || 0})
+                            </div>
+                          )}
+
                           <div className="flex items-center gap-3 text-[10px] text-slate-400 mt-0.5">
                             <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(item.sent_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
-                            <span className="font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded">Sent to {item.recipient_count} student(s)</span>
+                            <span className="font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded">Sent to {item.recipient_count || item.total_recipients || 0} student(s)</span>
                           </div>
                         </div>
                         <button

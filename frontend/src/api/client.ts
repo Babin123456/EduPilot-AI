@@ -28,3 +28,29 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// High-performance client-side in-memory cache for instant section navigation
+const memoryCache = new Map<string, { data: any; timestamp: number }>();
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+export const cachedGet = async (url: string, forceFresh = false) => {
+  const now = Date.now();
+  const cached = memoryCache.get(url);
+
+  if (!forceFresh && cached && now - cached.timestamp < CACHE_TTL_MS) {
+    // Return cached data instantly (0ms) and silently revalidate in background
+    api.get(url).then((res) => {
+      memoryCache.set(url, { data: res.data, timestamp: Date.now() });
+    }).catch(() => {});
+
+    return { data: cached.data };
+  }
+
+  const response = await api.get(url);
+  memoryCache.set(url, { data: response.data, timestamp: now });
+  return response;
+};
+
+export const clearApiCache = () => {
+  memoryCache.clear();
+};

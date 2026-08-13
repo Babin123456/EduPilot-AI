@@ -45,12 +45,12 @@ export const DashboardPage: React.FC = () => {
     setLoading(true);
     
     const fetchPromises: Promise<any>[] = [
-      api.get('/dashboard/summary'),
-      api.get('/timetable/today')
+      cachedGet('/dashboard/summary'),
+      cachedGet('/timetable/today')
     ];
 
     if (activeClass) {
-      fetchPromises.push(api.get(`/analytics/classes/${activeClass.id}/overview`));
+      fetchPromises.push(cachedGet(`/analytics/classes/${activeClass.id}/overview`));
     }
 
     Promise.allSettled(fetchPromises).then(([sumResult, timetableResult, analyticsResult]) => {
