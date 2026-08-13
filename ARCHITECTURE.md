@@ -19,40 +19,37 @@
 
 ## 🚀 High-Level System Architecture
 
+### Cloud Topology: Unified Vercel Platform & External Services
+
 ```mermaid
 flowchart LR
-    T[Teacher User] --> NGINX[Nginx Reverse Proxy]
-    NGINX --> FE[React + Vite Teacher Portal]
-    NGINX --> API[FastAPI REST API Layer]
+    T[Teacher User] --> VERCEL[Vercel Serverless Edge Platform]
+    
+    subgraph VERCEL[Vercel Unified Serverless Platform]
+        FE[React 18 + Vite SPA Portal]
+        API[FastAPI REST API Serverless Layer]
+    end
 
-    FE --> API
+    FE -->|Relative /api/v1 calls| API
 
-    API --> AUTH[Authentication & Authorization Guard]
-    API --> CORE[EduPilot Core Orchestrator]
-    API --> SERVICES[Academic Services]
+    API --> AUTH[JWT Auth Guard & Rate Limiter]
+    API --> CORE[EduPilot Core AI Orchestrator]
+    API --> SERVICES[Academic Domain Services]
 
-    SERVICES --> DB[(MongoDB / Atlas)]
-    SERVICES --> STORE[Local File Storage]
+    SERVICES --> DB[(MongoDB Atlas Cloud DB)]
 
-    CORE --> ROUTER[Smart Task-Based LLM & Vision Router]
-    ROUTER -->|Standard Text Chat| GROQ[Groq LLM Primary: Llama-3.3-70B]
-    ROUTER -->|File / Image Upload| GEMINI[Gemini 1.5 Flash Vision]
-    ROUTER -->|Offline Local OCR| OCR[RapidOCR ONNX Engine]
-    ROUTER -->|Vector Knowledge| RAG[RAG Retrieval Layer]
+    CORE --> ROUTER[Smart Multimodal LLM & Vision Router]
+    ROUTER -->|Standard Text Chat| GROQ[Groq Dual Primary: Llama-3.3-70B]
+    ROUTER -->|Image & Document Vision| GEMINI[Gemini 1.5 Flash Vision Cloud API]
+    ROUTER -->|Vector Knowledge RAG| RAG[MongoDB Vector Search + Embeddings]
 
     GROQ -.->|Fallback| GEMINI
     GEMINI -.->|Fallback| GROQ
-    OCR --> ROUTER
 
     RAG --> DB
 
     CORE --> DOC[Document Studio Engine]
-    CORE --> COMM[Gmail SMTP Communication]
-
-    DOC --> STORE
-    COMM --> MAIL[Gmail SMTP Server]
-
-    API --> FE
+    CORE --> COMM[Teacher-Student Communications Hub]
 ```
 
 ---

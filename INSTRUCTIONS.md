@@ -198,43 +198,29 @@ docker compose down
 
 ---
 
-### ⚛️ Option B: Frontend Cloud Deployment (Vercel)
+### 🚀 Option B: Unified Vercel Platform Deployment (Frontend + FastAPI Backend)
 
-1. Push project repository to GitHub.
-2. Go to [Vercel Dashboard](https://vercel.com/) and click **Add New Project**.
-3. Import the `EduPilot-AI` repository.
-4. Set **Root Directory** to `frontend`.
-5. Set **Build Command** to `npm run build` and **Output Directory** to `dist`.
-6. Add Environment Variable:
-   - `VITE_API_URL` = `https://your-backend-render-url.onrender.com/api/v1`
-7. Click **Deploy**.
+Deploying both the React frontend and FastAPI backend together on **Vercel** provides **instant responses (~1s cold starts)** under a single unified domain without any CORS complexity.
 
-### 🐍 Option C: Backend Deployment (Render.com Web Service)
+#### Architecture Setup
+1. **Entrypoint**: `api/index.py` wraps the FastAPI `app` from `backend/app/main.py` for Vercel Serverless.
+2. **Build & Route Mapping**: `vercel.json` maps static SPA requests to `frontend/dist` and `/api/v1/*` requests to the Python serverless function.
+3. **Multimodal Vision AI**: Image and document visual analysis is powered by **Google Gemini 1.5 Flash Vision Cloud API**, keeping the serverless Python package light (~35 MB) and execution within 1–2 seconds.
 
-1. Go to [Render Dashboard](https://render.com/) → **New +** → **Web Service**.
-2. Select your repository: **`Babin123456/EduPilot-AI`**.
-3. Fill in the exact Render configuration fields:
-   - **Name**: `edupilot-backend`
-   - **Language / Environment**: `Python 3`
-   - **Branch**: `main`
-   - **Region**: `Oregon (US West)` (or any preferred region)
-   - **Root Directory**: `backend`
-   - **Build Command**: `pip install -e .`
-   - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-4. Add Environment Variables under the **Environment** tab (same keys as `backend/.env.example`):
+#### Deployment Steps:
+1. Push repository to GitHub.
+2. Go to [Vercel Dashboard](https://vercel.com/) $\to$ Click **Add New Project**.
+3. Import the `Babin123456/EduPilot-AI` repository.
+4. Keep **Root Directory** as `./` (Root).
+5. Add Environment Variables under **Project Settings $\to$ Environment Variables**:
    - `MONGODB_URI` = `mongodb+srv://user:pass@cluster.mongodb.net/?appName=Cluster0`
    - `MONGODB_DB_NAME` = `edupilot`
    - `SECRET_KEY` = *(generate with `python -c "import secrets; print(secrets.token_hex(32))"`)*
    - `JWT_SECRET_KEY` = *(generate with same command)*
    - `GROQ_API_KEY_1` = `gsk_...`
    - `GROQ_API_KEY_2` = `gsk_...`
-   - `GEMINI_API_KEY` = `your_key_here`
-   - `ALLOWED_ORIGINS` = `https://your-frontend-app.vercel.app`
-   - `FRONTEND_URL` = `https://your-frontend-app.vercel.app`
-5. Add one more **critical** Environment Variable for the keep-alive self-ping:
-   - `BACKEND_URL` = `https://edupilot-backend.onrender.com` *(your Render service URL)*
-   - `APP_ENV` = `production`
-6. Click **Create Web Service**. Render will deploy your FastAPI backend with full `rapidocr-onnxruntime` OCR support!
+   - `GEMINI_API_KEY` = `AQ.Ab...`
+6. Click **Deploy**. Vercel will build both the React frontend and Python FastAPI serverless backend simultaneously!
 
 ---
 

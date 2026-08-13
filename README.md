@@ -201,14 +201,14 @@ It unifies daily teaching workflows, institutional data, AI copilot intelligence
 
 ### 🐍 Backend Architecture
 
-- **Framework**: Python 3.11+ & FastAPI 0.115
+- **Framework**: Python 3.11+ & FastAPI 0.115 (Serverless Ready for Vercel Platform)
 - **Database**: MongoDB / Atlas & PyMongo
 - **Security**: JWT Access/Refresh tokens + direct bcrypt password hashing
 - **AI Engine & Router**: Smart Model Router with Groq API (`llama-3.3-70b-versatile` Dual Primary Keys) & Google Gemini (`gemini-1.5-flash` Vision)
-- **Image OCR Engine**: Local RapidOCR (`rapidocr-onnxruntime`) for pure Python offline text extraction (zero C++ / Tesseract setup)
+- **Multimodal Vision Engine**: Google Gemini 1.5 Flash Vision Cloud API for real-time visual analysis of handwriting, diagrams, formulas, and documents
 - **Vector RAG Engine**: HuggingFace `all-MiniLM-L6-v2` embeddings & MongoDB vector search / cosine similarity
 - **Communications**: Integrated Teacher-Student Mail Engine & Gmail SMTP Integration
-- **Keep-Alive Self-Ping**: Built-in background task pings `/api/health` every 13 minutes in production to prevent Render free tier cold starts
+- **Unified Vercel Platform**: Zero CORS complexity single-domain deployment with instant response times
 
 ### ⚛️ Frontend Architecture
 
