@@ -199,14 +199,21 @@ def _call_gemini_llm(prompt: str, api_key: str, model: str, image_b64: str | Non
         print(f"[Gemini] SKIP — key invalid (length={len(api_key)}, starts='{api_key[:6]}...')")
         return None
 
-    # Compress large images to avoid Vercel payload limits and speed up Gemini processing
-    actual_b64 = image_b64
-    actual_mime = mime_type
+    # Clean base64 string (strip data URI prefix if present and strip whitespace)
+    clean_b64 = None
     if image_b64:
+        clean_b64 = image_b64.strip()
+        if "," in clean_b64:
+            clean_b64 = clean_b64.split(",", 1)[1].strip()
+
+    actual_b64 = clean_b64
+    actual_mime = mime_type or "image/jpeg"
+
+    if clean_b64:
         try:
             import base64 as b64mod
             from PIL import Image as PILImage
-            raw_bytes = b64mod.b64decode(image_b64)
+            raw_bytes = b64mod.b64decode(clean_b64)
             img = PILImage.open(io.BytesIO(raw_bytes))
             # Resize if image is larger than 1024px on any side
             max_dim = 1024
@@ -218,80 +225,75 @@ def _call_gemini_llm(prompt: str, api_key: str, model: str, image_b64: str | Non
             rgb_img.save(buf, format="JPEG", quality=80)
             actual_b64 = b64mod.b64encode(buf.getvalue()).decode("utf-8")
             actual_mime = "image/jpeg"
-            print(f"[Gemini] Image compressed: {len(image_b64)} → {len(actual_b64)} chars (JPEG {img.width}x{img.height})")
+            print(f"[Gemini] Image compressed: {len(clean_b64)} → {len(actual_b64)} chars (JPEG {img.width}x{img.height})")
         except Exception as compress_err:
-            print(f"[Gemini] Image compression failed, using original: {compress_err}")
+            print(f"[Gemini] Image compression warning, using cleaned base64: {compress_err}")
 
-    try:
-        gemini_model = model or "gemini-2.0-flash-lite"
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/{gemini_model}:generateContent?key={api_key}"
-        headers = {"Content-Type": "application/json"}
+    # Build model candidate list to try for this key
+    primary_model = (model or "").strip() or "gemini-1.5-flash"
+    candidate_models = []
+    for m in [primary_model, "gemini-1.5-flash", "gemini-2.0-flash", "gemini-2.0-flash-lite"]:
+        if m and m not in candidate_models:
+            candidate_models.append(m)
 
-        parts: list[dict] = []
-        if actual_b64:
-            clean_mime = actual_mime.split(";")[0].strip() if actual_mime else "image/jpeg"
-            parts.append({
-                "inline_data": {
-                    "mime_type": clean_mime,
-                    "data": actual_b64
-                }
-            })
-        parts.append({"text": prompt})
+    headers = {"Content-Type": "application/json"}
+    parts: list[dict] = []
+    if actual_b64:
+        clean_mime = actual_mime.split(";")[0].strip() if actual_mime else "image/jpeg"
+        parts.append({
+            "inline_data": {
+                "mime_type": clean_mime,
+                "data": actual_b64
+            }
+        })
+    parts.append({"text": prompt})
 
-        payload = {
-            "contents": [{"parts": parts}],
-            "generationConfig": {
-                "temperature": 0.7,
-                "maxOutputTokens": 2048,
-            },
-        }
+    payload = {
+        "contents": [{"parts": parts}],
+        "generationConfig": {
+            "temperature": 0.7,
+            "maxOutputTokens": 2048,
+        },
+    }
 
-        b64_len = len(actual_b64) if actual_b64 else 0
-        print(f"[Gemini] Calling {gemini_model} | key=...{api_key[-6:]} | image_b64_len={b64_len} | prompt_len={len(prompt)}")
+    b64_len = len(actual_b64) if actual_b64 else 0
 
-        with httpx.Client(timeout=9.0) as client:
-            response = client.post(url, json=payload, headers=headers)
-            print(f"[Gemini] Response status={response.status_code}")
-            if response.status_code == 200:
-                data = response.json()
-                try:
-                    text = data["candidates"][0]["content"]["parts"][0]["text"]
-                    print(f"[Gemini] SUCCESS — response length={len(text)}")
-                    return text
-                except (KeyError, IndexError) as parse_err:
-                    # Check for safety block
-                    if "candidates" in data and data["candidates"]:
-                        finish_reason = data["candidates"][0].get("finishReason", "")
-                        if finish_reason == "SAFETY":
-                            print(f"[Gemini] Response blocked by safety filters: {data['candidates'][0].get('safetyRatings', [])}")
-                            return "I received your image but the content was flagged by safety filters. Please try with a different image or rephrase your question."
-                    print(f"[Gemini] Parse error: {parse_err} | Response data keys: {list(data.keys())}")
-                    if "promptFeedback" in data:
-                        print(f"[Gemini] Prompt feedback: {data['promptFeedback']}")
-                    return None
-            else:
-                error_text = response.text[:500]
-                print(f"[Gemini] API error status={response.status_code}: {error_text}")
-                # If 400 with specific model, try fallback model
-                if response.status_code == 404 and "gemini-2.0" in gemini_model:
-                    print(f"[Gemini] Model {gemini_model} not found, trying gemini-1.5-flash...")
-                    fallback_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
-                    response2 = client.post(fallback_url, json=payload, headers=headers)
-                    if response2.status_code == 200:
-                        data2 = response2.json()
-                        try:
-                            return data2["candidates"][0]["content"]["parts"][0]["text"]
-                        except (KeyError, IndexError):
-                            pass
-    except httpx.TimeoutException:
-        print(f"[Gemini] TIMEOUT after 9s — key=...{api_key[-6:]}")
-    except Exception as exc:
-        print(f"[Gemini] EXCEPTION: {type(exc).__name__}: {exc}")
+    for target_model in candidate_models:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{target_model}:generateContent?key={api_key}"
+        print(f"[Gemini] Calling {target_model} | key=...{api_key[-6:]} | image_b64_len={b64_len} | prompt_len={len(prompt)}")
+
+        try:
+            with httpx.Client(timeout=6.0) as client:
+                response = client.post(url, json=payload, headers=headers)
+                print(f"[Gemini] {target_model} status={response.status_code}")
+                if response.status_code == 200:
+                    data = response.json()
+                    try:
+                        text = data["candidates"][0]["content"]["parts"][0]["text"]
+                        print(f"[Gemini] SUCCESS ({target_model}) — response length={len(text)}")
+                        return text
+                    except (KeyError, IndexError) as parse_err:
+                        if "candidates" in data and data["candidates"]:
+                            finish_reason = data["candidates"][0].get("finishReason", "")
+                            if finish_reason == "SAFETY":
+                                print(f"[Gemini] Blocked by safety filters")
+                                return "I received your image but the content was flagged by safety filters. Please try with a different image or question."
+                        print(f"[Gemini] Parse error on 200 response: {parse_err}")
+                elif response.status_code == 429:
+                    print(f"[Gemini] 429 Rate Limit / Quota Exceeded on key ...{api_key[-6:]} — switching key immediately")
+                    break  # Key is out of quota, stop trying other models on this key
+                else:
+                    print(f"[Gemini] API error {target_model} status={response.status_code}: {response.text[:300]}")
+        except httpx.TimeoutException:
+            print(f"[Gemini] TIMEOUT on {target_model} (6s limit) — key=...{api_key[-6:]}")
+        except Exception as exc:
+            print(f"[Gemini] EXCEPTION on {target_model}: {type(exc).__name__}: {exc}")
+
     return None
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# DIAGNOSTIC: API KEY HEALTH CHECK
+# DIAGNOSTIC: API KEY HEALTH & LIVE TEST
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 @router.get("/debug-keys")
@@ -325,6 +327,50 @@ async def debug_keys():
             "VERCEL": os.environ.get("VERCEL", "not set"),
         },
     }
+
+
+@router.get("/test-gemini")
+async def test_gemini():
+    """Live diagnostic endpoint: Performs actual test calls to Google Gemini API with each key."""
+    settings = get_settings()
+    keys = [
+        ("gemini_api_key", settings.gemini_api_key or os.environ.get("GEMINI_API_KEY", "")),
+        ("gemini_api_key_1", settings.gemini_api_key_1 or os.environ.get("GEMINI_API_KEY_1", "")),
+        ("gemini_api_key_2", settings.gemini_api_key_2 or os.environ.get("GEMINI_API_KEY_2", "")),
+    ]
+
+    results = []
+    # 1x1 red PNG base64 for vision test
+    test_b64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+
+    for name, key_val in keys:
+        k_clean = (key_val or "").strip()
+        if not k_clean or len(k_clean) < 15 or "your_" in k_clean:
+            results.append({"name": name, "status": "skipped", "reason": "empty or placeholder key"})
+            continue
+
+        # Try a quick test call
+        try:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={k_clean}"
+            payload = {
+                "contents": [{
+                    "parts": [
+                        {"inline_data": {"mime_type": "image/png", "data": test_b64}},
+                        {"text": "Describe this test pixel in one word."}
+                    ]
+                }]
+            }
+            with httpx.Client(timeout=5.0) as client:
+                res = client.post(url, json=payload, headers={"Content-Type": "application/json"})
+                if res.status_code == 200:
+                    text = res.json()["candidates"][0]["content"]["parts"][0]["text"]
+                    results.append({"name": name, "key_preview": f"...{k_clean[-6:]}", "http_status": 200, "success": True, "response": text.strip()})
+                else:
+                    results.append({"name": name, "key_preview": f"...{k_clean[-6:]}", "http_status": res.status_code, "success": False, "error": res.text[:300]})
+        except Exception as exc:
+            results.append({"name": name, "key_preview": f"...{k_clean[-6:]}", "success": False, "error": f"{type(exc).__name__}: {str(exc)}"})
+
+    return {"test_time": datetime.now(timezone.utc).isoformat(), "results": results}
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
