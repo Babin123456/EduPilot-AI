@@ -253,6 +253,30 @@ def create_assignment(
     return {"id": assignment_doc["id"], "message": "Assignment created successfully"}
 
 
+@router.delete("/{assignment_id}")
+def delete_assignment(
+    assignment_id: str,
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
+):
+    """Delete an assignment and its associated submissions."""
+    assignment = db.assignments.find_one({"id": assignment_id})
+    if not assignment:
+        raise http_404("Assignment not found")
+
+    tca = db.teacher_course_assignments.find_one({
+        "id": assignment["teacher_course_assignment_id"],
+        "teacher_id": teacher["id"],
+    })
+    if not tca:
+        raise http_403("Not authorized")
+
+    db.assignment_submissions.delete_many({"assignment_id": assignment_id})
+    db.assignments.delete_one({"id": assignment_id})
+
+    return {"success": True, "message": "Assignment deleted successfully"}
+
+
 @router.get("/{assignment_id}/submissions")
 def get_submissions(
     assignment_id: str,

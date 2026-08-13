@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { api } from '../api/client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FileText, Sparkles, Download, Send, Eye, X, Loader2, ClipboardList } from 'lucide-react';
+import { FileText, Sparkles, Download, Send, Eye, X, Loader2, ClipboardList, Trash2 } from 'lucide-react';
 
 import { generateQuizPDF } from '../utils/pdfGenerator';
 
@@ -206,6 +206,22 @@ export const AssignmentsPage: React.FC = () => {
       .catch(() => {});
   };
 
+  const handleDeleteAssignment = async (assignmentId: string, assignmentTitle: string) => {
+    if (!window.confirm(`Are you sure you want to delete "${assignmentTitle}"?`)) return;
+    try {
+      await api.delete(`/assignments/${assignmentId}`);
+      toast.success('Assignment Deleted', `Successfully removed "${assignmentTitle}".`);
+      if (activeTitle === assignmentTitle) {
+        setGeneratedMarkdown(null);
+        setGeneratedQuestionsData([]);
+        setActiveTitle('');
+      }
+      fetchAssignments();
+    } catch (err) {
+      toast.error('Failed to Delete Assignment');
+    }
+  };
+
   const handleGenerateAIQuestions = async () => {
     if (!topic.trim() || !activeClass) return;
     setGenerating(true);
@@ -366,58 +382,67 @@ export const AssignmentsPage: React.FC = () => {
               <span>Submissions: <strong>{a.submitted_count}/{a.total_students}</strong></span>
               <span>Marks: <strong>{a.total_marks}</strong></span>
             </div>
-            <button
-              onClick={() => {
-                let mdText = a.instructions || '';
-                let qData = [];
+            <div className="flex items-center gap-2 pt-1">
+              <button
+                onClick={() => {
+                  let mdText = a.instructions || '';
+                  let qData = [];
 
-                if (a.questions_json) {
-                  try {
-                    qData = typeof a.questions_json === 'string' ? JSON.parse(a.questions_json) : a.questions_json;
-                  } catch (e) {
-                    qData = [];
+                  if (a.questions_json) {
+                    try {
+                      qData = typeof a.questions_json === 'string' ? JSON.parse(a.questions_json) : a.questions_json;
+                    } catch (e) {
+                      qData = [];
+                    }
                   }
-                }
 
-                if (!mdText) {
-                  if (qData && qData.length > 0) {
-                    const mdLines = [
-                      `# ${a.title}`,
-                      `**Course:** ${activeClass?.course_name || ''} (\`${activeClass?.course_code || ''}\`) | **Total Marks:** ${a.total_marks || 50} | **Difficulty:** ${(a.difficulty || 'medium').toUpperCase()}`,
-                      '\n---\n',
-                    ];
-                    qData.forEach((q: any) => {
-                      mdLines.push(`### Question ${q.number} [${q.marks || 5} Marks]\n${q.text}\n`);
-                      if (q.options) {
-                        q.options.forEach((opt: string) => mdLines.push(`- ${opt}`));
-                        mdLines.push('');
-                      }
-                    });
-                    mdText = mdLines.join('\n');
-                  } else {
-                    mdText = `# ${a.title}\n**Course:** ${activeClass?.course_name || ''} (\`${activeClass?.course_code || ''}\`)\n\n${a.description || 'No detailed instructions available.'}`;
+                  if (!mdText) {
+                    if (qData && qData.length > 0) {
+                      const mdLines = [
+                        `# ${a.title}`,
+                        `**Course:** ${activeClass?.course_name || ''} (\`${activeClass?.course_code || ''}\`) | **Total Marks:** ${a.total_marks || 50} | **Difficulty:** ${(a.difficulty || 'medium').toUpperCase()}`,
+                        '\n---\n',
+                      ];
+                      qData.forEach((q: any) => {
+                        mdLines.push(`### Question ${q.number} [${q.marks || 5} Marks]\n${q.text}\n`);
+                        if (q.options) {
+                          q.options.forEach((opt: string) => mdLines.push(`- ${opt}`));
+                          mdLines.push('');
+                        }
+                      });
+                      mdText = mdLines.join('\n');
+                    } else {
+                      mdText = `# ${a.title}\n**Course:** ${activeClass?.course_name || ''} (\`${activeClass?.course_code || ''}\`)\n\n${a.description || 'No detailed instructions available.'}`;
+                    }
                   }
-                }
 
-                if (!qData || qData.length === 0) {
-                  qData = Array.from({ length: 5 }, (_, i) => ({
-                    number: i + 1,
-                    text: `Solve and submit problem ${i + 1} regarding ${a.topic || a.title}.`,
-                    type: 'short',
-                    marks: Math.ceil((a.total_marks || 50) / 5),
-                  }));
-                }
+                  if (!qData || qData.length === 0) {
+                    qData = Array.from({ length: 5 }, (_, i) => ({
+                      number: i + 1,
+                      text: `Solve and submit problem ${i + 1} regarding ${a.topic || a.title}.`,
+                      type: 'short',
+                      marks: Math.ceil((a.total_marks || 50) / 5),
+                    }));
+                  }
 
-                setGeneratedQuestionsData(qData);
-                setGeneratedMarkdown(mdText);
-                setActiveTitle(a.title);
-                toast.info('Opened Assignment View', `Review "${a.title}" in Markdown format.`);
-              }}
-              className="w-full py-2 bg-slate-100 dark:bg-slate-800 hover:bg-[#005BAC] hover:text-white text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-colors"
-            >
-              <Eye className="w-3.5 h-3.5" />
-              <span>View Material & PDF</span>
-            </button>
+                  setGeneratedQuestionsData(qData);
+                  setGeneratedMarkdown(mdText);
+                  setActiveTitle(a.title);
+                  toast.info('Opened Assignment View', `Review "${a.title}" in Markdown format.`);
+                }}
+                className="flex-1 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-[#005BAC] hover:text-white text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-colors"
+              >
+                <Eye className="w-3.5 h-3.5" />
+                <span>View Material & PDF</span>
+              </button>
+              <button
+                onClick={() => handleDeleteAssignment(a.id, a.title)}
+                className="p-2 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-600 hover:text-white text-rose-600 dark:text-rose-400 rounded-xl transition-colors"
+                title="Delete Assignment"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         ))}
       </div>
