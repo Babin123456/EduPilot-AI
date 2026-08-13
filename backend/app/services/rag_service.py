@@ -455,21 +455,33 @@ def delete_rag_document(document_id: str, teacher_id: str, db: Database) -> bool
 
 
 def list_rag_documents(teacher_id: str, db: Database) -> list[dict]:
-    """List all RAG documents uploaded by a teacher.
-
-    Args:
-        teacher_id: The teacher's ID.
-        db: MongoDB Database instance.
-
-    Returns:
-        List of document metadata dicts (without embeddings).
-    """
-    docs = list(
+    """List all RAG documents uploaded by a teacher with automatic deduplication."""
+    raw_docs = list(
         db.rag_documents.find(
             {"teacher_id": teacher_id},
             {"_id": 0},
         )
         .sort("created_at", -1)
-        .limit(50)
+        .limit(100)
     )
-    return docs
+
+    seen_keys = set()
+    unique_docs = []
+    duplicate_ids = []
+
+    for doc in raw_docs:
+        key = (doc.get("filename"), doc.get("file_size_bytes"))
+        if key in seen_keys:
+            if doc.get("id"):
+                duplicate_ids.append(doc["id"])
+        else:
+            seen_keys.add(key)
+            unique_docs.append(doc)
+
+    if duplicate_ids:
+        try:
+            db.rag_documents.delete_many({"id": {"$in": duplicate_ids}})
+        except Exception:
+            pass
+
+    return unique_docs

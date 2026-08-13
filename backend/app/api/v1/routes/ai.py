@@ -547,6 +547,8 @@ async def upload_file_for_ai(
 
     # Auto-ingest documents into RAG Knowledge Library (PDF & DOCX)
     if ext in [".pdf", ".docx"]:
+        # Remove any existing document with same filename to avoid duplication
+        db.rag_documents.delete_many({"teacher_id": teacher["id"], "filename": filename})
         background_tasks.add_task(
             ingest_document,
             file_bytes=file_bytes,
@@ -554,8 +556,20 @@ async def upload_file_for_ai(
             teacher_id=teacher["id"],
             db=db,
         )
+        return {
+            "success": True,
+            "filename": parsed["filename"],
+            "file_type": parsed["file_type"],
+            "size_bytes": parsed["size_bytes"],
+            "extracted_text": parsed["text_content"],
+            "image_url": None,
+            "image_b64": None,
+            "mime_type": None,
+            "summary": f"Uploaded {parsed['file_type'].upper()} document '{parsed['filename']}' ({parsed['size_bytes']} bytes) — auto-indexing into Knowledge Base.",
+        }
 
-    # Persist document record into Knowledge Base (db.rag_documents) for all file types
+    # For Non-PDF/DOCX file types (Images, PPT, Excel), remove previous duplicates and insert SINGLE record
+    db.rag_documents.delete_many({"teacher_id": teacher["id"], "filename": filename})
     doc_record = new_rag_document(
         teacher_id=teacher["id"],
         filename=filename,
