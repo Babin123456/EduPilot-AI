@@ -83,6 +83,10 @@ export const AttendancePage: React.FC = () => {
     }
   };
 
+  if (loading) {
+    return <SkeletonPageLoader count={6} />;
+  }
+
   if (!activeClass) {
     return (
       <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">

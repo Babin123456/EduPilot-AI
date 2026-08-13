@@ -83,7 +83,7 @@ export const DashboardPage: React.FC = () => {
     count
   })) : [];
 
-  if (loading && !summary) {
+  if (loading) {
     return <SkeletonPageLoader count={6} />;
   }
 

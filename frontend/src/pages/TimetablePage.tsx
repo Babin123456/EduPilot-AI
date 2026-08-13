@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { api } from '../api/client';
 import { Clock, MapPin } from 'lucide-react';
 
+import { SkeletonPageLoader } from '../components/SkeletonPageLoader';
+
 export const TimetablePage: React.FC = () => {
   const [week, setWeek] = useState<Record<string, any[]>>({});
   const [loading, setLoading] = useState(true);
@@ -11,6 +13,10 @@ export const TimetablePage: React.FC = () => {
       .then(res => setWeek(res.data))
       .finally(() => setLoading(false));
   }, []);
+
+  if (loading) {
+    return <SkeletonPageLoader count={6} />;
+  }
 
   return (
     <div className="space-y-6">
@@ -27,20 +33,7 @@ export const TimetablePage: React.FC = () => {
         </div>
       </div>
 
-
-
-      {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array(6).fill(0).map((_, i) => (
-            <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm space-y-4 animate-pulse">
-              <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-24 mb-2" />
-              <div className="h-16 bg-slate-100 dark:bg-slate-800/50 rounded-xl" />
-              <div className="h-16 bg-slate-100 dark:bg-slate-800/50 rounded-xl" />
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {Object.entries(week).map(([day, slots]) => (
           <div key={day} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm space-y-4">
             <h3 className="font-extrabold text-slate-900 dark:text-white text-sm border-b border-slate-100 dark:border-slate-800 pb-2">
@@ -69,7 +62,6 @@ export const TimetablePage: React.FC = () => {
           </div>
         ))}
       </div>
-      )}
     </div>
   );
 };

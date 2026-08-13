@@ -40,15 +40,27 @@ def list_communications(
     comms = list(
         db.communications.find(query_filter).sort("created_at", -1).limit(30)
     )
+    if not comms:
+        return []
+
+    # Pre-fetch all referenced TCAs, courses, years, and sections in bulk
+    tca_ids = list(set(c["teacher_course_assignment_id"] for c in comms if c.get("teacher_course_assignment_id")))
+    tcas = {t["id"]: t for t in db.teacher_course_assignments.find({"id": {"$in": tca_ids}})} if tca_ids else {}
+
+    course_ids = list(set(t["course_id"] for t in tcas.values() if t.get("course_id")))
+    year_ids = list(set(t["year_id"] for t in tcas.values() if t.get("year_id")))
+    section_ids = list(set(t["section_id"] for t in tcas.values() if t.get("section_id")))
+
+    courses = {c["id"]: c for c in db.courses.find({"id": {"$in": course_ids}})} if course_ids else {}
+    years = {y["id"]: y for y in db.years.find({"id": {"$in": year_ids}})} if year_ids else {}
+    sections = {s["id"]: s for s in db.sections.find({"id": {"$in": section_ids}})} if section_ids else {}
 
     result = []
     for c in comms:
-        tca = db.teacher_course_assignments.find_one(
-            {"id": c.get("teacher_course_assignment_id")}
-        ) if c.get("teacher_course_assignment_id") else None
-        course = db.courses.find_one({"id": tca["course_id"]}) if tca else None
-        year = db.years.find_one({"id": tca["year_id"]}) if tca else None
-        section = db.sections.find_one({"id": tca["section_id"]}) if tca else None
+        tca = tcas.get(c.get("teacher_course_assignment_id"))
+        course = courses.get(tca["course_id"]) if tca and tca.get("course_id") else None
+        year = years.get(tca["year_id"]) if tca and tca.get("year_id") else None
+        section = sections.get(tca["section_id"]) if tca and tca.get("section_id") else None
 
         sent_at = c.get("sent_at")
         created_at = c.get("created_at")
