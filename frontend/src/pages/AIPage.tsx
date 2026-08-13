@@ -63,6 +63,7 @@ export const AIPage: React.FC = () => {
   const [ragDocuments, setRagDocuments] = useState<RagDocument[]>([]);
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const imageInputRef = React.useRef<HTMLInputElement>(null);
   const ragFileInputRef = React.useRef<HTMLInputElement>(null);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
 
@@ -781,20 +782,42 @@ export const AIPage: React.FC = () => {
             }}
             className="flex items-center gap-2"
           >
-            {/* File Upload Input Button (PDF, DOCX, PPT, Excel, Image) */}
+            {/* Dedicated Image Upload Button */}
+            <input
+              type="file"
+              ref={imageInputRef}
+              onChange={handleFileUpload}
+              accept="image/*,.png,.jpg,.jpeg,.webp,.gif"
+              className="hidden"
+            />
+            <button
+              type="button"
+              onClick={() => imageInputRef.current?.click()}
+              disabled={uploading}
+              title="Upload Image (PNG, JPG, WebP, GIF for Vision Analysis)"
+              className="p-3 bg-slate-100 dark:bg-slate-800 hover:bg-[#005BAC]/10 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-[#005BAC] dark:hover:text-[#8CC63F] rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center"
+            >
+              {uploading ? (
+                <Loader2 className="w-4 h-4 animate-spin text-[#005BAC]" />
+              ) : (
+                <ImageIcon className="w-4 h-4 text-[#005BAC] dark:text-[#8CC63F]" />
+              )}
+            </button>
+
+            {/* Document File Attachment Button */}
             <input
               type="file"
               ref={fileInputRef}
               onChange={handleFileUpload}
-              accept=".pdf,.docx,.pptx,.ppt,.xlsx,.xls,.csv,.webp,.jpg,.jpeg,.webp"
+              accept=".pdf,.docx,.pptx,.ppt,.xlsx,.xls,.csv"
               className="hidden"
             />
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
-              title="Attach file (PDF, DOCX, PPT, Excel, Image)"
-              className="p-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl transition-colors disabled:opacity-50"
+              title="Attach Document (PDF, DOCX, PPT, Excel)"
+              className="p-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center"
             >
               {uploading ? (
                 <Loader2 className="w-4 h-4 animate-spin text-[#005BAC]" />
