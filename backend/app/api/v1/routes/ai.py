@@ -195,30 +195,39 @@ def _call_groq_llm(messages: list[dict], api_key: str, model: str) -> str | None
 
 
 def _call_gemini_llm(prompt: str, api_key: str, model: str, image_b64: str | None = None, mime_type: str = "image/png") -> str | None:
-    """Call Gemini API directly using httpx with 10.0s timeout and optional inline base64 image data for visual analysis."""
+    """Call Gemini API directly using httpx with 15.0s timeout and inline base64 image data for visual analysis."""
     api_key = (api_key or "").strip()
     if not api_key or "your_" in api_key or len(api_key) < 25:
+        print(f"[Gemini API Warning] Invalid or missing Gemini API key (length: {len(api_key)})")
         return None
     try:
         gemini_model = model or "gemini-1.5-flash"
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{gemini_model}:generateContent?key={api_key}"
         headers = {"Content-Type": "application/json"}
-        parts: list[dict] = [{"text": prompt}]
+        
+        parts: list[dict] = []
         if image_b64:
+            clean_mime = mime_type.split(";")[0].strip() if mime_type else "image/png"
             parts.append({
                 "inline_data": {
-                    "mime_type": mime_type,
+                    "mime_type": clean_mime,
                     "data": image_b64
                 }
             })
+        parts.append({"text": prompt})
+
         payload = {
             "contents": [{"parts": parts}]
         }
-        with httpx.Client(timeout=10.0) as client:
+        with httpx.Client(timeout=15.0) as client:
             response = client.post(url, json=payload, headers=headers)
             if response.status_code == 200:
                 data = response.json()
-                return data["candidates"][0]["content"]["parts"][0]["text"]
+                try:
+                    return data["candidates"][0]["content"]["parts"][0]["text"]
+                except (KeyError, IndexError) as parse_err:
+                    print(f"[Gemini Parse Error] Could not extract response text: {parse_err}, Data: {data}")
+                    return None
             else:
                 print(f"[LLM Error] Gemini API returned status {response.status_code}: {response.text}")
     except Exception as exc:
@@ -575,11 +584,20 @@ def chat(
     if has_attachment:
         # Attachment detected (Image or Document) -> Smart Route to Gemini Vision / Flash first with Multi-Key Failover
         model_used = "Gemini 1.5 Flash (Vision & Attachment Route)"
-        gemini_prompt = f"{system_prompt}\n\nUser Question: {full_user_input}"
+        if body.image_b64:
+            gemini_prompt = (
+                f"You are EduPilot AI, an expert visual & document AI assistant for Professor {teacher['full_name']}.\n"
+                f"The user has attached an image file for visual inspection.\n"
+                f"Inspect the image pixels thoroughly. Read all text, logos, headers, links, table data, and details inside the image.\n"
+                f"User Question: {body.message}\n"
+                f"Format your response in clean, professional Markdown."
+            )
+        else:
+            gemini_prompt = f"{system_prompt}\n\nUser Question: {full_user_input}"
         ai_response = _gemini_with_failover(gemini_prompt, body.image_b64, body.mime_type)
 
-        # Fallback to Groq if Gemini fails across all keys
-        if not ai_response:
+        # Fallback to Groq ONLY if it's a document (not a visual image requiring Gemini Vision)
+        if not ai_response and not body.image_b64:
             model_used = "Groq Llama-3.3-70B (Attachment Fallback)"
             ai_response = _call_groq_llm(llm_messages, settings.groq_api_key_1, settings.groq_model)
             if not ai_response:
