@@ -19,6 +19,8 @@ interface AttachedFile {
   text_content?: string;
   summary: string;
   image_url?: string | null;
+  image_b64?: string | null;
+  mime_type?: string | null;
 }
 
 interface RagDocument {

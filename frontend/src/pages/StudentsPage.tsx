@@ -184,7 +184,7 @@ export const StudentsPage: React.FC = () => {
           </button>
         </div>
 
-        <div className="w-36 h-24 flex items-center justify-center hidden sm:flex flex-shrink-0 relative z-10">
+        <div className="w-36 h-24 items-center justify-center hidden sm:flex flex-shrink-0 relative z-10">
           <img src="/images/analytics_dashboard.png" alt="Students Banner" className="w-full h-auto max-h-24 object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.4)]" />
         </div>
       </div>
