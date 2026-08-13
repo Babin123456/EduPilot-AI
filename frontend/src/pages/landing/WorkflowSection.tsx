@@ -67,7 +67,7 @@ export const WorkflowSection: React.FC = () => {
     <section
       id="workflow"
       ref={sectionRef}
-      className="py-28 bg-slate-50 dark:bg-[#0F172A] relative overflow-hidden transition-colors duration-200 wave-divider"
+      className="py-28 bg-slate-50 dark:bg-[#0F172A] relative overflow-hidden transition-colors duration-200 pb-36"
     >
       {/* ─── Upgraded Vibrant Ambient Background Light Effect ─── */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
