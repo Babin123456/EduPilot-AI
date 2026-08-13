@@ -111,11 +111,13 @@ async def lifespan(app: FastAPI):
     _server_start_time = datetime.now(timezone.utc)
 
     settings = get_settings()
-    try:
-        ensure_indexes()
-        run_seed()
-    except Exception as e:
-        print(f"[Warning] Database connection deferred during startup: {e}")
+    import os
+    if not os.environ.get("VERCEL"):
+        try:
+            ensure_indexes()
+            run_seed()
+        except Exception as e:
+            print(f"[Warning] Database connection deferred during startup: {e}")
 
     # Ensure storage directory exists
     settings.storage_path
