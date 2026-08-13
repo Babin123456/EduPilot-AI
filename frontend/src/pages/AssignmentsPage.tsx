@@ -426,7 +426,7 @@ export const AssignmentsPage: React.FC = () => {
                       });
                       mdText = mdLines.join('\n');
                     } else {
-                      mdText = `# ${a.title}\n**Course:** ${activeClass?.course_name || ''} (\`${activeClass?.course_code || ''}\`)\n\n${a.description || 'No detailed instructions available.'}`;
+                      mdText = `# ${a.title}\n**Course:** ${activeClass?.course_name || ''} (\`${activeClass?.course_code || ''}\`)\n\n${a.description || ''}`;
                     }
                   }
 

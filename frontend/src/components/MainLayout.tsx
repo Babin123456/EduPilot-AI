@@ -91,7 +91,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
           <div className="h-16 flex items-center justify-between px-5 border-b border-teal-200/50 dark:border-teal-900/30 flex-shrink-0 bg-white/40 dark:bg-slate-950/40 backdrop-blur-sm">
             <div className="flex items-center gap-3 overflow-hidden">
               <img
-                src="/brand_logo.webp"
+                src="/images/brand_logo.webp"
                 alt="EduPilot AI Logo"
                 className="w-11 h-11 object-contain flex-shrink-0"
               />

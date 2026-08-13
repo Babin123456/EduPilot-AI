@@ -153,7 +153,7 @@ export const FAQPage: React.FC = () => {
     <div className="min-h-screen bg-slate-50 dark:bg-[#071426] text-slate-900 dark:text-white transition-colors duration-200">
       <header className="sticky top-0 z-40 bg-white/90 dark:bg-[#0F172A]/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 py-4 px-4 sm:px-8 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-3">
-          <img src="/brand_logo.webp" alt="EduPilot Logo" className="w-8 h-8 object-contain" />
+          <img src="/images/brand_logo.webp" alt="EduPilot Logo" className="w-10 h-10 object-contain" />
           <span className="font-extrabold text-base tracking-tight">EduPilot AI</span>
         </Link>
         <div className="flex items-center gap-4">

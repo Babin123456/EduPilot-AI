@@ -82,7 +82,7 @@ export const LandingFooter: React.FC<LandingFooterProps> = ({ onNavigate }) => {
         <div className="footer-eyebrow flex flex-col md:flex-row items-center justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800/60">
           <div className="flex items-center gap-3">
             <img
-              src="/brand_logo.webp"
+              src="/images/brand_logo.webp"
               alt="EduPilot AI Logo"
               className="w-12 h-12 object-contain"
             />
