@@ -197,7 +197,7 @@ def _call_groq_llm(messages: list[dict], api_key: str, model: str) -> str | None
 def _call_gemini_llm(prompt: str, api_key: str, model: str, image_b64: str | None = None, mime_type: str = "image/png") -> str | None:
     """Call Gemini API directly using httpx with 15.0s timeout and inline base64 image data for visual analysis."""
     api_key = (api_key or "").strip()
-    if not api_key or "your_" in api_key or len(api_key) < 25:
+    if not api_key or "your_" in api_key or len(api_key) < 15:
         print(f"[Gemini API Warning] Invalid or missing Gemini API key (length: {len(api_key)})")
         return None
     try:
@@ -566,7 +566,7 @@ def chat(
         valid_keys = []
         for k in keys_to_try:
             k_clean = (k or "").strip()
-            if k_clean and "your_" not in k_clean and len(k_clean) >= 25 and k_clean not in valid_keys:
+            if k_clean and "your_" not in k_clean and len(k_clean) >= 15 and k_clean not in valid_keys:
                 valid_keys.append(k_clean)
 
         for key in valid_keys:
