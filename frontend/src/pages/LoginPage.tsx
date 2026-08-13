@@ -11,6 +11,11 @@ const DEMO_FACULTY = [
   { faculty_id: 'FAC-UNIV-003', name: 'Prof. Amitava Chatterjee', email: 'amitava.chatterjee@edupilot.ai', password: 'demo@1234', designation: 'Professor', specialization: 'AI & Machine Learning' },
   { faculty_id: 'FAC-UNIV-004', name: 'Prof. Sunita Devi', email: 'sunita.devi@edupilot.ai', password: 'demo@1234', designation: 'Assistant Professor', specialization: 'Networks & Security' },
   { faculty_id: 'FAC-UNIV-005', name: 'Prof. Debashis Ghosh', email: 'debashis.ghosh@edupilot.ai', password: 'demo@1234', designation: 'Associate Professor', specialization: 'OS & Cloud Computing' },
+  { faculty_id: 'FAC-UNIV-006', name: 'Prof. Meenakshi Iyer', email: 'meenakshi.iyer@edupilot.ai', password: 'demo@1234', designation: 'Assistant Professor', specialization: 'Software Engineering & Web Technologies' },
+  { faculty_id: 'FAC-UNIV-007', name: 'Prof. Arpan Mukherjee', email: 'arpan.mukherjee@edupilot.ai', password: 'demo@1234', designation: 'Professor', specialization: 'Deep Learning & NLP' },
+  { faculty_id: 'FAC-UNIV-008', name: 'Prof. Kavita Sharma', email: 'kavita.sharma@edupilot.ai', password: 'demo@1234', designation: 'Assistant Professor', specialization: 'Mathematics & Discrete Structures' },
+  { faculty_id: 'FAC-UNIV-009', name: 'Prof. Subhashis Roy', email: 'subhashis.roy@edupilot.ai', password: 'demo@1234', designation: 'Associate Professor', specialization: 'Blockchain & Cyber Security' },
+  { faculty_id: 'FAC-UNIV-010', name: 'Prof. Ananya Sengupta', email: 'ananya.sengupta@edupilot.ai', password: 'demo@1234', designation: 'Assistant Professor', specialization: 'IoT & Embedded Systems' },
 ];
 
 export const LoginPage: React.FC = () => {
