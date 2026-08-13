@@ -203,7 +203,7 @@ docker compose down
 Deploying both the React frontend and FastAPI backend together on **Vercel** provides **instant responses (~1s cold starts)** under a single unified domain without any CORS complexity.
 
 #### Architecture Setup
-1. **Entrypoint**: `api/index.py` wraps the FastAPI `app` from `backend/app/main.py` for Vercel Serverless.
+1. **Entrypoint**: `api/index.py` wraps the FastAPI `app` from `backend/app/main.py` for Vercel Serverless execution.
 2. **Build & Route Mapping**: `vercel.json` maps static SPA requests to `frontend/dist` and `/api/v1/*` requests to the Python serverless function.
 3. **Multimodal Vision AI**: Image and document visual analysis is powered by **Google Gemini 1.5 Flash Vision Cloud API**, keeping the serverless Python package light (~35 MB) and execution within 1–2 seconds.
 
@@ -224,44 +224,7 @@ Deploying both the React frontend and FastAPI backend together on **Vercel** pro
 
 ---
 
-## 🏓 5. Keep-Alive Self-Ping (Render Free Tier)
-
-Render's free tier **spins down** web services after 15 minutes of inactivity, causing 30–50 second cold-start delays on the next request. EduPilot AI includes a **built-in background self-ping** that eliminates this problem entirely.
-
-### How It Works
-
-When `APP_ENV=production` **and** `BACKEND_URL` is set to a non-localhost URL, the backend automatically starts a background task on startup that:
-
-1. Waits **13 minutes** (safely under Render's 15-minute idle threshold)
-2. Sends an HTTP GET to its own `/api/health` endpoint
-3. Repeats indefinitely, keeping the Render service permanently awake
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│  FastAPI Server (Render)                                    │
-│                                                             │
-│  startup → _keep_alive_ping() background task started       │
-│           │                                                 │
-│           ├── sleep 13 min                                  │
-│           ├── GET /api/health → 200 OK                      │
-│           ├── sleep 13 min                                  │
-│           ├── GET /api/health → 200 OK                      │
-│           └── ... (repeats forever)                         │
-│                                                             │
-│  Render idle timer is reset on every ping → never sleeps!   │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### Required Environment Variables (on Render)
-
-| Variable | Value | Purpose |
-| :--- | :--- | :--- |
-| `APP_ENV` | `production` | Enables the keep-alive task |
-| `BACKEND_URL` | `https://edupilot-backend.onrender.com` | The URL the service pings itself at |
-
-> 💡 The keep-alive task is **automatically disabled** in local development (when `APP_ENV=development` or `BACKEND_URL=http://localhost:8000`).
-
-### Health Check Endpoint
+### 🏥 Health Check Endpoint
 
 ```
 GET /api/health
@@ -272,21 +235,9 @@ Response:
 {
   "status": "healthy",
   "app": "EduPilot AI",
-  "version": "1.0.0",
-  "uptime_seconds": 4523,
-  "started_at": "2026-08-12T18:00:00+00:00"
+  "version": "1.0.0"
 }
 ```
-
-### Optional: External Monitoring (Extra Reliability)
-
-For additional reliability, you can also set up a free external uptime monitor:
-
-1. Go to [UptimeRobot](https://uptimerobot.com/) (free, no credit card)
-2. Add a new **HTTP(s) Monitor**:
-   - **URL**: `https://edupilot-backend.onrender.com/api/health`
-   - **Monitoring Interval**: `5 minutes`
-3. UptimeRobot will ping your backend every 5 minutes — a second safety net alongside the built-in self-ping.
 
 ---
 
