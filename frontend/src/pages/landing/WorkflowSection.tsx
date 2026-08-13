@@ -67,7 +67,7 @@ export const WorkflowSection: React.FC = () => {
     <section
       id="workflow"
       ref={sectionRef}
-      className="py-28 bg-slate-50 dark:bg-[#0F172A] relative overflow-hidden transition-colors duration-200 pb-36"
+      className="py-28 bg-[#F8FAFC] dark:bg-[#0F172A] relative overflow-hidden transition-colors duration-200 wave-divider-alt"
     >
       {/* ─── Upgraded Vibrant Ambient Background Light Effect ─── */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -172,13 +172,6 @@ export const WorkflowSection: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Curvy Wave Ending Segment Divider */}
-      <div className="absolute bottom-0 left-0 right-0 overflow-hidden leading-none z-10 pointer-events-none">
-        <svg className="relative block w-full h-[60px] sm:h-[80px]" viewBox="0 0 1440 80" preserveAspectRatio="none">
-          <path fill="currentColor" className="text-white dark:text-[#020617]" d="M0,32L48,42.7C96,53,192,75,288,80C384,85,480,75,576,64C672,53,768,43,864,48C960,53,1056,75,1152,80C1248,85,1344,75,1392,69.3L1440,64L1440,80L1392,80C1344,80,1248,80,1152,80C1056,80,960,80,864,80C768,80,672,80,576,80C480,80,384,80,288,80C192,80,96,80,48,80L0,80Z" />
-        </svg>
       </div>
     </section>
   );
