@@ -229,12 +229,20 @@ def _call_gemini_llm(prompt: str, api_key: str, model: str, image_b64: str | Non
         except Exception as compress_err:
             print(f"[Gemini] Image compression warning, using cleaned base64: {compress_err}")
 
-    # Build model candidate list to try for this key
+    # Build candidate (api_version, model_name) pairs to try for this key
     primary_model = (model or "").strip() or "gemini-1.5-flash"
-    candidate_models = []
-    for m in [primary_model, "gemini-1.5-flash", "gemini-2.0-flash", "gemini-2.0-flash-lite"]:
-        if m and m not in candidate_models:
-            candidate_models.append(m)
+    candidate_endpoints = [
+        ("v1", primary_model if primary_model != "gemini-2.0-flash" else "gemini-1.5-flash"),
+        ("v1beta", "gemini-2.0-flash"),
+        ("v1beta", "gemini-2.0-flash-lite"),
+        ("v1beta", "gemini-1.5-flash-latest"),
+        ("v1", "gemini-1.5-pro"),
+    ]
+    # Deduplicate preserving order
+    unique_candidates = []
+    for ver, mname in candidate_endpoints:
+        if (ver, mname) not in unique_candidates:
+            unique_candidates.append((ver, mname))
 
     headers = {"Content-Type": "application/json"}
     parts: list[dict] = []
@@ -258,19 +266,19 @@ def _call_gemini_llm(prompt: str, api_key: str, model: str, image_b64: str | Non
 
     b64_len = len(actual_b64) if actual_b64 else 0
 
-    for target_model in candidate_models:
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/{target_model}:generateContent?key={api_key}"
-        print(f"[Gemini] Calling {target_model} | key=...{api_key[-6:]} | image_b64_len={b64_len} | prompt_len={len(prompt)}")
+    for api_ver, target_model in unique_candidates:
+        url = f"https://generativelanguage.googleapis.com/{api_ver}/models/{target_model}:generateContent?key={api_key}"
+        print(f"[Gemini] Calling {api_ver}/{target_model} | key=...{api_key[-6:]} | image_b64_len={b64_len} | prompt_len={len(prompt)}")
 
         try:
             with httpx.Client(timeout=6.0) as client:
                 response = client.post(url, json=payload, headers=headers)
-                print(f"[Gemini] {target_model} status={response.status_code}")
+                print(f"[Gemini] {api_ver}/{target_model} status={response.status_code}")
                 if response.status_code == 200:
                     data = response.json()
                     try:
                         text = data["candidates"][0]["content"]["parts"][0]["text"]
-                        print(f"[Gemini] SUCCESS ({target_model}) — response length={len(text)}")
+                        print(f"[Gemini] SUCCESS ({api_ver}/{target_model}) — response length={len(text)}")
                         return text
                     except (KeyError, IndexError) as parse_err:
                         if "candidates" in data and data["candidates"]:
@@ -283,11 +291,11 @@ def _call_gemini_llm(prompt: str, api_key: str, model: str, image_b64: str | Non
                     print(f"[Gemini] 429 Rate Limit / Quota Exceeded on key ...{api_key[-6:]} — switching key immediately")
                     break  # Key is out of quota, stop trying other models on this key
                 else:
-                    print(f"[Gemini] API error {target_model} status={response.status_code}: {response.text[:300]}")
+                    print(f"[Gemini] API error {api_ver}/{target_model} status={response.status_code}: {response.text[:300]}")
         except httpx.TimeoutException:
-            print(f"[Gemini] TIMEOUT on {target_model} (6s limit) — key=...{api_key[-6:]}")
+            print(f"[Gemini] TIMEOUT on {api_ver}/{target_model} (6s limit) — key=...{api_key[-6:]}")
         except Exception as exc:
-            print(f"[Gemini] EXCEPTION on {target_model}: {type(exc).__name__}: {exc}")
+            print(f"[Gemini] EXCEPTION on {api_ver}/{target_model}: {type(exc).__name__}: {exc}")
 
     return None
 
@@ -331,7 +339,7 @@ async def debug_keys():
 
 @router.get("/test-gemini")
 async def test_gemini():
-    """Live diagnostic endpoint: Performs actual test calls to Google Gemini API with each key."""
+    """Live diagnostic endpoint: Performs actual test calls to Google Gemini API with each key across endpoints."""
     settings = get_settings()
     keys = [
         ("gemini_api_key", settings.gemini_api_key or os.environ.get("GEMINI_API_KEY", "")),
@@ -343,32 +351,41 @@ async def test_gemini():
     # 1x1 red PNG base64 for vision test
     test_b64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
 
+    endpoints_to_test = [
+        ("v1", "gemini-1.5-flash"),
+        ("v1beta", "gemini-2.0-flash"),
+        ("v1beta", "gemini-2.0-flash-lite"),
+    ]
+
     for name, key_val in keys:
         k_clean = (key_val or "").strip()
         if not k_clean or len(k_clean) < 15 or "your_" in k_clean:
             results.append({"name": name, "status": "skipped", "reason": "empty or placeholder key"})
             continue
 
-        # Try a quick test call
-        try:
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={k_clean}"
-            payload = {
-                "contents": [{
-                    "parts": [
-                        {"inline_data": {"mime_type": "image/png", "data": test_b64}},
-                        {"text": "Describe this test pixel in one word."}
-                    ]
-                }]
-            }
-            with httpx.Client(timeout=5.0) as client:
-                res = client.post(url, json=payload, headers={"Content-Type": "application/json"})
-                if res.status_code == 200:
-                    text = res.json()["candidates"][0]["content"]["parts"][0]["text"]
-                    results.append({"name": name, "key_preview": f"...{k_clean[-6:]}", "http_status": 200, "success": True, "response": text.strip()})
-                else:
-                    results.append({"name": name, "key_preview": f"...{k_clean[-6:]}", "http_status": res.status_code, "success": False, "error": res.text[:300]})
-        except Exception as exc:
-            results.append({"name": name, "key_preview": f"...{k_clean[-6:]}", "success": False, "error": f"{type(exc).__name__}: {str(exc)}"})
+        key_results = []
+        for api_ver, model_name in endpoints_to_test:
+            try:
+                url = f"https://generativelanguage.googleapis.com/{api_ver}/models/{model_name}:generateContent?key={k_clean}"
+                payload = {
+                    "contents": [{
+                        "parts": [
+                            {"inline_data": {"mime_type": "image/png", "data": test_b64}},
+                            {"text": "Describe this test pixel in one word."}
+                        ]
+                    }]
+                }
+                with httpx.Client(timeout=4.0) as client:
+                    res = client.post(url, json=payload, headers={"Content-Type": "application/json"})
+                    if res.status_code == 200:
+                        text = res.json()["candidates"][0]["content"]["parts"][0]["text"]
+                        key_results.append({"endpoint": f"{api_ver}/{model_name}", "http_status": 200, "success": True, "response": text.strip()})
+                    else:
+                        key_results.append({"endpoint": f"{api_ver}/{model_name}", "http_status": res.status_code, "success": False, "error": res.text[:200]})
+            except Exception as exc:
+                key_results.append({"endpoint": f"{api_ver}/{model_name}", "success": False, "error": f"{type(exc).__name__}: {str(exc)}"})
+
+        results.append({"name": name, "key_preview": f"...{k_clean[-6:]}", "trials": key_results})
 
     return {"test_time": datetime.now(timezone.utc).isoformat(), "results": results}
 
