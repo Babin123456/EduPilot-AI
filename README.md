@@ -96,7 +96,9 @@ cp frontend/.env.example frontend/.env
 | `JWT_SECRET_KEY` | 64-char JWT signing key | Same command as above |
 | `GROQ_API_KEY_1` | Primary Groq LLM key | [Groq Console](https://console.groq.com) |
 | `GROQ_API_KEY_2` | Backup Groq LLM key | Same console |
-| `GEMINI_API_KEY` | Fallback Gemini key | [Google AI Studio](https://aistudio.google.com) |
+| `GEMINI_API_KEY` | Primary Gemini Vision & LLM key | [Google AI Studio](https://aistudio.google.com) |
+| `GEMINI_API_KEY_1` | Backup Gemini failover key 1 | Same console |
+| `GEMINI_API_KEY_2` | Backup Gemini failover key 2 | Same console |
 
 **Frontend** (`frontend/.env`):
 | Variable | Description | Example |
