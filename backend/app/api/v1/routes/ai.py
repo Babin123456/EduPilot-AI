@@ -43,6 +43,8 @@ class ChatRequest(BaseModel):
     conversation_id: str | None = None
     class_id: str | None = None
     file_context: str | None = None
+    image_b64: str | None = None
+    mime_type: str | None = None
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -134,25 +136,12 @@ def parse_uploaded_file(file_bytes: bytes, filename: str, content_type: str) -> 
         elif ext in [".png", ".jpg", ".jpeg", ".webp", ".gif"]:
             file_type = "image"
             try:
+                import base64
                 from PIL import Image
                 img = Image.open(io.BytesIO(file_bytes))
-                ocr_text = ""
-                try:
-                    from rapidocr_onnxruntime import RapidOCR  # type: ignore # pyright: ignore[reportMissingImports]
-                    engine = RapidOCR()
-                    result, _ = engine(file_bytes)
-                    if result:
-                        ocr_text = "\n".join([line[1] for line in result if line and len(line) > 1]).strip()
-                except Exception:
-                    pass
-
-                if ocr_text:
-                    text_content = f"Image File: {filename}\nFormat: {img.format} ({img.size[0]}x{img.size[1]} px)\nExtracted Image Text (OCR):\n{ocr_text}"
-                else:
-                    text_content = (
-                        f"Image File: {filename} ({img.format}, {img.size[0]}x{img.size[1]} px).\n"
-                        f"Image uploaded and received by EduPilot AI for visual context analysis."
-                    )
+                b64_data = base64.b64encode(file_bytes).decode("utf-8")
+                mime_type = content_type or f"image/{ext.replace('.', '')}"
+                text_content = f"Image File: {filename} ({img.format}, {img.size[0]}x{img.size[1]} px). Base64 encoded for multimodal Gemini 1.5 Flash Vision inspection."
             except Exception:
                 text_content = f"Image File: {filename} ({len(file_bytes)} bytes) uploaded and received for visual inspection."
 
@@ -167,6 +156,8 @@ def parse_uploaded_file(file_bytes: bytes, filename: str, content_type: str) -> 
         "file_type": file_type,
         "size_bytes": len(file_bytes),
         "text_content": text_content.strip() or f"Content from {filename}",
+        "image_b64": b64_data if ext in [".png", ".jpg", ".jpeg", ".webp", ".gif"] and 'b64_data' in locals() else None,
+        "mime_type": content_type or f"image/{ext.replace('.', '')}" if ext in [".png", ".jpg", ".jpeg", ".webp", ".gif"] else None,
     }
 
 
@@ -203,8 +194,8 @@ def _call_groq_llm(messages: list[dict], api_key: str, model: str) -> str | None
     return None
 
 
-def _call_gemini_llm(prompt: str, api_key: str, model: str) -> str | None:
-    """Call Gemini API directly using httpx with 5.0s timeout."""
+def _call_gemini_llm(prompt: str, api_key: str, model: str, image_b64: str | None = None, mime_type: str = "image/png") -> str | None:
+    """Call Gemini API directly using httpx with 10.0s timeout and optional inline base64 image data for visual analysis."""
     api_key = (api_key or "").strip()
     if not api_key or "your_" in api_key or len(api_key) < 25:
         return None
@@ -212,10 +203,18 @@ def _call_gemini_llm(prompt: str, api_key: str, model: str) -> str | None:
         gemini_model = model or "gemini-1.5-flash"
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{gemini_model}:generateContent?key={api_key}"
         headers = {"Content-Type": "application/json"}
+        parts: list[dict] = [{"text": prompt}]
+        if image_b64:
+            parts.append({
+                "inline_data": {
+                    "mime_type": mime_type,
+                    "data": image_b64
+                }
+            })
         payload = {
-            "contents": [{"parts": [{"text": prompt}]}]
+            "contents": [{"parts": parts}]
         }
-        with httpx.Client(timeout=5.0) as client:
+        with httpx.Client(timeout=10.0) as client:
             response = client.post(url, json=payload, headers=headers)
             if response.status_code == 200:
                 data = response.json()
@@ -378,6 +377,8 @@ async def upload_file_for_ai(
         "size_bytes": parsed["size_bytes"],
         "extracted_text": parsed["text_content"],
         "image_url": image_url,
+        "image_b64": parsed.get("image_b64"),
+        "mime_type": parsed.get("mime_type"),
         "summary": f"Uploaded {parsed['file_type'].upper()} file '{parsed['filename']}' ({parsed['size_bytes']} bytes) ready for AI analysis & stored in Knowledge Base.",
     }
 
@@ -548,7 +549,13 @@ def chat(
         # Attachment detected (Image or Document) -> Smart Route to Gemini Vision / Flash first
         model_used = "Gemini 1.5 Flash (Vision & Attachment Route)"
         gemini_prompt = f"{system_prompt}\n\nUser Question: {full_user_input}"
-        ai_response = _call_gemini_llm(gemini_prompt, settings.gemini_api_key, settings.gemini_model)
+        ai_response = _call_gemini_llm(
+            prompt=gemini_prompt,
+            api_key=settings.gemini_api_key,
+            model=settings.gemini_model,
+            image_b64=body.image_b64,
+            mime_type=body.mime_type or "image/png",
+        )
 
         # Fallback to Groq if Gemini fails
         if not ai_response:

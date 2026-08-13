@@ -248,6 +248,8 @@ export const AIPage: React.FC = () => {
         conversation_id: conversationId,
         class_id: activeClass?.id,
         file_context: fileContext,
+        image_b64: currentAttached?.image_b64 || null,
+        mime_type: currentAttached?.mime_type || null,
       });
 
       setConversationId(res.data.conversation_id);
