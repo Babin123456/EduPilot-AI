@@ -177,7 +177,7 @@ export const DocumentStudioSection: React.FC = () => {
             {/* Right Side: Clean Isolated 3D Graphic */}
             <div className="lg:col-span-5 relative flex items-center justify-center p-4">
               <img
-                src="/document_studio.webp"
+                src="/images/document_studio.webp"
                 alt="Document Studio 3D Graphic"
                 className="w-full h-auto max-h-[380px] object-contain drop-shadow-[0_20px_45px_rgba(0,91,172,0.3)]"
                 loading="lazy"

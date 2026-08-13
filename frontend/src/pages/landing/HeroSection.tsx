@@ -143,7 +143,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
           <div className="lg:col-span-5 relative flex items-center justify-center mt-6 lg:mt-0 px-4 sm:px-0">
             <div className="floating-hero-asset relative w-full max-w-sm sm:max-w-md lg:max-w-lg">
               <img
-                src="/login_hero_illustration.webp"
+                src="/images/login_hero_illustration.webp"
                 alt="EduPilot AI Zero-Gravity Academic Operating System Graphic"
                 className="w-full h-auto object-contain drop-shadow-[0_20px_50px_rgba(0,91,172,0.35)]"
                 loading="eager"

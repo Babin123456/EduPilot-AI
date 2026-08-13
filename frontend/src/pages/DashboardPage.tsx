@@ -164,7 +164,7 @@ export const DashboardPage: React.FC = () => {
 
            {/* Teacher avatar is shared with the profile page through AuthContext. */}
            <div className="relative z-10 w-full sm:w-80 h-48 flex items-center justify-center flex-shrink-0">
-             <img src={user?.avatar_url || '/avatar.webp'} alt={`${user?.full_name || 'Teacher'} avatar`} className="w-36 h-36 rounded-[2rem] object-contain drop-shadow-md" />
+             <img src={user?.avatar_url || '/images/avatar.webp'} alt={`${user?.full_name || 'Teacher'} avatar`} className="w-36 h-36 rounded-[2rem] object-contain drop-shadow-md" />
           </div>
 
         </div>

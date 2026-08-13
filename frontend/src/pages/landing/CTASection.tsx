@@ -27,7 +27,7 @@ export const CTASection: React.FC = () => {
         <div className="rounded-[2.5rem] relative overflow-hidden shadow-2xl border border-slate-200/50 dark:border-slate-800">
           {/* Background Image + Gradient Overlay */}
           <div className="absolute inset-0">
-            <img src="/cta_background.webp" alt="EduPilot Background" className="w-full h-full object-cover" />
+            <img src="/images/cta_background.webp" alt="EduPilot Background" className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-r from-[#005BAC]/95 via-[#005BAC]/85 to-[#0F172A]/90" />
           </div>
 

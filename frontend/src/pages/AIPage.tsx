@@ -730,7 +730,7 @@ export const AIPage: React.FC = () => {
                 {(attachedFile.file_type === 'image' || attachedFile.image_url || attachedFile.image_b64) ? (
                   <div className="relative group/thumb cursor-pointer">
                     <img
-                      src={attachedFile.image_url || (attachedFile.image_b64 ? `data:${attachedFile.mime_type || 'image/png'};base64,${attachedFile.image_b64}` : '/avatar.webp')}
+                      src={attachedFile.image_url || (attachedFile.image_b64 ? `data:${attachedFile.mime_type || 'image/png'};base64,${attachedFile.image_b64}` : '/images/avatar.webp')}
                       alt={attachedFile.filename}
                       onClick={() => setPreviewImage({
                         url: attachedFile.image_url || `data:${attachedFile.mime_type || 'image/png'};base64,${attachedFile.image_b64}`,

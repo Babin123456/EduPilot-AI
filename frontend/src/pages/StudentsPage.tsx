@@ -185,7 +185,7 @@ export const StudentsPage: React.FC = () => {
         </div>
 
         <div className="w-36 h-24 items-center justify-center hidden sm:flex flex-shrink-0 relative z-10">
-          <img src="/analytics_dashboard.webp" alt="Students Banner" className="w-full h-auto max-h-24 object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.4)]" />
+          <img src="/images/analytics_dashboard.webp" alt="Students Banner" className="w-full h-auto max-h-24 object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.4)]" />
         </div>
       </div>
 

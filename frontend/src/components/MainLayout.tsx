@@ -142,7 +142,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
                   title={`${user?.full_name} — Faculty Profile`}
                   className="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-700/80 p-0.5 overflow-hidden group transition-transform hover:scale-105 shadow-sm"
                 >
-                  <img src={user?.avatar_url || '/avatar.webp'} alt={user?.full_name || 'Teacher avatar'} className="w-full h-full object-cover rounded-lg" />
+                  <img src={user?.avatar_url || '/images/avatar.webp'} alt={user?.full_name || 'Teacher avatar'} className="w-full h-full object-cover rounded-lg" />
                 </Link>
                 <button
                   onClick={handleLogout}
@@ -156,7 +156,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
               <div className="flex items-center justify-between gap-2 p-1.5 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/50 shadow-sm">
                 <Link to="/profile" className="flex items-center gap-2.5 min-w-0 flex-1 group">
                   <div className="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-700 p-0.5 overflow-hidden flex-shrink-0 group-hover:scale-105 transition-transform">
-                    <img src={user?.avatar_url || '/avatar.webp'} alt={user?.full_name || 'Teacher avatar'} className="w-full h-full object-cover rounded-lg" />
+                    <img src={user?.avatar_url || '/images/avatar.webp'} alt={user?.full_name || 'Teacher avatar'} className="w-full h-full object-cover rounded-lg" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-bold text-slate-900 dark:text-white truncate group-hover:text-[#005BAC] dark:group-hover:text-[#8CC63F] transition-colors">{user?.full_name}</p>

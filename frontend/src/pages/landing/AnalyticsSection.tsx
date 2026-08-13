@@ -133,7 +133,7 @@ export const AnalyticsSection: React.FC = () => {
           <div className="lg:col-span-5 space-y-8">
             {/* Parallax Image - Clean isolated object without container box */}
             <div className="analytics-image relative p-2 flex justify-center">
-              <img src="/analytics_dashboard.webp" alt="Analytics Dashboard Preview" className="w-full h-auto object-contain drop-shadow-[0_15px_35px_rgba(0,0,0,0.25)]" loading="lazy" />
+              <img src="/images/analytics_dashboard.webp" alt="Analytics Dashboard Preview" className="w-full h-auto object-contain drop-shadow-[0_15px_35px_rgba(0,0,0,0.25)]" loading="lazy" />
             </div>
 
 
