@@ -41,10 +41,10 @@ export const LandingFooter: React.FC<LandingFooterProps> = ({ onNavigate }) => {
         { attr: { x: '-25%' } },
         {
           attr: { x: '115%' },
-          duration: 4.5,
-          ease: 'power2.inOut',
+          duration: 1.4,
+          ease: 'power1.inOut',
           repeat: -1,
-          repeatDelay: 0.8,
+          repeatDelay: 0.1,
         }
       );
     }, footerRef);
