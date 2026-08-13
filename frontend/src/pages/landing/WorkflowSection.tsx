@@ -69,10 +69,15 @@ export const WorkflowSection: React.FC = () => {
       ref={sectionRef}
       className="py-28 bg-slate-50 dark:bg-[#0F172A] relative overflow-hidden transition-colors duration-200 wave-divider"
     >
-      {/* Background decorations */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/4 right-0 w-[500px] h-[500px] rounded-full bg-[#0A6FD8]/5 blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-[#8CC63F]/5 blur-3xl" />
+      {/* ─── Upgraded Vibrant Ambient Background Light Effect ─── */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {/* Subtle grid matrix overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:36px_36px]" />
+
+        {/* Ambient vibrant glowing light orbs */}
+        <div className="absolute -top-32 -right-32 w-[650px] h-[650px] rounded-full bg-gradient-to-bl from-[#005BAC]/20 via-[#0A6FD8]/15 to-emerald-400/10 blur-3xl animate-pulse" />
+        <div className="absolute top-[40%] -left-36 w-[600px] h-[600px] rounded-full bg-gradient-to-tr from-[#8CC63F]/20 via-sky-500/15 to-[#005BAC]/10 blur-3xl opacity-90" />
+        <div className="absolute -bottom-24 right-[25%] w-[450px] h-[450px] rounded-full bg-indigo-500/10 blur-3xl" />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -95,7 +100,7 @@ export const WorkflowSection: React.FC = () => {
           {/* Left: Workflow Image */}
           <div className="lg:col-span-5 relative">
             <div className="workflow-image relative">
-              <div className="absolute -inset-2 rounded-3xl bg-gradient-to-br from-[#005BAC]/20 to-[#8CC63F]/20 blur-xl animate-glow" />
+              <div className="absolute -inset-3 rounded-3xl bg-gradient-to-r from-[#005BAC]/35 via-[#0A6FD8]/25 to-[#8CC63F]/35 blur-2xl animate-pulse opacity-90" />
               <div className="relative p-2 flex justify-center">
                 <img
                   src="/images/workflow_diagram.webp"
