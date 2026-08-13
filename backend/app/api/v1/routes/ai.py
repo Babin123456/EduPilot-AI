@@ -230,13 +230,13 @@ def _call_gemini_llm(prompt: str, api_key: str, model: str, image_b64: str | Non
             print(f"[Gemini] Image compression warning, using cleaned base64: {compress_err}")
 
     # Build candidate (api_version, model_name) pairs to try for this key
-    primary_model = (model or "").strip() or "gemini-1.5-flash"
+    primary_model = (model or "").strip() or "gemini-1.5-flash-latest"
     candidate_endpoints = [
-        ("v1", primary_model if primary_model != "gemini-2.0-flash" else "gemini-1.5-flash"),
-        ("v1beta", "gemini-2.0-flash"),
-        ("v1beta", "gemini-2.0-flash-lite"),
         ("v1beta", "gemini-1.5-flash-latest"),
-        ("v1", "gemini-1.5-pro"),
+        ("v1beta", "gemini-2.5-flash"),
+        ("v1beta", "gemini-1.5-pro-latest"),
+        ("v1beta", "gemini-2.0-flash-exp"),
+        ("v1", "gemini-1.5-flash-latest"),
     ]
     # Deduplicate preserving order
     unique_candidates = []
@@ -339,7 +339,7 @@ async def debug_keys():
 
 @router.get("/test-gemini")
 async def test_gemini():
-    """Live diagnostic endpoint: Performs actual test calls to Google Gemini API with each key across endpoints."""
+    """Live diagnostic endpoint: Queries Google for available models and performs test calls to Google Gemini API."""
     settings = get_settings()
     keys = [
         ("gemini_api_key", settings.gemini_api_key or os.environ.get("GEMINI_API_KEY", "")),
@@ -348,13 +348,13 @@ async def test_gemini():
     ]
 
     results = []
-    # 1x1 red PNG base64 for vision test
     test_b64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
 
     endpoints_to_test = [
-        ("v1", "gemini-1.5-flash"),
-        ("v1beta", "gemini-2.0-flash"),
-        ("v1beta", "gemini-2.0-flash-lite"),
+        ("v1beta", "gemini-1.5-flash-latest"),
+        ("v1beta", "gemini-2.5-flash"),
+        ("v1beta", "gemini-1.5-pro-latest"),
+        ("v1beta", "gemini-2.0-flash-exp"),
     ]
 
     for name, key_val in keys:
@@ -362,6 +362,18 @@ async def test_gemini():
         if not k_clean or len(k_clean) < 15 or "your_" in k_clean:
             results.append({"name": name, "status": "skipped", "reason": "empty or placeholder key"})
             continue
+
+        # Fetch list of available models from Google for this key
+        available_models = []
+        try:
+            list_url = f"https://generativelanguage.googleapis.com/v1beta/models?key={k_clean}"
+            with httpx.Client(timeout=4.0) as client:
+                res_list = client.get(list_url)
+                if res_list.status_code == 200:
+                    model_objs = res_list.json().get("models", [])
+                    available_models = [m.get("name", "").replace("models/", "") for m in model_objs if "generateContent" in m.get("supportedGenerationMethods", [])]
+        except Exception as list_exc:
+            available_models = [f"Error listing models: {list_exc}"]
 
         key_results = []
         for api_ver, model_name in endpoints_to_test:
@@ -385,7 +397,12 @@ async def test_gemini():
             except Exception as exc:
                 key_results.append({"endpoint": f"{api_ver}/{model_name}", "success": False, "error": f"{type(exc).__name__}: {str(exc)}"})
 
-        results.append({"name": name, "key_preview": f"...{k_clean[-6:]}", "trials": key_results})
+        results.append({
+            "name": name,
+            "key_preview": f"...{k_clean[-6:]}",
+            "available_models_from_google": available_models[:10],
+            "trials": key_results
+        })
 
     return {"test_time": datetime.now(timezone.utc).isoformat(), "results": results}
 
@@ -694,7 +711,8 @@ def chat(
         f"3. Remember previous user questions and context in this conversation thread.\n"
         f"4. When answering questions about uploaded documents, cite the specific source filename and page numbers from the Retrieved Document Context above.\n"
         f"5. Format responses cleanly using rich GitHub Markdown: use **bold** for key metrics/names, *italics* for emphasis, standard markdown `[link label](url)` for web URLs/references, bullet lists, and clean Markdown tables for tabular data.\n"
-        f"6. STRICT EMOJI POLICY: DO NOT include any text emojis or emoticons (such as 📚, 📄, 🤖, 😀, etc.) in your responses under any circumstances. Keep responses clean, elegant, and professional."
+        f"6. STRICT EMOJI POLICY: DO NOT include any text emojis or emoticons (such as 📚, 📄, 🤖, 😀, etc.) in your responses under any circumstances. Keep responses clean, elegant, and professional.\n"
+        f"7. TEMPORAL AWARENESS & REAL-WORLD CONTEXT: The current year is {now_ist.year} (2026). Treat all events, movies, releases, and milestones scheduled for or occurring by 2026 (such as the Project Hail Mary film released in March 2026, directed by Phil Lord & Christopher Miller, starring Ryan Gosling) as current or completed events rather than future/unannounced projects."
     )
 
     # ── Build LLM message array ──
