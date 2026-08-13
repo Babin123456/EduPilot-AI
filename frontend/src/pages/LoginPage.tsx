@@ -35,10 +35,24 @@ export const LoginPage: React.FC = () => {
       return;
     }
 
+    const orderMap: Record<string, number> = {
+      'FAC-UNIV-004': 0,
+      'FAC-UNIV-001': 1,
+      'FAC-UNIV-002': 2,
+      'FAC-UNIV-003': 3,
+      'FAC-UNIV-005': 4,
+      'FAC-UNIV-006': 5,
+      'FAC-UNIV-007': 6,
+      'FAC-UNIV-008': 7,
+      'FAC-UNIV-009': 8,
+      'FAC-UNIV-010': 9,
+    };
+
     api.get('/auth/demo-accounts')
       .then(res => {
         if (res.data && res.data.length > 0) {
-          setDemoAccounts(res.data);
+          const sorted = [...res.data].sort((a, b) => (orderMap[a.faculty_id] ?? 99) - (orderMap[b.faculty_id] ?? 99));
+          setDemoAccounts(sorted);
         }
       })
       .catch(() => {});

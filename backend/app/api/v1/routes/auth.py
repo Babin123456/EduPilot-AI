@@ -259,9 +259,22 @@ async def upload_avatar(
 @router.get("/demo-accounts", response_model=list[DemoTeacherCard])
 def get_demo_accounts(db: Database = Depends(get_db)):
     """Return demo teacher accounts for the login page."""
+    order_map = {
+        "FAC-UNIV-004": 0,
+        "FAC-UNIV-001": 1,
+        "FAC-UNIV-002": 2,
+        "FAC-UNIV-003": 3,
+        "FAC-UNIV-005": 4,
+        "FAC-UNIV-006": 5,
+        "FAC-UNIV-007": 6,
+        "FAC-UNIV-008": 7,
+        "FAC-UNIV-009": 8,
+        "FAC-UNIV-010": 9,
+    }
     try:
         teachers = list(db.teachers.find({"is_demo": True, "is_active": True}))
         if teachers:
+            teachers.sort(key=lambda t: order_map.get(t.get("faculty_id"), 99))
             return [
                 DemoTeacherCard(
                     faculty_id=t["faculty_id"],
