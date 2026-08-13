@@ -54,6 +54,22 @@ flowchart LR
 
 ---
 
+## 🤖 Smart Model Router Execution Flow
+
+EduPilot AI uses an automated task-based routing pipeline to deliver ultra-fast responses and multimodal image comprehension:
+
+| Input Type | Primary Model | Fallback Model | Capabilities |
+| :--- | :--- | :--- | :--- |
+| **Standard Text Chat** | **Groq Llama-3.3-70B** | Gemini 1.5 Flash | Sub-second response speed, curriculum Q&A, lesson planning |
+| **Image / Document Upload** | **Gemini 1.5 Flash Vision** | Groq Llama-3.3-70B | Visual comprehension of handwriting, diagrams, equations, and textbook screenshots |
+| **RAG Vector Search** | **MongoDB Vector Engine** | Local Keyword RAG | Custom institutional syllabus and uploaded PDF knowledge retrieval |
+
+```
+Standard Chat  ─────► Groq Llama-3.3-70B (Primary) ──► Fast 0.5s Text Answer
+Image Upload   ─────► Gemini 1.5 Flash Vision      ──► Visual Comprehension & Answer
+API Key Unset  ─────► EduPilot Local Smart Engine   ──► Fallback Contextual Response
+```
+
 ## 👥 Academic Hierarchy & Student Placement
 
 ```mermaid
