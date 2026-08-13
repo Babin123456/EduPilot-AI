@@ -229,14 +229,13 @@ def _call_gemini_llm(prompt: str, api_key: str, model: str, image_b64: str | Non
         except Exception as compress_err:
             print(f"[Gemini] Image compression warning, using cleaned base64: {compress_err}")
 
-    # Build candidate (api_version, model_name) pairs to try for this key
-    primary_model = (model or "").strip() or "gemini-1.5-flash-latest"
+    # Build candidate (api_version, model_name) pairs to try for this key — gemini-2.5-flash is primary verified model
     candidate_endpoints = [
-        ("v1beta", "gemini-1.5-flash-latest"),
         ("v1beta", "gemini-2.5-flash"),
-        ("v1beta", "gemini-1.5-pro-latest"),
-        ("v1beta", "gemini-2.0-flash-exp"),
-        ("v1", "gemini-1.5-flash-latest"),
+        ("v1beta", "gemini-2.5-flash-lite"),
+        ("v1beta", "gemini-2.5-pro"),
+        ("v1beta", "gemini-flash-latest"),
+        ("v1beta", "gemini-pro-latest"),
     ]
     # Deduplicate preserving order
     unique_candidates = []
