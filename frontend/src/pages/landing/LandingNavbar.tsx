@@ -27,6 +27,7 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ onNavigate }) => {
   }, []);
 
   const navLinks = [
+    { label: 'Home', id: 'top' },
     { label: 'Features', id: 'features' },
     { label: 'AI Workflow', id: 'workflow' },
     { label: 'Analytics', id: 'analytics' },
@@ -35,7 +36,11 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ onNavigate }) => {
 
   const handleNavClick = (id: string) => {
     setMobileMenuOpen(false);
-    onNavigate(id);
+    if (id === 'top') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      onNavigate(id);
+    }
   };
 
   return (
