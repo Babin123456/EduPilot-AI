@@ -46,7 +46,11 @@
       "dest": "/assets/$1"
     },
     {
-      "src": "/(.*\\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|json|ttf|eot))",
+      "src": "/images/(.*)",
+      "dest": "/images/$1"
+    },
+    {
+      "src": "/(.*\\.(js|css|png|jpg|jpeg|webp|gif|ico|svg|woff|woff2|json|ttf|eot))",
       "dest": "/$1"
     },
     {
