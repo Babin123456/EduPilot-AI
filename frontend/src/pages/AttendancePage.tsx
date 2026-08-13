@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { api } from '../api/client';
 import { Check, AlertCircle, CheckCircle2, XCircle, Send, Edit3 } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 
 export const AttendancePage: React.FC = () => {
@@ -219,8 +220,14 @@ export const AttendancePage: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {students.map((s) => (
-                <tr key={s.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
+              {students.map((s, idx) => (
+                <motion.tr
+                  key={s.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25, delay: Math.min(idx * 0.02, 0.4) }}
+                  className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50"
+                >
                   <td className="px-6 py-3.5 font-mono font-semibold text-slate-700 dark:text-slate-300">
                     {s.roll_number}
                   </td>
@@ -253,7 +260,7 @@ export const AttendancePage: React.FC = () => {
                               ? st === 'present'
                                 ? 'bg-emerald-500 text-white shadow'
                                 : 'bg-red-500 text-white shadow'
-                              : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                              : 'text-[#005BAC] hover:text-slate-900 dark:hover:text-white'
                           }`}
                         >
                           {st}
@@ -261,7 +268,7 @@ export const AttendancePage: React.FC = () => {
                       ))}
                     </div>
                   </td>
-                </tr>
+                </motion.tr>
               ))}
             </tbody>
           </table>

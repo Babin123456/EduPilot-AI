@@ -7,6 +7,7 @@ import {
   Mail, Send, Users, Search, CheckCircle2, Loader2,
   Clock, ChevronDown, ChevronUp, Inbox, FileText
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export const CommunicationsPage: React.FC = () => {
   const location = useLocation();
@@ -229,12 +230,15 @@ export const CommunicationsPage: React.FC = () => {
 
           {/* Student List */}
           <div className="max-h-96 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800 pr-1">
-            {filteredStudents.map((student) => {
+            {filteredStudents.map((student, idx) => {
               if (!student || !student.id) return null;
               const isSelected = selectedStudents.has(student.id);
               return (
-                <div
+                <motion.div
                   key={student.id}
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.2, delay: Math.min(idx * 0.015, 0.3) }}
                   onClick={() => {
                     setSendMode('selected');
                     handleToggleStudent(student.id);
@@ -254,7 +258,7 @@ export const CommunicationsPage: React.FC = () => {
                     readOnly
                     className="w-4 h-4 rounded text-[#005BAC] focus:ring-[#005BAC] cursor-pointer"
                   />
-                </div>
+                </motion.div>
               );
             })}
           </div>
