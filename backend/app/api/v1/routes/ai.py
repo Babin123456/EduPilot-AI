@@ -489,18 +489,46 @@ def chat(
             f"{rag_context}\n"
         )
 
+    # ── Real-Time Temporal & Upcoming Schedule Context ──
+    now_utc = datetime.now(timezone.utc)
+    current_date_str = now_utc.strftime("%B %d, %Y")
+    current_time_str = now_utc.strftime("%I:%M %p UTC")
+    current_day_name = now_utc.strftime("%A")
+    today_dow = now_utc.weekday()
+
+    # Load today's upcoming classes for the teacher
+    from app.api.v1.routes.timetable import _get_timetable_for_day
+    today_schedule_entries = _get_timetable_for_day(db, teacher, today_dow)
+    schedule_summary_lines = []
+    if today_schedule_entries:
+        for entry in today_schedule_entries:
+            attendance_tag = " [Attendance Taken]" if entry.get("attendance_taken") else " [Pending Attendance]"
+            schedule_summary_lines.append(
+                f"- {entry['start_time']} - {entry['end_time']}: {entry['course_code']} ({entry['course_name']}) "
+                f"for {entry['year_label']} Sec {entry['section_name']} in Room {entry['room']}{attendance_tag}"
+            )
+        upcoming_schedule_str = "\n".join(schedule_summary_lines)
+    else:
+        upcoming_schedule_str = "No classes scheduled for today (or weekend / non-teaching day)."
+
     system_prompt = (
         f"You are EduPilot AI, the intelligent academic copilot for university faculty.\n"
         f"You are assisting Professor {teacher['full_name']} ({teacher.get('designation', '')}, {teacher.get('specialization', 'CSE')}).\n"
-        f"Current Academic Context: {class_context_str or 'General Academic Workspace'}\n"
+        f"Real-Time Temporal Context:\n"
+        f"  - Date: {current_date_str}\n"
+        f"  - Day: {current_day_name}\n"
+        f"  - Current Time: {current_time_str}\n"
+        f"Today's Teaching Schedule & Upcoming Classes:\n{upcoming_schedule_str}\n"
+        f"Current Active Class Context: {class_context_str or 'General Academic Workspace'}\n"
         f"Live Database Information:\n{student_summary_str or 'N/A'}\n"
         f"{rag_section}\n"
         f"Instructions:\n"
-        f"1. Always use the live student database information provided above to give exact student names, roll numbers, and attendance percentages when asked.\n"
-        f"2. Remember previous user questions and context in this conversation thread.\n"
-        f"3. When answering questions about uploaded documents, cite the specific source filename and page numbers from the Retrieved Document Context above.\n"
-        f"4. Format responses cleanly using rich GitHub Markdown: use **bold** for key metrics/names, *italics* for emphasis, standard markdown `[link label](url)` for web URLs/references, bullet lists, and clean Markdown tables for tabular data.\n"
-        f"5. STRICT EMOJI POLICY: DO NOT include any text emojis or emoticons (such as 📚, 📄, 🤖, 😀, etc.) in your responses under any circumstances. Keep responses clean, elegant, and professional."
+        f"1. Always use the real-time temporal context and upcoming schedule above to answer questions like 'What day is it?', 'Do I have any classes today?', 'What is my next class?', or 'What time is it?'.\n"
+        f"2. Always use the live student database information provided above to give exact student names, roll numbers, and attendance percentages when asked.\n"
+        f"3. Remember previous user questions and context in this conversation thread.\n"
+        f"4. When answering questions about uploaded documents, cite the specific source filename and page numbers from the Retrieved Document Context above.\n"
+        f"5. Format responses cleanly using rich GitHub Markdown: use **bold** for key metrics/names, *italics* for emphasis, standard markdown `[link label](url)` for web URLs/references, bullet lists, and clean Markdown tables for tabular data.\n"
+        f"6. STRICT EMOJI POLICY: DO NOT include any text emojis or emoticons (such as 📚, 📄, 🤖, 😀, etc.) in your responses under any circumstances. Keep responses clean, elegant, and professional."
     )
 
     # ── Build LLM message array ──
