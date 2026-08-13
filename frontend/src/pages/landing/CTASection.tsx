@@ -42,10 +42,7 @@ export const CTASection: React.FC = () => {
             </div>
             
             <h2 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight">
-              Transform Your{' '}
-              <span className="text-gradient animate-gradient font-cursive text-4xl sm:text-6xl lg:text-7xl tracking-normal inline-block py-1">
-                Classroom Management Today
-              </span>
+              Transform Your Classroom Management Today
             </h2>
             
             <p className="text-base sm:text-xl text-slate-200 max-w-2xl mx-auto font-normal leading-relaxed">
