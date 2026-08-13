@@ -354,22 +354,22 @@ async def upload_file_for_ai(
     image_url = None
     # Save file to disk for media access if it is an image
     if ext in [".png", ".jpg", ".jpeg", ".webp", ".gif"]:
-        storage_path = Path(settings.storage_local_path).resolve()
-        storage_path.mkdir(parents=True, exist_ok=True)
+        storage_path = settings.storage_path
         safe_filename = f"chat_img_{uuid.uuid4().hex[:8]}_{filename.replace(' ', '_')}"
         file_dest = storage_path / safe_filename
         with open(file_dest, "wb") as f:
             f.write(file_bytes)
         image_url = f"/media/{safe_filename}"
 
-    # Auto-ingest documents and images into RAG Knowledge Library
-    background_tasks.add_task(
-        ingest_document,
-        file_bytes=file_bytes,
-        filename=filename,
-        teacher_id=teacher["id"],
-        db=db,
-    )
+    # Auto-ingest documents into RAG Knowledge Library (PDF & DOCX)
+    if ext in [".pdf", ".docx"]:
+        background_tasks.add_task(
+            ingest_document,
+            file_bytes=file_bytes,
+            filename=filename,
+            teacher_id=teacher["id"],
+            db=db,
+        )
 
     return {
         "success": True,
