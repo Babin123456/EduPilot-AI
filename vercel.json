@@ -39,6 +39,14 @@
       "dest": "api/index.py"
     },
     {
+      "src": "/assets/(.*)",
+      "dest": "/assets/$1"
+    },
+    {
+      "src": "/(.*\\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|json|ttf|eot))",
+      "dest": "/$1"
+    },
+    {
       "src": "/(.*)",
       "dest": "/index.html"
     }
