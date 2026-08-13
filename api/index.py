@@ -10,6 +10,7 @@ backend_dir = root_dir / "backend"
 if str(backend_dir) not in sys.path:
     sys.path.insert(0, str(backend_dir))
 
+# pyrefly: ignore [missing-import]
 from app.main import app  # noqa: E402
 
 # Expose app instance for Vercel Serverless Handler

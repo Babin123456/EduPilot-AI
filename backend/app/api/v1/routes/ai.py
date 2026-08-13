@@ -195,44 +195,138 @@ def _call_groq_llm(messages: list[dict], api_key: str, model: str) -> str | None
 
 
 def _call_gemini_llm(prompt: str, api_key: str, model: str, image_b64: str | None = None, mime_type: str = "image/png") -> str | None:
-    """Call Gemini API directly using httpx with 15.0s timeout and inline base64 image data for visual analysis."""
+    """Call Gemini API directly using httpx with inline base64 image data for visual analysis."""
     api_key = (api_key or "").strip()
     if not api_key or "your_" in api_key or len(api_key) < 15:
-        print(f"[Gemini API Warning] Invalid or missing Gemini API key (length: {len(api_key)})")
+        print(f"[Gemini] SKIP — key invalid (length={len(api_key)}, starts='{api_key[:6]}...')")
         return None
+
+    # Compress large images to avoid Vercel payload limits and speed up Gemini processing
+    actual_b64 = image_b64
+    actual_mime = mime_type
+    if image_b64:
+        try:
+            import base64 as b64mod
+            from PIL import Image as PILImage
+            raw_bytes = b64mod.b64decode(image_b64)
+            img = PILImage.open(io.BytesIO(raw_bytes))
+            # Resize if image is larger than 1024px on any side
+            max_dim = 1024
+            if img.width > max_dim or img.height > max_dim:
+                img.thumbnail((max_dim, max_dim), PILImage.LANCZOS)
+            # Convert to JPEG for smaller payload
+            buf = io.BytesIO()
+            rgb_img = img.convert("RGB") if img.mode != "RGB" else img
+            rgb_img.save(buf, format="JPEG", quality=80)
+            actual_b64 = b64mod.b64encode(buf.getvalue()).decode("utf-8")
+            actual_mime = "image/jpeg"
+            print(f"[Gemini] Image compressed: {len(image_b64)} → {len(actual_b64)} chars (JPEG {img.width}x{img.height})")
+        except Exception as compress_err:
+            print(f"[Gemini] Image compression failed, using original: {compress_err}")
+
     try:
-        gemini_model = model or "gemini-1.5-flash"
+        gemini_model = model or "gemini-2.0-flash-lite"
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{gemini_model}:generateContent?key={api_key}"
         headers = {"Content-Type": "application/json"}
-        
+
         parts: list[dict] = []
-        if image_b64:
-            clean_mime = mime_type.split(";")[0].strip() if mime_type else "image/png"
+        if actual_b64:
+            clean_mime = actual_mime.split(";")[0].strip() if actual_mime else "image/jpeg"
             parts.append({
                 "inline_data": {
                     "mime_type": clean_mime,
-                    "data": image_b64
+                    "data": actual_b64
                 }
             })
         parts.append({"text": prompt})
 
         payload = {
-            "contents": [{"parts": parts}]
+            "contents": [{"parts": parts}],
+            "generationConfig": {
+                "temperature": 0.7,
+                "maxOutputTokens": 2048,
+            },
         }
-        with httpx.Client(timeout=15.0) as client:
+
+        b64_len = len(actual_b64) if actual_b64 else 0
+        print(f"[Gemini] Calling {gemini_model} | key=...{api_key[-6:]} | image_b64_len={b64_len} | prompt_len={len(prompt)}")
+
+        with httpx.Client(timeout=9.0) as client:
             response = client.post(url, json=payload, headers=headers)
+            print(f"[Gemini] Response status={response.status_code}")
             if response.status_code == 200:
                 data = response.json()
                 try:
-                    return data["candidates"][0]["content"]["parts"][0]["text"]
+                    text = data["candidates"][0]["content"]["parts"][0]["text"]
+                    print(f"[Gemini] SUCCESS — response length={len(text)}")
+                    return text
                 except (KeyError, IndexError) as parse_err:
-                    print(f"[Gemini Parse Error] Could not extract response text: {parse_err}, Data: {data}")
+                    # Check for safety block
+                    if "candidates" in data and data["candidates"]:
+                        finish_reason = data["candidates"][0].get("finishReason", "")
+                        if finish_reason == "SAFETY":
+                            print(f"[Gemini] Response blocked by safety filters: {data['candidates'][0].get('safetyRatings', [])}")
+                            return "I received your image but the content was flagged by safety filters. Please try with a different image or rephrase your question."
+                    print(f"[Gemini] Parse error: {parse_err} | Response data keys: {list(data.keys())}")
+                    if "promptFeedback" in data:
+                        print(f"[Gemini] Prompt feedback: {data['promptFeedback']}")
                     return None
             else:
-                print(f"[LLM Error] Gemini API returned status {response.status_code}: {response.text}")
+                error_text = response.text[:500]
+                print(f"[Gemini] API error status={response.status_code}: {error_text}")
+                # If 400 with specific model, try fallback model
+                if response.status_code == 404 and "gemini-2.0" in gemini_model:
+                    print(f"[Gemini] Model {gemini_model} not found, trying gemini-1.5-flash...")
+                    fallback_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+                    response2 = client.post(fallback_url, json=payload, headers=headers)
+                    if response2.status_code == 200:
+                        data2 = response2.json()
+                        try:
+                            return data2["candidates"][0]["content"]["parts"][0]["text"]
+                        except (KeyError, IndexError):
+                            pass
+    except httpx.TimeoutException:
+        print(f"[Gemini] TIMEOUT after 9s — key=...{api_key[-6:]}")
     except Exception as exc:
-        print(f"[LLM Exception] Gemini API call failed: {exc}")
+        print(f"[Gemini] EXCEPTION: {type(exc).__name__}: {exc}")
     return None
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# DIAGNOSTIC: API KEY HEALTH CHECK
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+@router.get("/debug-keys")
+async def debug_keys():
+    """Diagnostic endpoint to verify API key availability on Vercel (never exposes actual key values)."""
+    settings = get_settings()
+    def key_status(val: str | None) -> dict:
+        v = (val or "").strip()
+        return {
+            "length": len(v),
+            "present": bool(v),
+            "valid": bool(v and "your_" not in v and len(v) >= 15),
+            "preview": f"...{v[-4:]}" if len(v) >= 15 else "(empty/invalid)",
+        }
+
+    return {
+        "pydantic_settings": {
+            "gemini_api_key": key_status(settings.gemini_api_key),
+            "gemini_api_key_1": key_status(settings.gemini_api_key_1),
+            "gemini_api_key_2": key_status(settings.gemini_api_key_2),
+            "groq_api_key_1": key_status(settings.groq_api_key_1),
+            "groq_api_key_2": key_status(settings.groq_api_key_2),
+            "gemini_model": settings.gemini_model,
+        },
+        "os_environ": {
+            "GEMINI_API_KEY": key_status(os.environ.get("GEMINI_API_KEY")),
+            "GEMINI_API_KEY_1": key_status(os.environ.get("GEMINI_API_KEY_1")),
+            "GEMINI_API_KEY_2": key_status(os.environ.get("GEMINI_API_KEY_2")),
+            "GROQ_API_KEY_1": key_status(os.environ.get("GROQ_API_KEY_1")),
+            "GROQ_API_KEY_2": key_status(os.environ.get("GROQ_API_KEY_2")),
+            "VERCEL": os.environ.get("VERCEL", "not set"),
+        },
+    }
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -557,31 +651,48 @@ def chat(
 
     # Helper for multi-key Gemini failover
     def _gemini_with_failover(prompt_text: str, b64_img: str | None = None, mime: str | None = None) -> str | None:
+        # Collect keys from both pydantic-settings and direct os.environ (Vercel injects into os.environ)
         keys_to_try = [
-            settings.gemini_api_key,
-            settings.gemini_api_key_1,
-            settings.gemini_api_key_2,
-            os.environ.get("GEMINI_API_KEY"),
-            os.environ.get("GEMINI_API_KEY_1"),
-            os.environ.get("GEMINI_API_KEY_2"),
+            ("settings.gemini_api_key", settings.gemini_api_key),
+            ("settings.gemini_api_key_1", settings.gemini_api_key_1),
+            ("settings.gemini_api_key_2", settings.gemini_api_key_2),
+            ("os.environ GEMINI_API_KEY", os.environ.get("GEMINI_API_KEY")),
+            ("os.environ GEMINI_API_KEY_1", os.environ.get("GEMINI_API_KEY_1")),
+            ("os.environ GEMINI_API_KEY_2", os.environ.get("GEMINI_API_KEY_2")),
         ]
+
+        # Debug: log which key sources have values
+        for source, val in keys_to_try:
+            v = (val or "").strip()
+            print(f"[Gemini Failover] {source}: len={len(v)}, valid={bool(v and 'your_' not in v and len(v) >= 15)}")
+
         # Filter non-empty unique keys
         valid_keys = []
-        for k in keys_to_try:
+        for _source, k in keys_to_try:
             k_clean = (k or "").strip()
             if k_clean and "your_" not in k_clean and len(k_clean) >= 15 and k_clean not in valid_keys:
                 valid_keys.append(k_clean)
 
-        for key in valid_keys:
+        print(f"[Gemini Failover] Total valid unique keys: {len(valid_keys)} | has_image={bool(b64_img)} | prompt_len={len(prompt_text)}")
+
+        if not valid_keys:
+            print("[Gemini Failover] NO VALID KEYS FOUND — falling back to offline response generator")
+            return None
+
+        for i, key in enumerate(valid_keys):
+            print(f"[Gemini Failover] Trying key {i+1}/{len(valid_keys)} (ends ...{key[-6:]})")
             res = _call_gemini_llm(
                 prompt=prompt_text,
                 api_key=key,
-                model=settings.gemini_model,
+                model=settings.gemini_model or "gemini-2.0-flash-lite",
                 image_b64=b64_img,
-                mime_type=mime or "image/png",
+                mime_type=mime or "image/jpeg",
             )
             if res:
+                print(f"[Gemini Failover] Key {i+1} succeeded!")
                 return res
+            print(f"[Gemini Failover] Key {i+1} failed, trying next...")
+        print("[Gemini Failover] ALL keys exhausted — no response obtained")
         return None
 
     if has_attachment:
@@ -689,8 +800,13 @@ def _generate_contextual_response(
         if is_image:
             return (
                 f"### Image Received ({file_context.splitlines()[0] if file_context.splitlines() else 'Uploaded Image'})\n\n"
-                f"EduPilot AI received your image file and prepared the base64 visual payload.\n\n"
-                f"To enable full Gemini 1.5 Flash Vision image recognition & visual Q&A, please ensure `GEMINI_API_KEY` is set in your Vercel Environment Variables."
+                f"EduPilot AI received your image file and prepared the visual payload, "
+                f"but the Gemini Vision API could not process it at this time.\n\n"
+                f"**Possible causes:**\n"
+                f"- Gemini API keys may have exhausted their free quota (check [Google AI Studio](https://aistudio.google.com/apikey))\n"
+                f"- The image may be too large or the API request timed out\n"
+                f"- The API key may not have the Gemini Vision model enabled\n\n"
+                f"**Try:** Upload a smaller image, or check your API key quota in Google AI Studio."
             )
         else:
             return (

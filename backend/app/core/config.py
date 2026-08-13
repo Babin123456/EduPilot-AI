@@ -59,7 +59,7 @@ class Settings(BaseSettings):
     gemini_api_key: str = ""
     gemini_api_key_1: str = ""
     gemini_api_key_2: str = ""
-    gemini_model: str = "gemini-1.5-flash"
+    gemini_model: str = "gemini-2.0-flash-lite"
 
     # ---- Email (Gmail SMTP) ----
     smtp_host: str = "smtp.gmail.com"
