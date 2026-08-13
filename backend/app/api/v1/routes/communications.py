@@ -133,7 +133,7 @@ def get_email_templates(
         {
             "id": "attendance_warning",
             "name": "Attendance Warning",
-            "subject": "⚠️ Attendance Warning — Action Required",
+            "subject": "Attendance Warning — Action Required",
             "body": "Dear Student,\n\nThis is to inform you that your attendance in the course has fallen below the minimum required threshold of 75%.\n\nPlease ensure regular attendance to avoid academic penalties.\n\nRegards,\n{teacher_name}\n{designation}\nDepartment of Computer Science",
         },
         {

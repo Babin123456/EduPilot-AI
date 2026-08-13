@@ -80,15 +80,15 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
 
   return (
     <div className="flex h-screen bg-slate-50 dark:bg-slate-950 overflow-hidden">
-      {/* Sidebar */}
+      {/* Sidebar with Combined Light Green + Azure Blue Gradient */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-all duration-300 lg:static ${
+        className={`fixed inset-y-0 left-0 z-50 bg-gradient-to-b from-[#EEF7F6] via-[#F3FAF2] to-[#EBF4FC] dark:bg-gradient-to-b dark:from-[#061826] dark:via-[#082229] dark:to-[#041D17] border-r border-teal-200/60 dark:border-teal-900/40 transition-all duration-300 lg:static shadow-sm ${
           mobileOpen ? 'translate-x-0 w-64' : '-translate-x-full lg:translate-x-0'
         } ${sidebarCollapsed ? 'lg:w-20' : 'lg:w-64'}`}
       >
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="h-16 flex items-center justify-between px-5 border-b border-slate-200 dark:border-slate-800 flex-shrink-0">
+          <div className="h-16 flex items-center justify-between px-5 border-b border-teal-200/50 dark:border-teal-900/30 flex-shrink-0 bg-white/40 dark:bg-slate-950/40 backdrop-blur-sm">
             <div className="flex items-center gap-3 overflow-hidden">
               <img
                 src="/brand_logo.png"
@@ -98,19 +98,19 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
               {!sidebarCollapsed && (
                 <div className="truncate">
                   <h1 className="font-extrabold text-slate-900 dark:text-white leading-none text-base">EduPilot AI</h1>
-                  <p className="text-[10px] text-[#005BAC] dark:text-[#8CC63F] font-bold">Academic OS</p>
+                  <p className="text-[10px] text-[#005BAC] dark:text-[#8CC63F] font-bold tracking-wide">Academic OS</p>
                 </div>
               )}
             </div>
 
-            <button className="lg:hidden text-slate-500" onClick={() => setMobileOpen(false)}>
+            <button className="lg:hidden text-slate-500 hover:text-slate-900 dark:hover:text-white" onClick={() => setMobileOpen(false)}>
               <X className="w-5 h-5" />
             </button>
           </div>
 
 
           {/* Nav Links */}
-          <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+          <nav className="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto custom-scrollbar">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname.startsWith(item.path);
@@ -120,13 +120,13 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
                   to={item.path}
                   onClick={() => setMobileOpen(false)}
                   title={sidebarCollapsed ? item.label : undefined}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 ${
                     isActive
-                      ? 'bg-[#005BAC]/10 dark:bg-[#8CC63F]/20 text-[#005BAC] dark:text-[#8CC63F] font-bold shadow-sm'
-                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+                      ? 'bg-gradient-to-r from-[#005BAC] to-[#0A6FD8] text-white shadow-md font-bold'
+                      : 'text-slate-700 dark:text-slate-300 hover:bg-emerald-500/10 dark:hover:bg-emerald-500/15 hover:text-[#005BAC] dark:hover:text-[#8CC63F]'
                   } ${sidebarCollapsed ? 'justify-center px-0' : ''}`}
                 >
-                  <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-[#005BAC] dark:text-[#8CC63F]' : ''}`} />
+                  <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-[#8CC63F]' : ''}`} />
                   {!sidebarCollapsed && <span className="truncate">{item.label}</span>}
                 </Link>
               );
@@ -134,7 +134,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
           </nav>
 
           {/* Footer User Profile & Logout */}
-          <div className="p-3.5 border-t border-slate-200/80 dark:border-slate-800/80 bg-slate-50/70 dark:bg-slate-900/70 backdrop-blur-md">
+          <div className="p-3.5 border-t border-teal-200/50 dark:border-teal-900/30 bg-white/50 dark:bg-slate-950/50 backdrop-blur-md">
             {sidebarCollapsed ? (
               <div className="flex flex-col items-center gap-2">
                 <Link

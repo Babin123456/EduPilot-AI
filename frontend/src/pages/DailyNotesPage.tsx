@@ -9,6 +9,7 @@ import {
   Notebook, Sparkles, Download, ChevronDown, ChevronUp,
   Calendar, Clock, BookOpen, CheckCircle2, Loader2, Mail
 } from 'lucide-react';
+import { SkeletonPageLoader } from '../components/SkeletonPageLoader';
 import { generateDailyNotePDF } from '../utils/pdfGenerator';
 
 
@@ -30,15 +31,12 @@ export const DailyNotesPage: React.FC = () => {
 
   useEffect(() => {
     if (!activeClass) return;
-    fetchNotes();
-  }, [activeClass]);
-
-  const fetchNotes = () => {
     setLoading(true);
-    api.get('/daily-notes', { params: { class_id: activeClass?.id } })
-      .then(res => setNotes(res.data))
+    api.get(`/daily-notes?class_id=${activeClass.id}`)
+      .then(res => setNotes(res.data || []))
+      .catch(() => {})
       .finally(() => setLoading(false));
-  };
+  }, [activeClass]);
 
   const handleGenerate = async () => {
     if (!topic.trim() || !activeClass) return;
@@ -105,6 +103,10 @@ export const DailyNotesPage: React.FC = () => {
     }
   };
 
+  if (loading) {
+    return <SkeletonPageLoader count={6} />;
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-[#005BAC] via-[#0A6FD8] to-[#8CC63F] p-6 sm:p-8 rounded-3xl text-white shadow-xl relative overflow-hidden">
@@ -121,9 +123,9 @@ export const DailyNotesPage: React.FC = () => {
         <div className="flex items-center gap-3 relative z-10">
           <button
             onClick={() => setShowForm(!showForm)}
-            className="px-5 py-2.5 bg-slate-950 hover:bg-slate-900 text-white text-xs font-black rounded-xl transition-all shadow-lg active:scale-95 flex items-center gap-2 border border-slate-700"
+            className="px-5 py-2.5 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-[#005BAC] dark:text-white text-xs font-black rounded-xl transition-all shadow-md active:scale-95 flex items-center gap-2 border border-slate-200 dark:border-slate-700"
           >
-            <Sparkles className="w-4 h-4 text-[#8CC63F]" />
+            <Sparkles className="w-4 h-4 text-[#005BAC] dark:text-[#8CC63F]" />
             <span>{showForm ? 'Cancel Form' : "Generate Note"}</span>
           </button>
           <div className="w-36 h-24 items-center justify-center hidden sm:flex flex-shrink-0">

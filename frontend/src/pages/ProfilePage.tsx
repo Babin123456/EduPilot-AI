@@ -117,9 +117,10 @@ export const ProfilePage: React.FC = () => {
       const formData = new FormData();
       formData.append('image', file);
       const response = await api.post('/auth/me/avatar', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
-      setSelectedAvatar(response.data.avatar_url);
-      updateUser(response.data);
-      toast.success('Profile photo uploaded', 'Your new photo is now visible across the dashboard.');
+      const newAvatar = response.data.avatar_url;
+      setSelectedAvatar(newAvatar);
+      updateUser({ avatar_url: newAvatar });
+      toast.success('Profile photo uploaded', 'Your new photo is now active across EduPilot AI.');
     } catch (err: any) {
       toast.error(err.response?.data?.detail || 'Failed to upload profile photo');
     } finally {

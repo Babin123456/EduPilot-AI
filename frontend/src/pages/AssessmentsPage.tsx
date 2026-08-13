@@ -4,6 +4,7 @@ import { useToast } from '../context/ToastContext';
 import { api } from '../api/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HelpCircle, Download, ChevronDown, ChevronUp, Award, Clock, Target, Send, Sparkles, X, Loader2, BookOpen, Trash2, AlertTriangle } from 'lucide-react';
+import { SkeletonPageLoader } from '../components/SkeletonPageLoader';
 import { generateQuizPDF, generateAssessmentReportPDF } from '../utils/pdfGenerator';
 
 export const AssessmentsPage: React.FC = () => {
@@ -327,6 +328,10 @@ export const AssessmentsPage: React.FC = () => {
       })),
     });
   };
+
+  if (loading) {
+    return <SkeletonPageLoader count={6} />;
+  }
 
   return (
     <div className="space-y-6">

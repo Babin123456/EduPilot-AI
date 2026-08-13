@@ -221,22 +221,39 @@ async def upload_avatar(
     teacher: dict = Depends(get_current_teacher),
     db: Database = Depends(get_db),
 ):
-    """Store a teacher-uploaded profile image and make it immediately available."""
-    allowed_types = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp"}
-    if image.content_type not in allowed_types:
+    """Store a teacher-uploaded profile image as base64 data URI (works everywhere including Vercel serverless)."""
+    allowed_types = {"image/jpeg", "image/jpg", "image/png", "image/webp"}
+    if image.content_type not in allowed_types and not any((image.filename or "").lower().endswith(ext) for ext in [".jpg", ".jpeg", ".png", ".webp"]):
         raise HTTPException(status_code=400, detail="Upload a JPG, PNG, or WebP image.")
-    content = await image.read()
-    if len(content) > 5 * 1024 * 1024:
-        raise HTTPException(status_code=400, detail="Image must be smaller than 5 MB.")
 
-    settings = get_settings()
-    filename = f"teacher-{teacher['id']}-{uuid.uuid4().hex}{allowed_types[image.content_type]}"
-    storage_path = Path(settings.storage_local_path).resolve()
-    storage_path.mkdir(parents=True, exist_ok=True)
-    (storage_path / filename).write_bytes(content)
-    avatar_url = f"{settings.backend_url}/media/{filename}"
+    content = await image.read()
+    if len(content) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Image must be smaller than 10 MB.")
+
+    try:
+        from PIL import Image
+        import io, base64
+
+        img = Image.open(io.BytesIO(content))
+        img = img.convert("RGB")
+        img.thumbnail((500, 500))
+        buf = io.BytesIO()
+        img.save(buf, format="JPEG", quality=85)
+        b64_str = base64.b64encode(buf.getvalue()).decode("utf-8")
+        avatar_url = f"data:image/jpeg;base64,{b64_str}"
+    except Exception:
+        import base64
+        b64_raw = base64.b64encode(content).decode("utf-8")
+        mime = image.content_type or "image/jpeg"
+        avatar_url = f"data:{mime};base64,{b64_raw}"
+
     db.teachers.update_one({"id": teacher["id"]}, {"$set": {"avatar_url": avatar_url}})
-    return {"avatar_url": avatar_url}
+    return {
+        "id": teacher["id"],
+        "avatar_url": avatar_url,
+        "full_name": teacher.get("full_name"),
+        "email": teacher.get("email"),
+    }
 
 
 @router.get("/demo-accounts", response_model=list[DemoTeacherCard])

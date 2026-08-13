@@ -7,12 +7,14 @@ import { api } from '../api/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FileText, Sparkles, Download, Send, Eye, X, Loader2, ClipboardList, Trash2, AlertTriangle } from 'lucide-react';
 
+import { SkeletonPageLoader } from '../components/SkeletonPageLoader';
 import { generateQuizPDF } from '../utils/pdfGenerator';
 
 export const AssignmentsPage: React.FC = () => {
   const { activeClass, user } = useAuth();
   const toast = useToast();
   const [assignments, setAssignments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [deleteConfirmAssignment, setDeleteConfirmAssignment] = useState<{ id: string; title: string } | null>(null);
   const [deletingAssignment, setDeletingAssignment] = useState(false);
 
@@ -203,9 +205,11 @@ export const AssignmentsPage: React.FC = () => {
 
 
   const fetchAssignments = () => {
+    setLoading(true);
     api.get(`/assignments?class_id=${activeClass?.id}`)
       .then(res => setAssignments(res.data || []))
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setLoading(false));
   };
 
   const handleDeleteAssignment = async () => {
@@ -296,6 +300,10 @@ export const AssignmentsPage: React.FC = () => {
       toast.error('Failed to send email to students');
     }
   };
+
+  if (loading) {
+    return <SkeletonPageLoader count={6} />;
+  }
 
   return (
     <div className="space-y-6">

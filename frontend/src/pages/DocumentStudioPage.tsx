@@ -7,16 +7,21 @@ import {
   FileText, Clock, File, Send
 } from 'lucide-react';
 
+import { SkeletonPageLoader } from '../components/SkeletonPageLoader';
+
 export const DocumentStudioPage: React.FC = () => {
   const { activeClass, user } = useAuth();
   const toast = useToast();
   const [documents, setDocuments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!activeClass) return;
+    setLoading(true);
     api.get('/documents', { params: { class_id: activeClass.id } })
-      .then(res => setDocuments(res.data))
-      .catch(() => {});
+      .then(res => setDocuments(res.data || []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, [activeClass]);
 
   const handleSendDocumentToStudents = async (doc: any) => {
@@ -34,6 +39,10 @@ export const DocumentStudioPage: React.FC = () => {
     }
   };
 
+
+  if (loading) {
+    return <SkeletonPageLoader count={6} />;
+  }
 
   return (
     <div className="space-y-6">
