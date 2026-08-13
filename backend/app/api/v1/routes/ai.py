@@ -540,8 +540,8 @@ def chat(
     llm_messages.append({"role": "user", "content": full_user_input})
 
     # ── Smart Model Routing: Check if prompt contains attached file/image context ──
-    has_attachment = bool(body.file_context and body.file_context.strip())
-    is_image = "Image File:" in (body.file_context or "")
+    has_attachment = bool((body.file_context and body.file_context.strip()) or body.image_b64)
+    is_image = bool(body.image_b64 or "Image File:" in (body.file_context or ""))
 
     model_used = ""
     ai_response = None
@@ -647,14 +647,9 @@ def _generate_contextual_response(
         is_image = "Image File:" in file_context or any(kw in file_context.lower() for kw in ["png", "jpg", "jpeg", "webp", "gif"])
         if is_image:
             return (
-                f"### Image Analysis & Extracted Content\n\n"
-                f"**File Received**: {file_context.splitlines()[0] if file_context.splitlines() else 'Uploaded Image'}\n\n"
-                f"{file_context}\n\n"
-                f"---\n"
-                f"**Summary & Visual Insights:**\n"
-                f"- EduPilot AI successfully ingested and processed your uploaded image file.\n"
-                f"- Text content and OCR text layers (if present) were extracted for your teaching context.\n"
-                f"- You can reference this image across your **Knowledge Base**, **Daily Notes**, or **Document Studio**."
+                f"### Image Received ({file_context.splitlines()[0] if file_context.splitlines() else 'Uploaded Image'})\n\n"
+                f"EduPilot AI received your image file and prepared the base64 visual payload.\n\n"
+                f"To enable full Gemini 1.5 Flash Vision image recognition & visual Q&A, please ensure `GEMINI_API_KEY` is set in your Vercel Environment Variables."
             )
         else:
             return (
