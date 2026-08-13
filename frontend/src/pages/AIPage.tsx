@@ -205,9 +205,11 @@ export const AIPage: React.FC = () => {
       const res = await promise;
       const fileData = res.data;
       if (fileData && fileData.image_url && fileData.image_url.startsWith('/media')) {
-        const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
-        const serverOrigin = baseURL.replace(/\/api\/v1\/?$/, '');
-        fileData.image_url = `${serverOrigin}${fileData.image_url}`;
+        const baseURL = import.meta.env.VITE_API_URL || '';
+        if (baseURL.startsWith('http')) {
+          const serverOrigin = baseURL.replace(/\/api\/v1\/?$/, '');
+          fileData.image_url = `${serverOrigin}${fileData.image_url}`;
+        }
       }
       setAttachedFile(fileData);
       setTimeout(fetchRagDocuments, 1000);
