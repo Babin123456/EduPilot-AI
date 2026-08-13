@@ -5,7 +5,7 @@ from __future__ import annotations
 import io
 import os
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import httpx
@@ -490,12 +490,13 @@ def chat(
             f"{rag_context}\n"
         )
 
-    # ── Real-Time Temporal & Upcoming Schedule Context ──
-    now_utc = datetime.now(timezone.utc)
-    current_date_str = now_utc.strftime("%B %d, %Y")
-    current_time_str = now_utc.strftime("%I:%M %p UTC")
-    current_day_name = now_utc.strftime("%A")
-    today_dow = now_utc.weekday()
+    # ── Real-Time Temporal Context (Indian Standard Time - IST, UTC+5:30) ──
+    ist_tz = timezone(timedelta(hours=5, minutes=30))
+    now_ist = datetime.now(ist_tz)
+    current_date_str = now_ist.strftime("%B %d, %Y")
+    current_time_str = now_ist.strftime("%I:%M %p IST")
+    current_day_name = now_ist.strftime("%A")
+    today_dow = now_ist.weekday()
 
     # Load today's upcoming classes for the teacher
     from app.api.v1.routes.timetable import _get_timetable_for_day
@@ -515,7 +516,7 @@ def chat(
     system_prompt = (
         f"You are EduPilot AI, the intelligent academic copilot for university faculty.\n"
         f"You are assisting Professor {teacher['full_name']} ({teacher.get('designation', '')}, {teacher.get('specialization', 'CSE')}).\n"
-        f"Real-Time Temporal Context:\n"
+        f"Real-Time Temporal Context (Indian Standard Time):\n"
         f"  - Date: {current_date_str}\n"
         f"  - Day: {current_day_name}\n"
         f"  - Current Time: {current_time_str}\n"
