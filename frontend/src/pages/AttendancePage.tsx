@@ -137,7 +137,7 @@ export const AttendancePage: React.FC = () => {
             <button
               onClick={handleSubmit}
               disabled={saving || isWeekendClosed}
-              className="px-5 py-2 bg-[#005BAC] hover:bg-[#0A6FD8] text-white text-xs font-black rounded-xl transition-all shadow-md active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5 border border-blue-400/40 shadow-sm"
+              className="px-5 py-2 bg-[#005BAC] hover:bg-[#0A6FD8] text-white text-xs font-black rounded-xl transition-all shadow-md active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5 border border-blue-400/40"
             >
               <Send className="w-4 h-4 text-[#8CC63F]" />
               {saving ? 'Transmitting...' : isEditing ? 'Update & Re-submit' : 'Submit Attendance'}
@@ -149,7 +149,7 @@ export const AttendancePage: React.FC = () => {
 
 
         <div className="w-36 h-24 hidden sm:flex items-center justify-center flex-shrink-0 relative z-10">
-          <img src="/images/attendance_tracking.png" alt="Attendance Tracking Banner" className="w-full h-auto max-h-24 object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.4)]" />
+          <img src="/attendance_tracking.webp" alt="Attendance Tracking Banner" className="w-full h-auto max-h-24 object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.4)]" />
         </div>
       </div>
 

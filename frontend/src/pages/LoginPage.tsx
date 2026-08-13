@@ -154,7 +154,7 @@ export const LoginPage: React.FC = () => {
           {/* Center Isolated Product Showcase Graphic */}
           <div className="relative z-10 my-6 flex justify-center">
             <img
-              src="/images/login_hero_illustration.png"
+              src="/login_hero_illustration.webp"
               alt="EduPilot Academic OS Visual"
               className="w-full h-auto object-contain max-h-64 drop-shadow-[0_15px_35px_rgba(0,0,0,0.35)]"
             />

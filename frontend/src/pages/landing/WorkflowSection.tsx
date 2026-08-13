@@ -98,7 +98,7 @@ export const WorkflowSection: React.FC = () => {
               <div className="absolute -inset-2 rounded-3xl bg-gradient-to-br from-[#005BAC]/20 to-[#8CC63F]/20 blur-xl animate-glow" />
               <div className="relative p-2 flex justify-center">
                 <img
-                  src="/images/workflow_diagram.png"
+                  src="/workflow_diagram.webp"
                   alt="EduPilot AI Workflow Architecture"
                   className="w-full h-auto object-contain drop-shadow-[0_15px_35px_rgba(0,0,0,0.25)]"
                   loading="lazy"

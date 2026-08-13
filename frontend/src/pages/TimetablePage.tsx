@@ -23,7 +23,7 @@ export const TimetablePage: React.FC = () => {
           <p className="text-xs text-slate-100 font-medium">View upcoming lectures, lab sessions, and classroom assignments across all sections.</p>
         </div>
         <div className="w-36 h-24 hidden sm:flex items-center justify-center flex-shrink-0 relative z-10">
-          <img src="/images/timetable_banner.png" alt="Timetable Banner" className="w-full h-auto max-h-24 object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.4)]" />
+          <img src="/timetable_banner.webp" alt="Timetable Banner" className="w-full h-auto max-h-24 object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.4)]" />
         </div>
       </div>
 

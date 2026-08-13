@@ -65,7 +65,7 @@ export const ProfilePage: React.FC = () => {
     navigate('/login', { replace: true });
   };
   
-  const [selectedAvatar, setSelectedAvatar] = useState<string>(user?.avatar_url || '/images/avatar.png');
+  const [selectedAvatar, setSelectedAvatar] = useState<string>(user?.avatar_url || '/avatar.webp');
   const [phone, setPhone] = useState(user?.phone || '+91 98301 23456');
   const [specialization, setSpecialization] = useState(user?.specialization || 'Distributed Systems & Cybersecurity');
   const [saving, setSaving] = useState(false);
@@ -259,7 +259,7 @@ export const ProfilePage: React.FC = () => {
         
         <div className="flex items-center gap-4 relative z-10 flex-shrink-0 self-end sm:self-center">
           <div className="w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center flex-shrink-0">
-            <img src="/images/avatar.png" alt="Teacher profile avatar" className="w-full h-full object-contain" />
+            <img src="/avatar.webp" alt="Teacher profile avatar" className="w-full h-full object-contain" />
           </div>
         </div>
       </div>

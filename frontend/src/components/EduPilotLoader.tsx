@@ -134,7 +134,7 @@ export const EduPilotLoader: React.FC<EduPilotLoaderProps> = ({
           {/* Official Brand Logo Image without background container */}
           <div className="w-20 h-20 flex items-center justify-center relative">
             <img
-              src="/brand_logo.png"
+              src="/brand_logo.webp"
               alt="EduPilot AI Official Brand Logo"
               className="w-16 h-16 object-contain drop-shadow-[0_10px_25px_rgba(0,91,172,0.35)] animate-[pulse_3s_easeInOut_infinite]"
             />

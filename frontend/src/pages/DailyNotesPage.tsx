@@ -129,7 +129,7 @@ export const DailyNotesPage: React.FC = () => {
             <span>{showForm ? 'Cancel Form' : "Generate Note"}</span>
           </button>
           <div className="w-36 h-24 items-center justify-center hidden sm:flex flex-shrink-0">
-            <img src="/images/daily_notes_banner.png" alt="Daily Notes Banner" className="w-full h-auto max-h-24 object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.4)]" />
+            <img src="/daily_notes_banner.webp" alt="Daily Notes Banner" className="w-full h-auto max-h-24 object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.4)]" />
           </div>
         </div>
       </div>

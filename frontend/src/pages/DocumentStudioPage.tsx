@@ -58,7 +58,7 @@ export const DocumentStudioPage: React.FC = () => {
           </p>
         </div>
         <div className="w-36 h-24 hidden sm:flex items-center justify-center flex-shrink-0 relative z-10">
-          <img src="/images/document_studio.png" alt="Document Studio Banner" className="w-full h-auto max-h-24 object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.4)]" />
+          <img src="/document_studio.webp" alt="Document Studio Banner" className="w-full h-auto max-h-24 object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.4)]" />
         </div>
       </div>
 

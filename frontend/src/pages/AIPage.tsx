@@ -355,7 +355,7 @@ export const AIPage: React.FC = () => {
                 type="file"
                 ref={ragFileInputRef}
                 onChange={handleRagUpload}
-                accept=".pdf,.docx,.png,.jpg,.jpeg,.webp"
+                accept=".pdf,.docx,.webp,.jpg,.jpeg,.webp"
                 className="hidden"
               />
               <button
@@ -730,7 +730,7 @@ export const AIPage: React.FC = () => {
                 {(attachedFile.file_type === 'image' || attachedFile.image_url || attachedFile.image_b64) ? (
                   <div className="relative group/thumb cursor-pointer">
                     <img
-                      src={attachedFile.image_url || (attachedFile.image_b64 ? `data:${attachedFile.mime_type || 'image/png'};base64,${attachedFile.image_b64}` : '/images/avatar.png')}
+                      src={attachedFile.image_url || (attachedFile.image_b64 ? `data:${attachedFile.mime_type || 'image/png'};base64,${attachedFile.image_b64}` : '/avatar.webp')}
                       alt={attachedFile.filename}
                       onClick={() => setPreviewImage({
                         url: attachedFile.image_url || `data:${attachedFile.mime_type || 'image/png'};base64,${attachedFile.image_b64}`,
@@ -786,7 +786,7 @@ export const AIPage: React.FC = () => {
               type="file"
               ref={fileInputRef}
               onChange={handleFileUpload}
-              accept=".pdf,.docx,.pptx,.ppt,.xlsx,.xls,.csv,.png,.jpg,.jpeg,.webp"
+              accept=".pdf,.docx,.pptx,.ppt,.xlsx,.xls,.csv,.webp,.jpg,.jpeg,.webp"
               className="hidden"
             />
             <button

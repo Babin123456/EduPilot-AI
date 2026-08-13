@@ -91,7 +91,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
           <div className="h-16 flex items-center justify-between px-5 border-b border-teal-200/50 dark:border-teal-900/30 flex-shrink-0 bg-white/40 dark:bg-slate-950/40 backdrop-blur-sm">
             <div className="flex items-center gap-3 overflow-hidden">
               <img
-                src="/brand_logo.png"
+                src="/brand_logo.webp"
                 alt="EduPilot AI Logo"
                 className="w-11 h-11 object-contain flex-shrink-0"
               />
@@ -142,7 +142,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
                   title={`${user?.full_name} — Faculty Profile`}
                   className="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-700/80 p-0.5 overflow-hidden group transition-transform hover:scale-105 shadow-sm"
                 >
-                  <img src={user?.avatar_url || '/images/avatar.png'} alt={user?.full_name || 'Teacher avatar'} className="w-full h-full object-cover rounded-lg" />
+                  <img src={user?.avatar_url || '/avatar.webp'} alt={user?.full_name || 'Teacher avatar'} className="w-full h-full object-cover rounded-lg" />
                 </Link>
                 <button
                   onClick={handleLogout}
@@ -156,7 +156,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
               <div className="flex items-center justify-between gap-2 p-1.5 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/50 shadow-sm">
                 <Link to="/profile" className="flex items-center gap-2.5 min-w-0 flex-1 group">
                   <div className="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-700 p-0.5 overflow-hidden flex-shrink-0 group-hover:scale-105 transition-transform">
-                    <img src={user?.avatar_url || '/images/avatar.png'} alt={user?.full_name || 'Teacher avatar'} className="w-full h-full object-cover rounded-lg" />
+                    <img src={user?.avatar_url || '/avatar.webp'} alt={user?.full_name || 'Teacher avatar'} className="w-full h-full object-cover rounded-lg" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-bold text-slate-900 dark:text-white truncate group-hover:text-[#005BAC] dark:group-hover:text-[#8CC63F] transition-colors">{user?.full_name}</p>

@@ -352,7 +352,7 @@ export const AssessmentsPage: React.FC = () => {
             <span>Generate MCQ Quiz (10-20 Qs)</span>
           </button>
           <div className="w-36 h-24 hidden sm:flex items-center justify-center flex-shrink-0">
-            <img src="/images/features_ai_planning.png" alt="Quiz Studio Illustration" className="w-full h-auto max-h-24 object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.4)]" />
+            <img src="/features_ai_planning.webp" alt="Quiz Studio Illustration" className="w-full h-auto max-h-24 object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.4)]" />
           </div>
         </div>
       </div>
