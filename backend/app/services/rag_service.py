@@ -30,24 +30,30 @@ _embeddings_instance = None
 
 
 def get_embeddings():
-    """Return a singleton HuggingFaceEmbeddings instance (all-MiniLM-L6-v2, 384 dims).
-
-    Downloads the model on first call (~80MB), then uses local cache.
-    Runs entirely on CPU — no API key or external service required.
-    """
+    """Return a singleton HuggingFaceEmbeddings instance (all-MiniLM-L6-v2, 384 dims)."""
     global _embeddings_instance
     if _embeddings_instance is None:
-        from langchain_huggingface import HuggingFaceEmbeddings
+        try:
+            import os
+            # Set cache directory to /tmp on serverless environments
+            if os.environ.get("VERCEL"):
+                os.environ["TORCH_HOME"] = "/tmp/torch"
+                os.environ["HF_HOME"] = "/tmp/hf"
 
-        settings = get_settings()
-        model_name = f"sentence-transformers/{settings.embedding_model}"
-        logger.info("Loading embedding model: %s (first load downloads ~80MB)", model_name)
-        _embeddings_instance = HuggingFaceEmbeddings(
-            model_name=model_name,
-            model_kwargs={"device": "cpu"},
-            encode_kwargs={"normalize_embeddings": True},
-        )
-        logger.info("Embedding model loaded successfully.")
+            from langchain_huggingface import HuggingFaceEmbeddings
+
+            settings = get_settings()
+            model_name = f"sentence-transformers/{settings.embedding_model}"
+            logger.info("Loading embedding model: %s", model_name)
+            _embeddings_instance = HuggingFaceEmbeddings(
+                model_name=model_name,
+                model_kwargs={"device": "cpu"},
+                encode_kwargs={"normalize_embeddings": True},
+            )
+            logger.info("Embedding model loaded successfully.")
+        except Exception as exc:
+            logger.warning("Could not load local embedding model in serverless mode: %s", str(exc))
+            return None
     return _embeddings_instance
 
 
@@ -249,7 +255,12 @@ def retrieve_context(
 
     # Embed the query
     embeddings = get_embeddings()
-    query_vector = embeddings.embed_query(query)
+    if not embeddings:
+        return ""
+    try:
+        query_vector = embeddings.embed_query(query)
+    except Exception:
+        return ""
 
     # Attempt MongoDB Atlas Vector Search via $vectorSearch aggregation
     try:
