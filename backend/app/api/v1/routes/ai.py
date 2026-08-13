@@ -103,35 +103,33 @@ def parse_uploaded_file(file_bytes: bytes, filename: str, content_type: str) -> 
 
         elif ext == ".pdf":
             file_type = "pdf"
-            import tempfile
-
-            from langchain_community.document_loaders import PyPDFLoader
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-                tmp.write(file_bytes)
-                tmp_path = tmp.name
             try:
-                loader = PyPDFLoader(tmp_path)
-                docs = loader.load()
-                text_content = "\n\n".join([doc.page_content for doc in docs])[:8000]
-            finally:
-                if os.path.exists(tmp_path):
-                    os.unlink(tmp_path)
+                from pypdf import PdfReader
+                reader = PdfReader(io.BytesIO(file_bytes))
+                pages_text = []
+                for page in reader.pages:
+                    page_text = page.extract_text()
+                    if page_text:
+                        pages_text.append(page_text)
+                text_content = "\n\n".join(pages_text)[:8000]
+            except Exception:
+                text_content = f"PDF Document: {filename} ({len(file_bytes)} bytes)."
 
         elif ext in [".docx", ".doc"]:
             file_type = "docx"
-            import tempfile
-
-            from langchain_community.document_loaders import Docx2txtLoader
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".docx") as tmp:
-                tmp.write(file_bytes)
-                tmp_path = tmp.name
             try:
-                loader = Docx2txtLoader(tmp_path)
-                docs = loader.load()
-                text_content = "\n\n".join([doc.page_content for doc in docs])[:8000]
-            finally:
-                if os.path.exists(tmp_path):
-                    os.unlink(tmp_path)
+                import tempfile
+                import docx2txt
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".docx") as tmp:
+                    tmp.write(file_bytes)
+                    tmp_path = tmp.name
+                try:
+                    text_content = docx2txt.process(tmp_path)[:8000]
+                finally:
+                    if os.path.exists(tmp_path):
+                        os.unlink(tmp_path)
+            except Exception:
+                text_content = f"Word Document: {filename} ({len(file_bytes)} bytes)."
 
         elif ext in [".png", ".jpg", ".jpeg", ".webp", ".gif"]:
             file_type = "image"
