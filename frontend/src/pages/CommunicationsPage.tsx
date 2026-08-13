@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { api } from '../api/client';
+import { api, cachedGet } from '../api/client';
 import {
   Mail, Send, Users, Search, CheckCircle2, Loader2,
   Clock, ChevronDown, ChevronUp, Inbox, FileText

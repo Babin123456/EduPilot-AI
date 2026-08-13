@@ -3,7 +3,6 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { api, cachedGet } from '../api/client';
 import { Check, AlertCircle, CheckCircle2, XCircle, Send, Edit3, Clock, Lock } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { SkeletonPageLoader } from '../components/SkeletonPageLoader';
 
 export const AttendancePage: React.FC = () => {

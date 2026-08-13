@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { api, cachedGet } from '../api/client';
+import { cachedGet } from '../api/client';
 import { Clock, MapPin } from 'lucide-react';
 
 import { SkeletonPageLoader } from '../components/SkeletonPageLoader';

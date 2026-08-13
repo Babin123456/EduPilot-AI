@@ -700,8 +700,9 @@ def chat(
     today_dow = now_ist.weekday()
 
     # Load today's upcoming classes for the teacher
-    from app.api.v1.routes.timetable import _get_timetable_for_day
-    today_schedule_entries = _get_timetable_for_day(db, teacher, today_dow)
+    from app.api.v1.routes.timetable import DAY_NAMES, _get_bulk_timetable
+    timetable_by_day = _get_bulk_timetable(db, teacher)
+    today_schedule_entries = timetable_by_day.get(DAY_NAMES[today_dow], [])
     schedule_summary_lines = []
     if today_schedule_entries:
         for entry in today_schedule_entries:

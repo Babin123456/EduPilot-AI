@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { api } from '../api/client';
+import { cachedGet } from '../api/client';
 import { motion } from 'framer-motion';
 import {
   Users,
