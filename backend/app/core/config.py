@@ -87,7 +87,9 @@ class Settings(BaseSettings):
 
     @property
     def storage_path(self) -> Path:
-        p = Path(self.storage_local_path)
+        import os
+        path_str = "/tmp/storage" if os.environ.get("VERCEL") else self.storage_local_path
+        p = Path(path_str)
         p.mkdir(parents=True, exist_ok=True)
         return p
 

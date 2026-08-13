@@ -16,13 +16,15 @@ def get_client() -> MongoClient:
     """Return (and lazily create) a singleton MongoClient."""
     global _client
     if _client is None:
-        _client = MongoClient(settings.mongodb_uri)
+        curr_settings = get_settings()
+        _client = MongoClient(curr_settings.mongodb_uri)
     return _client
 
 
 def get_db() -> Database:
     """FastAPI dependency — returns the PyMongo Database object."""
-    return get_client()[settings.mongodb_db_name]
+    curr_settings = get_settings()
+    return get_client()[curr_settings.mongodb_db_name]
 
 
 def ensure_indexes():
