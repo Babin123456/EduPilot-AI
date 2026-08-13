@@ -561,6 +561,9 @@ def chat(
             settings.gemini_api_key,
             settings.gemini_api_key_1,
             settings.gemini_api_key_2,
+            os.environ.get("GEMINI_API_KEY"),
+            os.environ.get("GEMINI_API_KEY_1"),
+            os.environ.get("GEMINI_API_KEY_2"),
         ]
         # Filter non-empty unique keys
         valid_keys = []
