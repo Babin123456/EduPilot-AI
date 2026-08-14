@@ -8,7 +8,7 @@ import {
   Bot, Send, Sparkles, Paperclip, FileText, Image as ImageIcon,
   FileSpreadsheet, Presentation, File, X, Loader2,
   Copy, Check, RotateCw, PlusCircle, Trash2, MessageSquare, Download,
-  BookOpen, Upload, Database
+  BookOpen, Upload, Database, AlertTriangle
 } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 
@@ -51,6 +51,10 @@ export const AIPage: React.FC = () => {
   const [copiedCodeId, setCopiedCodeId] = useState<string | null>(null);
   const [previewImage, setPreviewImage] = useState<{ url: string; title: string } | null>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+
+  // ── Confirmation Modal State ──
+  const [convoToDelete, setConvoToDelete] = useState<{ id: string; title: string } | null>(null);
+  const [docToDelete, setDocToDelete] = useState<{ id: string; filename: string } | null>(null);
 
   const handleCopyCode = (codeText: string, codeId: string) => {
     navigator.clipboard.writeText(codeText);
@@ -107,16 +111,22 @@ export const AIPage: React.FC = () => {
     } catch (err) {}
   };
 
-  const handleDeleteConversation = async (id: string, e: React.MouseEvent) => {
+  const promptDeleteConversation = (id: string, title: string, e: React.MouseEvent) => {
     e.stopPropagation();
+    setConvoToDelete({ id, title });
+  };
+
+  const confirmDeleteConversation = async (id: string) => {
     try {
       await api.delete(`/ai/conversations/${id}`);
       if (conversationId === id || !conversationId) {
         handleNewChat();
       }
       fetchConversations();
+      toast.success('Chat Thread Deleted', 'Conversation history removed.');
     } catch (err) {
       console.error('Delete conversation error:', err);
+      toast.error('Failed to delete chat thread.');
     }
   };
 
@@ -178,8 +188,12 @@ export const AIPage: React.FC = () => {
     }
   };
 
-  const handleDeleteRagDocument = async (docId: string, e: React.MouseEvent) => {
+  const promptDeleteRagDocument = (docId: string, filename: string, e: React.MouseEvent) => {
     e.stopPropagation();
+    setDocToDelete({ id: docId, filename });
+  };
+
+  const confirmDeleteRagDocument = async (docId: string) => {
     setRagDocuments((prev) => prev.filter((d) => d.id !== docId));
     try {
       await api.delete(`/ai/rag/documents/${docId}`);
@@ -266,19 +280,19 @@ export const AIPage: React.FC = () => {
         ...prev,
         {
           role: 'assistant',
-          content: res.data.message.content,
-          model_used: res.data.message.model_used || 'EduPilot AI',
-          content_type: res.data.message.content_type || 'text',
-          sources: res.data.message.sources || [],
+          content: res.data.response,
+          sources: res.data.sources || [],
+          model_used: res.data.model_used,
         },
       ]);
       fetchConversations();
-    } catch (err) {
+    } catch (err: any) {
+      toast.error('AI Processing Error', 'Failed to generate response. Please try again.');
       setMessages((prev) => [
         ...prev,
         {
           role: 'assistant',
-          content: 'I encountered an issue connecting to the AI engine. Please verify backend services and try again.',
+          content: 'Sorry, I encountered an issue processing your request. Please try sending your prompt again.',
         },
       ]);
     } finally {
@@ -286,36 +300,20 @@ export const AIPage: React.FC = () => {
     }
   };
 
-  const handleRegenerate = async () => {
+  const handleRegenerate = () => {
     if (messages.length < 2 || loading) return;
     const lastUserMsg = [...messages].reverse().find((m) => m.role === 'user');
     if (lastUserMsg) {
-      setMessages((prev) => prev.slice(0, prev.length - 1));
+      setMessages((prev) => prev.slice(0, -1));
       handleSend(lastUserMsg.content);
     }
   };
 
-  const handleCopy = (text: string, index: number) => {
-    navigator.clipboard.writeText(text);
+  const handleCopy = (content: string, index: number) => {
+    navigator.clipboard.writeText(content);
     setCopiedIndex(index);
-    toast.info('Copied', 'Message copied to clipboard.');
+    toast.success('Copied!', 'Message copied to clipboard.');
     setTimeout(() => setCopiedIndex(null), 2000);
-  };
-
-  const samplePrompts = [
-    'Which students in my active class have attendance below 75%?',
-    'What classes do I have scheduled for today?',
-    'Explain the TCP/IP protocol suite vs OSI model',
-    'Generate a quiz topic outline for Operating Systems',
-  ];
-
-  const getFileIcon = (type?: string) => {
-    if (type === 'pdf') return <FileText className="w-4 h-4 text-red-500" />;
-    if (type === 'spreadsheet') return <FileSpreadsheet className="w-4 h-4 text-emerald-500" />;
-    if (type === 'presentation') return <Presentation className="w-4 h-4 text-amber-500" />;
-    if (type === 'image') return <ImageIcon className="w-4 h-4 text-blue-500" />;
-    if (type === 'docx') return <FileText className="w-4 h-4 text-blue-600" />;
-    return <File className="w-4 h-4 text-slate-500" />;
   };
 
   const formatFileSize = (bytes: number) => {
@@ -324,285 +322,242 @@ export const AIPage: React.FC = () => {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
+  const getFileIcon = (fileType: string) => {
+    switch (fileType.toLowerCase()) {
+      case 'presentation':
+      case 'pptx':
+      case 'ppt':
+        return <Presentation className="w-4 h-4 text-orange-500" />;
+      case 'spreadsheet':
+      case 'xlsx':
+      case 'xls':
+      case 'csv':
+        return <FileSpreadsheet className="w-4 h-4 text-emerald-500" />;
+      case 'pdf':
+        return <FileText className="w-4 h-4 text-rose-500" />;
+      case 'image':
+      case 'png':
+      case 'jpg':
+      case 'jpeg':
+      case 'webp':
+        return <ImageIcon className="w-4 h-4 text-[#005BAC]" />;
+      default:
+        return <File className="w-4 h-4 text-slate-500" />;
+    }
+  };
+
   return (
-    <div className="w-full">
-      <div className="flex h-[calc(100vh-10rem)] min-h-[600px] bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-        {/* ─── Light & Dark Compatible Sidebar ─── */}
-        <div className="w-72 bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 border-r border-slate-200 dark:border-slate-800 p-3.5 hidden md:flex flex-col justify-between flex-shrink-0">
-          <div className="space-y-4 flex-1 flex flex-col min-h-0">
-            
-            {/* New Chat Button */}
-            <button
-              onClick={handleNewChat}
-              className="w-full py-2.5 px-3.5 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-900 dark:text-white text-xs font-bold rounded-xl flex items-center justify-between border border-slate-200 dark:border-slate-800 shadow-sm transition-all group"
-            >
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-lg bg-[#005BAC] text-white flex items-center justify-center">
-                  <Sparkles className="w-3.5 h-3.5" />
-                </div>
-                <span>New Chat</span>
-              </div>
-              <PlusCircle className="w-4 h-4 text-slate-400 group-hover:text-slate-700 dark:group-hover:text-white transition-colors" />
-            </button>
-
-            {/* Knowledge Base Section */}
-            <div className="bg-slate-100/70 dark:bg-slate-900/60 rounded-xl p-3 border border-slate-200/80 dark:border-slate-800/80 space-y-2.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
-                  <Database className="w-3 h-3 text-emerald-600 dark:text-emerald-400" /> Knowledge Base
-                </span>
-                <span className="text-[9px] font-bold px-1.5 py-0.5 bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 rounded-full border border-emerald-200 dark:border-emerald-800/50">
-                  {ragDocuments.length} docs
-                </span>
-              </div>
-
-              {/* Upload Document Button */}
-              <input
-                type="file"
-                ref={ragFileInputRef}
-                onChange={handleRagUpload}
-                accept=".pdf,.docx,.webp,.jpg,.jpeg,.webp"
-                className="hidden"
-              />
-              <button
-                onClick={() => ragFileInputRef.current?.click()}
-                disabled={ragUploading}
-                className="w-full py-2 px-3 bg-emerald-50 dark:bg-emerald-600/20 hover:bg-emerald-100 dark:hover:bg-emerald-600/30 text-emerald-700 dark:text-emerald-300 hover:text-emerald-800 dark:hover:text-emerald-200 text-xs font-bold rounded-lg flex items-center justify-center gap-2 border border-emerald-200 dark:border-emerald-500/30 transition-all disabled:opacity-50"
-              >
-                {ragUploading ? (
-                  <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    <span>Indexing File...</span>
-                  </>
-                ) : (
-                  <>
-                    <Upload className="w-3.5 h-3.5" />
-                    <span>Upload Document / Image</span>
-                  </>
-                )}
-              </button>
-
-              {/* Knowledge Base Document List with 1-Click Attach */}
-              <div className="space-y-1 max-h-36 overflow-y-auto pr-1 custom-scrollbar">
-                {ragDocuments.length === 0 ? (
-                  <p className="py-2 text-[10px] text-slate-400 dark:text-slate-500 text-center leading-relaxed">
-                    Upload documents to power AI context search.
-                  </p>
-                ) : (
-                  ragDocuments.map((doc) => (
-                    <div
-                      key={doc.id}
-                      className="group flex items-center justify-between px-2 py-1.5 rounded-lg bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800/50 hover:border-emerald-400 dark:hover:border-emerald-600 transition-all"
-                    >
-                      <div className="flex items-center gap-2 min-w-0 flex-1">
-                        {getFileIcon(doc.file_type)}
-                        <div className="min-w-0 flex-1">
-                          <p className="text-[11px] font-semibold text-slate-800 dark:text-slate-200 truncate" title={doc.filename}>
-                            {doc.filename}
-                          </p>
-                          <p className="text-[9px] text-slate-400">
-                            {formatFileSize(doc.file_size_bytes)}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-1 flex-shrink-0">
-                        {/* 1-Click Attach Button */}
-                        <button
-                          onClick={() => {
-                            setAttachedFile({
-                              filename: doc.filename,
-                              file_type: doc.file_type,
-                              image_url: doc.image_url || null,
-                              image_b64: doc.image_b64 || null,
-                              mime_type: doc.mime_type || null,
-                              extracted_text: doc.extracted_text || `Knowledge Base Document: ${doc.filename}`,
-                              summary: `Attached from Knowledge Base: ${doc.filename}`,
-                            });
-                            toast.success('Attached to Prompt', `Attached "${doc.filename}" from Knowledge Base for chat analysis.`);
-                          }}
-                          className="px-1.5 py-0.5 bg-emerald-50 dark:bg-emerald-950 hover:bg-emerald-500 text-emerald-700 dark:text-emerald-300 hover:text-white rounded text-[9px] font-bold border border-emerald-200 dark:border-emerald-800 transition-all flex items-center gap-0.5"
-                          title="Attach this file/image to current chat prompt"
-                        >
-                          <Paperclip className="w-2.5 h-2.5" /> Attach
-                        </button>
-
-                        <button
-                          onClick={(e) => handleDeleteRagDocument(doc.id, e)}
-                          className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-md transition-colors"
-                          title="Delete document from Knowledge Base"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-
-            {/* Recent Conversations Sidebar */}
-            <div className="flex-1 flex flex-col min-h-0 space-y-1.5">
-              <p className="px-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Recent Chats</p>
-              <div className="flex-1 overflow-y-auto space-y-1 pr-1 custom-scrollbar">
-                {conversations.length === 0 ? (
-                  <p className="px-2 py-4 text-[11px] text-slate-400 dark:text-slate-500 text-center">No recent chats</p>
-                ) : (
-                  conversations.map((c) => (
-                    <div
-                      key={c.id}
-                      onClick={() => handleLoadConversation(c.id)}
-                      className={`group w-full text-left px-3 py-2 rounded-xl text-xs font-medium truncate flex items-center justify-between gap-2 transition-all cursor-pointer ${
-                        conversationId === c.id
-                          ? 'bg-[#005BAC] text-white font-bold shadow-sm'
-                          : 'text-slate-700 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-800'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2.5 truncate min-w-0">
-                        <MessageSquare className="w-3.5 h-3.5 flex-shrink-0 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200" />
-                        <span className="truncate">{c.title}</span>
-                      </div>
-                      <button
-                        onClick={(e) => handleDeleteConversation(c.id, e)}
-                        className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 transition-opacity"
-                        title="Delete thread"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-
+    <div className="h-[calc(100vh-6.5rem)] flex flex-col space-y-4">
+      {/* Top Header Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-[#005BAC] via-[#0A6FD8] to-[#8CC63F] p-4 sm:p-6 rounded-3xl text-white shadow-xl relative overflow-hidden flex-shrink-0">
+        <div className="space-y-1 relative z-10">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-extrabold text-white">
+            <Sparkles className="w-3.5 h-3.5 text-[#8CC63F]" /> Academic Copilot & Knowledge Library
           </div>
+          <h1 className="text-xl sm:text-2xl font-black">EduPilot AI Assistant</h1>
+          <p className="text-xs text-slate-100 font-medium">
+            {activeClass ? `Active Context: ${activeClass.course_name} (${activeClass.year_label} Sec ${activeClass.section_name})` : 'General Workspace Context'}
+          </p>
+        </div>
 
-          {conversationId && (
+        <div className="flex items-center gap-2 relative z-10">
+          {messages.length > 0 && (
             <button
-              onClick={handleNewChat}
-              className="w-full mt-2 py-2 px-3 text-[11px] text-slate-500 dark:text-slate-400 hover:text-red-500 flex items-center justify-center gap-1.5 transition-colors border-t border-slate-200 dark:border-slate-800 pt-3"
+              onClick={handleExportChatTXT}
+              className="px-3 py-2 bg-white/20 hover:bg-white/30 text-white rounded-xl text-xs font-extrabold backdrop-blur-md transition-all flex items-center gap-1.5 border border-white/20"
+              title="Export conversation history to TXT file"
             >
-              <Trash2 className="w-3.5 h-3.5" />
-              <span>Clear Active Chat</span>
+              <Download className="w-3.5 h-3.5" /> Export
             </button>
           )}
-        </div>
 
-        {/* ─── Main Chat Window ─── */}
-        <div className="flex-1 flex flex-col min-w-0">
-        {/* Header Banner */}
-        <div className="bg-gradient-to-r from-[#005BAC] via-[#0A6FD8] to-[#8CC63F] p-3.5 sm:p-4 text-white shadow-md flex items-center justify-between gap-4 relative overflow-hidden flex-shrink-0">
-          <div className="space-y-0.5 relative z-10">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-extrabold text-white">
-              <Bot className="w-3 h-3 text-[#8CC63F]" /> EduPilot AI Intelligence Engine
-              {ragDocuments.length > 0 && (
-                <span className="ml-1 px-1.5 py-0.5 bg-emerald-500/30 rounded-full text-[9px] inline-flex items-center gap-1">
-                  <FileText className="w-2.5 h-2.5" /> {ragDocuments.length} doc{ragDocuments.length !== 1 ? 's' : ''} indexed
-                </span>
+          <button
+            onClick={handleNewChat}
+            className="px-4 py-2 bg-white text-[#005BAC] hover:bg-slate-100 rounded-xl text-xs font-black shadow-md transition-all flex items-center gap-1.5"
+          >
+            <PlusCircle className="w-4 h-4" /> New Chat
+          </button>
+        </div>
+      </div>
+
+      {/* Main Grid: Sidebar + Chat Area */}
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 min-h-0">
+        {/* Left Sidebar: Knowledge Base & Conversations */}
+        <div className="lg:col-span-3 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 flex flex-col space-y-4 shadow-sm overflow-hidden min-h-0">
+          {/* Knowledge Base Section */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-extrabold uppercase tracking-wider text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+                <Database className="w-3.5 h-3.5 text-[#005BAC] dark:text-[#8CC63F]" /> Knowledge Base
+              </span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500">
+                {ragDocuments.length} files
+              </span>
+            </div>
+
+            {/* Knowledge Base Upload Trigger */}
+            <input
+              type="file"
+              ref={ragFileInputRef}
+              onChange={handleRagUpload}
+              accept=".pdf,.docx,.pptx,.ppt,.xlsx,.xls,.csv,image/*"
+              className="hidden"
+            />
+            <button
+              onClick={() => ragFileInputRef.current?.click()}
+              disabled={ragUploading}
+              className="w-full py-2 px-3 bg-emerald-50 dark:bg-emerald-600/20 hover:bg-emerald-100 dark:hover:bg-emerald-600/30 text-emerald-700 dark:text-emerald-300 hover:text-emerald-800 dark:hover:text-emerald-200 text-xs font-bold rounded-lg flex items-center justify-center gap-2 border border-emerald-200 dark:border-emerald-500/30 transition-all disabled:opacity-50"
+            >
+              {ragUploading ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Indexing File...</span>
+                </>
+              ) : (
+                <>
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>Upload Document / Image</span>
+                </>
+              )}
+            </button>
+
+            {/* Knowledge Base Document List */}
+            <div className="space-y-1 max-h-36 overflow-y-auto pr-1 custom-scrollbar">
+              {ragDocuments.length === 0 ? (
+                <p className="py-2 text-[10px] text-slate-400 dark:text-slate-500 text-center leading-relaxed">
+                  Upload documents to power AI context search.
+                </p>
+              ) : (
+                ragDocuments.map((doc) => (
+                  <div
+                    key={doc.id}
+                    className="group flex items-center justify-between px-2 py-1.5 rounded-lg bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800/50 hover:border-emerald-400 dark:hover:border-emerald-600 transition-all"
+                  >
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      {getFileIcon(doc.file_type)}
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[11px] font-semibold text-slate-800 dark:text-slate-200 truncate" title={doc.filename}>
+                          {doc.filename}
+                        </p>
+                        <p className="text-[9px] text-slate-400">
+                          {formatFileSize(doc.file_size_bytes)}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <button
+                        onClick={() => {
+                          setAttachedFile({
+                            filename: doc.filename,
+                            file_type: doc.file_type,
+                            image_url: doc.image_url || null,
+                            image_b64: doc.image_b64 || null,
+                            mime_type: doc.mime_type || null,
+                            extracted_text: doc.extracted_text || `Knowledge Base Document: ${doc.filename}`,
+                            summary: `Attached from Knowledge Base: ${doc.filename}`,
+                          });
+                          toast.success('Attached to Prompt', `Attached "${doc.filename}" from Knowledge Base for chat analysis.`);
+                        }}
+                        className="px-1.5 py-0.5 bg-emerald-50 dark:bg-emerald-950 hover:bg-emerald-500 text-emerald-700 dark:text-emerald-300 hover:text-white rounded text-[9px] font-bold border border-emerald-200 dark:border-emerald-800 transition-all flex items-center gap-0.5"
+                        title="Attach this file/image to current chat prompt"
+                      >
+                        <Paperclip className="w-2.5 h-2.5" /> Attach
+                      </button>
+
+                      <button
+                        onClick={(e) => promptDeleteRagDocument(doc.id, doc.filename, e)}
+                        className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-md transition-colors"
+                        title="Delete document from Knowledge Base"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ))
               )}
             </div>
-            <h1 className="text-base sm:text-lg font-black">EduPilot AI Copilot</h1>
           </div>
 
-
-          {/* Export Controls */}
-          <div className="flex items-center gap-2 relative z-10">
-            {messages.length > 0 && (
-              <button
-                onClick={handleExportChatTXT}
-                className="px-3 py-1.5 bg-slate-950 hover:bg-slate-900 text-white text-xs font-black rounded-xl border border-slate-700 flex items-center gap-1.5 transition-all shadow active:scale-95"
-                title="Export conversation to TXT file"
-              >
-                <Download className="w-3.5 h-3.5 text-[#8CC63F]" />
-                <span className="hidden sm:inline">Export TXT</span>
-              </button>
-            )}
+          {/* Recent Conversations Sidebar */}
+          <div className="flex-1 flex flex-col min-h-0 space-y-1.5">
+            <p className="px-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Recent Chats</p>
+            <div className="flex-1 overflow-y-auto space-y-1 pr-1 custom-scrollbar">
+              {conversations.length === 0 ? (
+                <p className="px-2 py-4 text-[11px] text-slate-400 dark:text-slate-500 text-center">No recent chats</p>
+              ) : (
+                conversations.map((c) => (
+                  <div
+                    key={c.id}
+                    onClick={() => handleLoadConversation(c.id)}
+                    className={`group w-full text-left px-3 py-2 rounded-xl text-xs font-medium truncate flex items-center justify-between gap-2 transition-all cursor-pointer ${
+                      conversationId === c.id
+                        ? 'bg-[#005BAC] text-white font-bold shadow-sm'
+                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-800'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 truncate min-w-0">
+                      <MessageSquare className="w-3.5 h-3.5 flex-shrink-0 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200" />
+                      <span className="truncate">{c.title}</span>
+                    </div>
+                    <button
+                      onClick={(e) => promptDeleteConversation(c.id, c.title, e)}
+                      className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 transition-opacity"
+                      title="Delete thread"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
 
-
-        {/* Messages Window */}
-        <div className="flex-1 p-6 overflow-y-auto space-y-4">
-          {messages.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center max-w-lg mx-auto space-y-4">
-              <div className="w-14 h-14 rounded-2xl bg-brand-blue/10 text-brand-blue dark:text-brand-green flex items-center justify-center shadow-inner">
-                <Sparkles className="w-7 h-7" />
+        {/* Right Area: Chat Workspace */}
+        <div className="lg:col-span-9 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col min-h-0 overflow-hidden">
+          {/* Chat Messages Log */}
+          <div className="flex-1 p-4 lg:p-6 overflow-y-auto space-y-6">
+            {messages.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center text-center space-y-4 max-w-md mx-auto my-auto py-12">
+                <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-[#005BAC]/20 to-[#8CC63F]/20 text-[#005BAC] dark:text-[#8CC63F] flex items-center justify-center shadow-lg">
+                  <Bot className="w-8 h-8" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-base font-extrabold text-slate-900 dark:text-white">EduPilot AI Assistant</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                    Ask questions about your classes, analyze uploaded PDF/DOCX documents, or generate teaching materials.
+                  </p>
+                </div>
               </div>
-              <div className="space-y-2">
-                <h3 className="font-extrabold text-slate-900 dark:text-white text-lg">How can EduPilot assist your teaching today?</h3>
-                <p className="text-xs text-slate-500 max-w-md">
-                  Your intelligent academic copilot. Ask about your active class, student performance, syllabus topics, or upload course documents for RAG analysis.
-                </p>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full pt-2">
-                {samplePrompts.map((prompt, i) => (
-                  <button
-                    key={i}
-                    onClick={() => handleSend(prompt)}
-                    className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:border-brand-blue hover:bg-brand-blue/5 text-left transition-all duration-200"
-                  >
-                    {prompt}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ) : (
-            messages.map((msg, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.25 }}
-                className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                {msg.role === 'assistant' && (
-                  <div className={`w-8 h-8 rounded-lg ${msg.content_type === 'rag' ? 'bg-emerald-500' : 'bg-[#8CC63F]'} text-slate-950 flex items-center justify-center flex-shrink-0 shadow-sm`}>
-                    {msg.content_type === 'rag' ? <BookOpen className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
-                  </div>
-                )}
-
-                <div className="space-y-1 max-w-3xl group">
+            ) : (
+              messages.map((msg, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  {msg.role === 'assistant' && (
+                    <div className="w-8 h-8 rounded-xl bg-[#005BAC] text-white flex items-center justify-center flex-shrink-0 shadow-md">
+                      <Bot className="w-4 h-4" />
+                    </div>
+                  )}
 
                   <div
-                    className={`p-3.5 rounded-2xl text-xs font-medium leading-relaxed shadow-sm relative ${
+                    className={`max-w-[85%] rounded-2xl p-4 space-y-2 text-xs leading-relaxed shadow-sm ${
                       msg.role === 'user'
-                        ? 'bg-[#005BAC] text-white rounded-tr-none whitespace-pre-wrap'
+                        ? 'bg-[#005BAC] text-white font-medium rounded-tr-none'
                         : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-tl-none border border-slate-200 dark:border-slate-700'
                     }`}
                   >
-
                     {msg.role === 'user' ? (
-                      <div className="space-y-2">
-                        {msg.image_url && (
-                          <div className="relative group/img cursor-pointer max-w-xs rounded-xl overflow-hidden border border-white/30 shadow-md">
-                            <img
-                              src={msg.image_url}
-                              alt="Uploaded Chat Attachment"
-                              onClick={() => setPreviewImage({ url: msg.image_url, title: 'Chat Image Attachment' })}
-                              className="w-full h-auto max-h-48 object-cover group-hover/img:scale-105 transition-transform duration-200"
-                            />
-                            <div
-                              onClick={() => setPreviewImage({ url: msg.image_url, title: 'Chat Image Attachment' })}
-                              className="absolute inset-0 bg-slate-950/50 opacity-0 group-hover/img:opacity-100 flex items-center justify-center text-white text-[11px] font-bold transition-opacity gap-1.5"
-                            >
-                              <ImageIcon className="w-3.5 h-3.5" /> Click to View Fullscreen
-                            </div>
-                          </div>
-                        )}
-                        <div>{msg.content}</div>
-                      </div>
+                      <div className="whitespace-pre-wrap">{msg.content}</div>
                     ) : (
                       <ReactMarkdown
                         remarkPlugins={[remarkGfm]}
                         components={{
-                          p: ({ node, ...props }) => <p className="mb-2 last:mb-0" {...props} />,
-                          ul: ({ node, ...props }) => <ul className="list-disc pl-4 mb-2 space-y-1" {...props} />,
-                          ol: ({ node, ...props }) => <ol className="list-decimal pl-4 mb-2 space-y-1" {...props} />,
-                          li: ({ node, ...props }) => <li className="" {...props} />,
-                          h1: ({ node, ...props }) => <h1 className="text-lg font-extrabold mb-2 mt-4 first:mt-0" {...props} />,
-                          h2: ({ node, ...props }) => <h2 className="text-base font-extrabold mb-2 mt-4 first:mt-0" {...props} />,
-                          h3: ({ node, ...props }) => <h3 className="text-sm font-bold mb-2 mt-3 first:mt-0" {...props} />,
-                          a: ({ node, ...props }) => <a className="text-brand-blue dark:text-brand-green hover:underline" target="_blank" rel="noopener noreferrer" {...props} />,
                           strong: ({ node, ...props }) => <strong className="font-bold text-slate-900 dark:text-white" {...props} />,
                           table: ({ node, ...props }) => <div className="overflow-x-auto mb-2"><table className="min-w-full divide-y divide-slate-300 dark:divide-slate-700" {...props} /></div>,
                           thead: ({ node, ...props }) => <thead className="bg-slate-200 dark:bg-slate-800" {...props} />,
@@ -629,7 +584,6 @@ export const AIPage: React.FC = () => {
 
                             return (
                               <div className="relative my-3 rounded-xl overflow-hidden border border-slate-700/80 shadow-md bg-slate-900 dark:bg-slate-950">
-                                {/* Code Header Toolbar */}
                                 <div className="flex items-center justify-between px-3.5 py-1.5 bg-slate-800/90 text-slate-300 text-[10px] font-mono border-b border-slate-700/60">
                                   <span className="font-bold text-[#8CC63F] uppercase tracking-wider">
                                     {match ? match[1] : 'code'}
@@ -653,7 +607,6 @@ export const AIPage: React.FC = () => {
                                     )}
                                   </button>
                                 </div>
-                                {/* Code Content */}
                                 <pre className="p-3.5 overflow-x-auto text-[11px] font-mono text-slate-100 leading-relaxed">
                                   <code className={className} {...props}>
                                     {children}
@@ -667,234 +620,283 @@ export const AIPage: React.FC = () => {
                         {msg.content}
                       </ReactMarkdown>
                     )}
-                  </div>
 
-                  {/* Message Action Bar (Copy, Regenerate, Sources) */}
-                  <div className="flex items-center justify-between text-[10px] text-slate-400 px-1 pt-1 opacity-80 group-hover:opacity-100 transition-opacity">
-                    <div className="flex items-center gap-2">
-                      {/* RAG Source Badges */}
-                      {msg.sources && msg.sources.length > 0 && (
-                        <div className="flex items-center gap-1">
-                          <Database className="w-3 h-3 text-emerald-500" />
-                          {msg.sources.map((src: string, si: number) => (
-                            <span key={si} className="px-1.5 py-0.5 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 rounded text-[9px] font-semibold border border-emerald-200 dark:border-emerald-800 inline-flex items-center gap-1">
-                              <FileText className="w-2.5 h-2.5" /> {src}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 ml-auto">
-                      <button
-                        onClick={() => handleCopy(msg.content, i)}
-                        className="flex items-center gap-1 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
-                        title="Copy message"
-                      >
-                        {copiedIndex === i ? (
-                          <><Check className="w-3 h-3 text-emerald-500" /> Copied!</>
-                        ) : (
-                          <><Copy className="w-3 h-3" /> Copy</>
+                    <div className="flex items-center justify-between text-[10px] text-slate-400 px-1 pt-1 opacity-80 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-2">
+                        {msg.sources && msg.sources.length > 0 && (
+                          <div className="flex items-center gap-1">
+                            <Database className="w-3 h-3 text-emerald-500" />
+                            {msg.sources.map((src: string, si: number) => (
+                              <span key={si} className="px-1.5 py-0.5 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 rounded text-[9px] font-semibold border border-emerald-200 dark:border-emerald-800 inline-flex items-center gap-1">
+                                <FileText className="w-2.5 h-2.5" /> {src}
+                              </span>
+                            ))}
+                          </div>
                         )}
-                      </button>
-
-                      {msg.role === 'assistant' && i === messages.length - 1 && (
+                      </div>
+                      <div className="flex items-center gap-2 ml-auto">
                         <button
-                          onClick={handleRegenerate}
+                          onClick={() => handleCopy(msg.content, i)}
                           className="flex items-center gap-1 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
-                          title="Regenerate response"
+                          title="Copy message"
                         >
-                          <RotateCw className="w-3 h-3" /> Regenerate
+                          {copiedIndex === i ? (
+                            <><Check className="w-3 h-3 text-emerald-500" /> Copied!</>
+                          ) : (
+                            <><Copy className="w-3 h-3" /> Copy</>
+                          )}
                         </button>
-                      )}
+
+                        {msg.role === 'assistant' && i === messages.length - 1 && (
+                          <button
+                            onClick={handleRegenerate}
+                            className="flex items-center gap-1 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+                            title="Regenerate response"
+                          >
+                            <RotateCw className="w-3 h-3" /> Regenerate
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
+                </motion.div>
+              ))
+            )}
+            {loading && (
+              <div className="flex gap-3 items-center text-xs text-slate-400 font-semibold animate-pulse">
+                <div className="w-8 h-8 rounded-lg bg-[#8CC63F]/20 text-[#8CC63F] flex items-center justify-center">
+                  <Bot className="w-4 h-4" />
                 </div>
-              </motion.div>
-            ))
-          )}
-          {loading && (
-            <div className="flex gap-3 items-center text-xs text-slate-400 font-semibold animate-pulse">
-              <div className="w-8 h-8 rounded-lg bg-[#8CC63F]/20 text-[#8CC63F] flex items-center justify-center">
-                <Bot className="w-4 h-4" />
+                EduPilot AI is processing your query...
               </div>
-              EduPilot AI is processing your query...
-            </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
 
-        {/* Attached File & Image Preview Bar */}
-        <AnimatePresence>
-          {attachedFile && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="px-6 py-2.5 bg-blue-50/90 dark:bg-slate-800/90 border-t border-blue-200 dark:border-slate-700 flex items-center justify-between shadow-inner"
-            >
-              <div className="flex items-center gap-3 text-xs font-bold text-slate-800 dark:text-slate-100">
-                {(attachedFile.file_type === 'image' || attachedFile.image_url || attachedFile.image_b64) ? (
-                  <div className="relative group/thumb cursor-pointer">
-                    <img
-                      src={attachedFile.image_url || (attachedFile.image_b64 ? `data:${attachedFile.mime_type || 'image/png'};base64,${attachedFile.image_b64}` : '/images/avatar.webp')}
-                      alt={attachedFile.filename}
-                      onClick={() => setPreviewImage({
-                        url: attachedFile.image_url || `data:${attachedFile.mime_type || 'image/png'};base64,${attachedFile.image_b64}`,
-                        title: attachedFile.filename
-                      })}
-                      className="w-12 h-12 object-cover rounded-xl border border-slate-300 dark:border-slate-600 shadow-md group-hover/thumb:scale-105 transition-transform"
-                    />
+          {/* Attached File & Image Preview Bar */}
+          <AnimatePresence>
+            {attachedFile && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="px-6 py-2.5 bg-blue-50/90 dark:bg-slate-800/90 border-t border-blue-200 dark:border-slate-700 flex items-center justify-between shadow-inner"
+              >
+                <div className="flex items-center gap-3 text-xs font-bold text-slate-800 dark:text-slate-100">
+                  {(attachedFile.file_type === 'image' || attachedFile.image_url || attachedFile.image_b64) ? (
+                    <div className="relative group/thumb cursor-pointer">
+                      <img
+                        src={attachedFile.image_url || (attachedFile.image_b64 ? `data:${attachedFile.mime_type || 'image/png'};base64,${attachedFile.image_b64}` : '/images/avatar.webp')}
+                        alt={attachedFile.filename}
+                        onClick={() => setPreviewImage({
+                          url: attachedFile.image_url || `data:${attachedFile.mime_type || 'image/png'};base64,${attachedFile.image_b64}`,
+                          title: attachedFile.filename
+                        })}
+                        className="w-12 h-12 object-cover rounded-xl border border-slate-300 dark:border-slate-600 shadow-md group-hover/thumb:scale-105 transition-transform"
+                      />
+                    </div>
+                  ) : (
+                    <div className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-center shadow-xs">
+                      {getFileIcon(attachedFile.file_type)}
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span className="truncate max-w-xs font-extrabold">{attachedFile.filename}</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 dark:bg-slate-700 text-[#005BAC] dark:text-[#8CC63F] font-mono font-bold uppercase">
+                        {attachedFile.file_type}
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 font-normal">
+                      {(attachedFile.file_type === 'image' || attachedFile.image_url || attachedFile.image_b64)
+                        ? 'Image Attached — Gemini 2.5 Flash Vision Ready'
+                        : 'File Attached — Stored in Knowledge Base for AI Context'}
+                    </p>
                   </div>
-                ) : (
-                  <div className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-center shadow-xs">
-                    {getFileIcon(attachedFile.file_type)}
-                  </div>
-                )}
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <span className="truncate max-w-xs font-extrabold">{attachedFile.filename}</span>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 dark:bg-slate-700 text-[#005BAC] dark:text-[#8CC63F] font-mono font-bold uppercase">
-                      {attachedFile.file_type}
-                    </span>
-                  </div>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 font-normal">
-                    {(attachedFile.file_type === 'image' || attachedFile.image_url || attachedFile.image_b64)
-                      ? 'Image Attached — Gemini 2.5 Flash Vision Ready'
-                      : 'File Attached — Stored in Knowledge Base for AI Context'}
-                  </p>
                 </div>
-              </div>
+                <button
+                  type="button"
+                  onClick={() => setAttachedFile(null)}
+                  className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-all"
+                  title="Remove attached file"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Input Form */}
+          <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if ((input.trim() || attachedFile) && !loading) {
+                  handleSend();
+                }
+              }}
+              className="flex items-center gap-2"
+            >
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileUpload}
+                accept="image/*,.png,.jpg,.jpeg,.webp,.gif,.pdf,.docx,.pptx,.ppt,.xlsx,.xls,.csv"
+                className="hidden"
+              />
               <button
                 type="button"
-                onClick={() => setAttachedFile(null)}
-                className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-all"
-                title="Remove attached file"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                title="Attach File or Image (PNG, JPG, PDF, DOCX, PPT, Excel)"
+                className="p-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center"
               >
-                <X className="w-4 h-4" />
+                {uploading ? (
+                  <Loader2 className="w-4 h-4 animate-spin text-[#005BAC]" />
+                ) : (
+                  <Paperclip className="w-4 h-4" />
+                )}
               </button>
-            </motion.div>
+
+              <textarea
+                rows={1}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    if (!uploading && (input.trim() || attachedFile) && !loading) {
+                      handleSend();
+                    }
+                  }
+                }}
+                placeholder={attachedFile
+                  ? `Ask a question about ${attachedFile.filename} or press Send...`
+                  : uploading
+                  ? "Uploading file, please wait..."
+                  : ragDocuments.length > 0
+                  ? "Ask about your documents or any academic topic... (Shift+Enter for new line)"
+                  : "Message EduPilot AI... (Shift+Enter for new line)"
+                }
+                className="flex-1 px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#005BAC] resize-none min-h-[44px] max-h-36 overflow-y-auto leading-relaxed"
+              />
+
+              <button
+                type="submit"
+                disabled={uploading || (!input.trim() && !attachedFile) || loading}
+                className="p-3 bg-[#005BAC] hover:bg-[#0A6FD8] text-white rounded-xl shadow disabled:opacity-40 disabled:cursor-not-allowed transition-all self-end"
+                title={uploading ? 'File uploading, please wait...' : (!input.trim() && !attachedFile) ? 'Type a message or attach a file to send' : 'Send message'}
+              >
+                <Send className="w-4 h-4" />
+              </button>
+            </form>
+          </div>
+        </div>
+
+        {/* ── ⚠️ Delete Chat Thread Confirmation Modal ── */}
+        <AnimatePresence>
+          {convoToDelete && (
+            <div
+              onClick={() => setConvoToDelete(null)}
+              className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 cursor-pointer"
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.94 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.94 }}
+                onClick={(e) => e.stopPropagation()}
+                className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl p-6 space-y-4 text-left"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center flex-shrink-0">
+                    <Trash2 className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-extrabold text-sm text-slate-900 dark:text-white">Delete Chat Thread?</h3>
+                    <p className="text-xs text-slate-500 font-medium truncate max-w-xs">{convoToDelete.title}</p>
+                  </div>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                  Are you sure you want to permanently delete this chat thread? All saved conversation messages and context history will be removed. This action cannot be undone.
+                </p>
+                <div className="flex items-center justify-end gap-2.5 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setConvoToDelete(null)}
+                    className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const targetId = convoToDelete.id;
+                      setConvoToDelete(null);
+                      confirmDeleteConversation(targetId);
+                    }}
+                    className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold rounded-xl shadow-md transition-all active:scale-95"
+                  >
+                    Yes, Delete Thread
+                  </button>
+                </div>
+              </motion.div>
+            </div>
           )}
         </AnimatePresence>
 
-        {/* Input Form */}
-        <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              if ((input.trim() || attachedFile) && !loading) {
-                handleSend();
-              }
-            }}
-            className="flex items-center gap-2"
-          >
-            {/* Single Unified Attachment Button (Images + Documents) */}
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileUpload}
-              accept="image/*,.png,.jpg,.jpeg,.webp,.gif,.pdf,.docx,.pptx,.ppt,.xlsx,.xls,.csv"
-              className="hidden"
-            />
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
-              title="Attach File or Image (PNG, JPG, PDF, DOCX, PPT, Excel)"
-              className="p-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center"
+        {/* ── ⚠️ Delete Knowledge Base File Confirmation Modal ── */}
+        <AnimatePresence>
+          {docToDelete && (
+            <div
+              onClick={() => setDocToDelete(null)}
+              className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 cursor-pointer"
             >
-              {uploading ? (
-                <Loader2 className="w-4 h-4 animate-spin text-[#005BAC]" />
-              ) : (
-                <Paperclip className="w-4 h-4" />
-              )}
-            </button>
-
-            <textarea
-              rows={1}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  if (!uploading && (input.trim() || attachedFile) && !loading) {
-                    handleSend();
-                  }
-                }
-              }}
-              placeholder={attachedFile
-                ? `Ask a question about ${attachedFile.filename} or press Send...`
-                : uploading
-                ? "Uploading file, please wait..."
-                : ragDocuments.length > 0
-                ? "Ask about your documents or any academic topic... (Shift+Enter for new line)"
-                : "Message EduPilot AI... (Shift+Enter for new line)"
-              }
-              className="flex-1 px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#005BAC] resize-none min-h-[44px] max-h-36 overflow-y-auto leading-relaxed"
-            />
-
-            <button
-              type="submit"
-              disabled={uploading || (!input.trim() && !attachedFile) || loading}
-              className="p-3 bg-[#005BAC] hover:bg-[#0A6FD8] text-white rounded-xl shadow disabled:opacity-40 disabled:cursor-not-allowed transition-all self-end"
-              title={uploading ? 'File uploading, please wait...' : (!input.trim() && !attachedFile) ? 'Type a message or attach a file to send' : 'Send message'}
-            >
-              <Send className="w-4 h-4" />
-            </button>
-          </form>
-        </div>
-      </div>
-
-      {/* ── ChatGPT-Style Fullscreen Image Lightbox Modal ── */}
-      <AnimatePresence>
-        {previewImage && (
-          <div
-            onClick={() => setPreviewImage(null)}
-            className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 cursor-pointer"
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              onClick={(e) => e.stopPropagation()}
-              className="relative max-w-4xl max-h-[90vh] bg-slate-900 rounded-3xl border border-slate-800 shadow-2xl overflow-hidden flex flex-col"
-            >
-              <div className="flex items-center justify-between p-4 border-b border-slate-800 bg-slate-950/80">
-                <span className="text-xs font-bold text-white flex items-center gap-2">
-                  <ImageIcon className="w-4 h-4 text-[#8CC63F]" /> {previewImage.title}
-                </span>
-                <div className="flex items-center gap-2">
-                  <a
-                    href={previewImage.url}
-                    download
-                    target="_blank"
-                    rel="noreferrer"
-                    className="p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 text-xs flex items-center gap-1 font-semibold"
-                  >
-                    <Download className="w-3.5 h-3.5" /> Download
-                  </a>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.94 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.94 }}
+                onClick={(e) => e.stopPropagation()}
+                className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl p-6 space-y-4 text-left"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center flex-shrink-0">
+                    <Trash2 className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-extrabold text-sm text-slate-900 dark:text-white">Delete Document from Knowledge Base?</h3>
+                    <p className="text-xs text-slate-500 font-medium truncate max-w-xs">{docToDelete.filename}</p>
+                  </div>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                  Are you sure you want to remove <strong>"{docToDelete.filename}"</strong> from your AI Knowledge Library? Vector embeddings for this document will be erased.
+                </p>
+                <div className="flex items-center justify-end gap-2.5 pt-2">
                   <button
-                    onClick={() => setPreviewImage(null)}
-                    className="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700"
+                    type="button"
+                    onClick={() => setDocToDelete(null)}
+                    className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl transition-colors"
                   >
-                    <X className="w-4 h-4" />
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const targetId = docToDelete.id;
+                      setDocToDelete(null);
+                      confirmDeleteRagDocument(targetId);
+                    }}
+                    className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold rounded-xl shadow-md transition-all active:scale-95"
+                  >
+                    Yes, Delete Document
                   </button>
                 </div>
-              </div>
-
-              <div className="p-4 flex items-center justify-center overflow-auto max-h-[80vh]">
-                <img
-                  src={previewImage.url}
-                  alt="Fullscreen Preview"
-                  className="max-w-full max-h-[75vh] object-contain rounded-xl shadow-lg"
-                />
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
-  </div>
-);
+  );
 };
 
 export default AIPage;
