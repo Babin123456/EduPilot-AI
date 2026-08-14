@@ -81,10 +81,10 @@ async def upload_personal_file(
             print(f"[PersonalFiles] DOCX text extraction error: {e}")
     elif file_type_str == "pdf":
         try:
-            import pdfplumber
-            with pdfplumber.open(io.BytesIO(content)) as pdf:
-                pages = [p.extract_text() or "" for p in pdf.pages[:15]]
-                extracted_text = "\n\n".join(pages).strip()
+            import pypdf
+            reader = pypdf.PdfReader(io.BytesIO(content))
+            pages = [p.extract_text() or "" for p in reader.pages[:15]]
+            extracted_text = "\n\n".join(pages).strip()
         except Exception as e:
             print(f"[PersonalFiles] PDF text extraction error: {e}")
     elif file_type_str in ("txt", "csv"):
@@ -337,10 +337,10 @@ def get_personal_file_text_content(
                     print(f"DOCX extract error: {e}")
             elif file_type == "pdf":
                 try:
-                    import pdfplumber
-                    with pdfplumber.open(io.BytesIO(raw_bytes)) as pdf:
-                        pages = [p.extract_text() or "" for p in pdf.pages[:15]]
-                        extracted_text = "\n\n".join(pages).strip()
+                    import pypdf
+                    reader = pypdf.PdfReader(io.BytesIO(raw_bytes))
+                    pages = [p.extract_text() or "" for p in reader.pages[:15]]
+                    extracted_text = "\n\n".join(pages).strip()
                 except Exception as e:
                     print(f"PDF extract error: {e}")
             elif file_type in ("txt", "csv"):
