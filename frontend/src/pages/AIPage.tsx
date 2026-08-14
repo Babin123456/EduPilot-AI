@@ -314,14 +314,18 @@ export const AIPage: React.FC = () => {
         mime_type: currentAttached?.mime_type || null,
       });
 
+      const replyContent = res.data.message?.content || res.data.response || res.data.content || 'I have processed your query.';
+      const replySources = res.data.message?.sources || res.data.sources || [];
+      const replyModel = res.data.message?.model_used || res.data.model_used || 'EduPilot AI';
+
       setConversationId(res.data.conversation_id);
       setMessages((prev) => [
         ...prev,
         {
           role: 'assistant',
-          content: res.data.response,
-          sources: res.data.sources || [],
-          model_used: res.data.model_used,
+          content: replyContent,
+          sources: replySources,
+          model_used: replyModel,
         },
       ]);
       fetchConversations();
