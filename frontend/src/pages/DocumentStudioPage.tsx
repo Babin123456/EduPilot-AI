@@ -6,7 +6,7 @@ import { useToast } from '../context/ToastContext';
 import { api } from '../api/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  FileText, Clock, File, Send, Eye, X, Download, Trash2, CheckCircle2, Sparkles
+  FileText, Clock, File, Send, Eye, X, Trash2
 } from 'lucide-react';
 import { SkeletonPageLoader } from '../components/SkeletonPageLoader';
 

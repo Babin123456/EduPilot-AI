@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { api, cachedGet } from '../api/client';
-import { Check, AlertCircle, CheckCircle2, XCircle, Send, Edit3, Clock, Lock, Search, Filter } from 'lucide-react';
+import { Check, AlertCircle, CheckCircle2, XCircle, Send, Edit3, Clock, Lock, Search } from 'lucide-react';
 import { SkeletonPageLoader } from '../components/SkeletonPageLoader';
 
 export const AttendancePage: React.FC = () => {

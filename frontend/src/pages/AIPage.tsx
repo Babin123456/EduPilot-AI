@@ -8,7 +8,7 @@ import {
   Bot, Send, Sparkles, Paperclip, FileText, Image as ImageIcon,
   FileSpreadsheet, Presentation, File, X, Loader2,
   Copy, Check, RotateCw, PlusCircle, Trash2, MessageSquare, Download,
-  BookOpen, Upload, Database, AlertTriangle
+  Upload, Database
 } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 
@@ -49,7 +49,6 @@ export const AIPage: React.FC = () => {
   const [conversations, setConversations] = useState<any[]>([]);
   const [attachedFile, setAttachedFile] = useState<AttachedFile | null>(null);
   const [copiedCodeId, setCopiedCodeId] = useState<string | null>(null);
-  const [previewImage, setPreviewImage] = useState<{ url: string; title: string } | null>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
   // ── Confirmation Modal State ──
@@ -688,10 +687,6 @@ export const AIPage: React.FC = () => {
                       <img
                         src={attachedFile.image_url || (attachedFile.image_b64 ? `data:${attachedFile.mime_type || 'image/png'};base64,${attachedFile.image_b64}` : '/images/avatar.webp')}
                         alt={attachedFile.filename}
-                        onClick={() => setPreviewImage({
-                          url: attachedFile.image_url || `data:${attachedFile.mime_type || 'image/png'};base64,${attachedFile.image_b64}`,
-                          title: attachedFile.filename
-                        })}
                         className="w-12 h-12 object-cover rounded-xl border border-slate-300 dark:border-slate-600 shadow-md group-hover/thumb:scale-105 transition-transform"
                       />
                     </div>
