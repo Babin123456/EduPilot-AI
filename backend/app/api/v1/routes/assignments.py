@@ -583,3 +583,30 @@ def assignment_analytics(
         "score_distribution": buckets,
     }
 
+
+@router.delete("/{assignment_id}")
+def delete_assignment(
+    assignment_id: str,
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
+):
+    """Delete an assignment and automatically cascade delete its document from Document Studio."""
+    assignment = db.assignments.find_one({"id": assignment_id, "teacher_id": teacher["id"]})
+    if not assignment:
+        raise http_404("Assignment not found")
+
+    title = assignment.get("title", "")
+    db.assignments.delete_one({"id": assignment_id})
+    db.assignment_submissions.delete_many({"assignment_id": assignment_id})
+
+    if title:
+        db.documents.delete_many({
+            "teacher_id": teacher["id"],
+            "$or": [
+                {"title": title},
+                {"title": {"$regex": title[:12], "$options": "i"}},
+            ],
+        })
+
+    return {"success": True, "message": "Assignment and linked document removed from Document Studio"}
+

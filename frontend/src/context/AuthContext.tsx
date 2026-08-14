@@ -129,7 +129,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <AuthContext.Provider value={{ user, token, activeClass, classChangeKey, isLoggingOut, setActiveClass, updateUser, login, logout, performLogout, isLoading, classesByYear }}>
       {children}
-      {/* ── Sleek Fullscreen Blur Fade-Out / Fade-In Logout Overlay ── */}
+      {/* ── Pure Fullscreen Blur Fade-Out / Fade-In Logout Overlay (No text box) ── */}
       <AnimatePresence>
         {isLoggingOut && (
           <motion.div
@@ -137,24 +137,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             animate={{ opacity: 1, backdropFilter: 'blur(24px)' }}
             exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
             transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed inset-0 z-[9999] bg-slate-950/80 backdrop-blur-2xl flex flex-col items-center justify-center pointer-events-auto"
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              transition={{ duration: 0.35, ease: 'easeOut' }}
-              className="flex flex-col items-center space-y-4 text-center"
-            >
-              <div className="w-16 h-16 rounded-2xl bg-white/10 dark:bg-slate-800/80 p-3 border border-white/20 shadow-2xl flex items-center justify-center backdrop-blur-xl">
-                <img src="/images/brand_logo.webp" alt="EduPilot Logo" className="w-full h-full object-contain animate-pulse" />
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-sm font-black text-white tracking-wide">Signing Out of EduPilot AI...</h3>
-                <p className="text-[11px] text-slate-300 font-medium">Securing session data and preparing login portal</p>
-              </div>
-            </motion.div>
-          </motion.div>
+            className="fixed inset-0 z-[9999] bg-slate-950/80 backdrop-blur-2xl pointer-events-auto"
+          />
         )}
       </AnimatePresence>
     </AuthContext.Provider>

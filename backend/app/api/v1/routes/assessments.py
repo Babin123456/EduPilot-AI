@@ -555,7 +555,7 @@ def delete_assessment(
     teacher: dict = Depends(get_current_teacher),
     db: Database = Depends(get_db),
 ):
-    """Delete a quiz/assessment permanently."""
+    """Delete a quiz/assessment permanently and cascade delete its studio document."""
     assessment = db.assessments.find_one({"id": assessment_id})
     if not assessment:
         raise http_404("Assessment not found")
@@ -566,7 +566,19 @@ def delete_assessment(
     if not tca:
         raise http_403("Not authorized")
 
+    title = assessment.get("title", "")
     db.assessments.delete_one({"id": assessment_id})
     db.assessment_results.delete_many({"assessment_id": assessment_id})
-    return {"message": "Quiz deleted successfully", "assessment_id": assessment_id}
+
+    # Cascade deletion from Document Studio
+    if title:
+        db.documents.delete_many({
+            "teacher_id": teacher["id"],
+            "$or": [
+                {"title": title},
+                {"title": {"$regex": title[:12], "$options": "i"}},
+            ],
+        })
+
+    return {"message": "Quiz and associated studio document deleted successfully", "assessment_id": assessment_id}
 

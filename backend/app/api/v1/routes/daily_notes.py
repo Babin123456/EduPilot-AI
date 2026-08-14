@@ -384,3 +384,29 @@ def share_note_to_class(
         "communication_id": comm["id"],
         "student_emails": [s["email"] for s in students],
     }
+
+
+@router.delete("/{note_id}")
+def delete_daily_note(
+    note_id: str,
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
+):
+    """Delete a daily note and automatically cascade delete its document from Document Studio."""
+    note = db.daily_notes.find_one({"id": note_id, "teacher_id": teacher["id"]})
+    if not note:
+        raise http_404("Daily note not found")
+
+    topic = note.get("topic", "")
+    db.daily_notes.delete_one({"id": note_id})
+
+    # Cascade deletion from Document Studio (db.documents)
+    if topic:
+        db.documents.delete_many({
+            "teacher_id": teacher["id"],
+            "$or": [
+                {"title": {"$regex": topic[:12], "$options": "i"}},
+            ],
+        })
+
+    return {"success": True, "message": "Daily note and associated studio document deleted successfully"}

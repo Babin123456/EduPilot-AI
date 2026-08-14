@@ -21,7 +21,9 @@ import {
   FolderOpen,
   Clock,
   HardDrive,
-  LogOut
+  LogOut,
+  Eye,
+  X
 } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 
@@ -215,19 +217,26 @@ export const ProfilePage: React.FC = () => {
     }
   };
 
+  const [previewFile, setPreviewFile] = useState<PersonalFile | null>(null);
+
   const handleDownload = async (file: PersonalFile) => {
     try {
       const response = await api.get(`/personal-files/download/${file.id}`, { responseType: 'blob' });
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const blob = response.data instanceof Blob ? response.data : new Blob([response.data]);
+      const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = file.original_filename;
+      a.download = file.original_filename || 'downloaded_file';
       document.body.appendChild(a);
       a.click();
-      window.URL.revokeObjectURL(url);
-      a.remove();
-    } catch {
-      toast.error('Failed to download file');
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+        a.remove();
+      }, 100);
+      toast.success('Download Started', `Downloading "${file.original_filename}"...`);
+    } catch (err: any) {
+      console.error('Download error:', err);
+      toast.error('Download Failed', 'Failed to download file from vault.');
     }
   };
 
@@ -524,6 +533,13 @@ export const ProfilePage: React.FC = () => {
 
                          {/* Action Buttons */}
                          <div className="flex items-center gap-1.5 flex-shrink-0 opacity-60 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={() => setPreviewFile(file)}
+                              className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors"
+                              title="Preview file"
+                            >
+                              <Eye className="w-4 h-4 text-[#005BAC] dark:text-[#8CC63F]" />
+                            </button>
                            <button
                              onClick={() => handleDownload(file)}
                              className="p-2 rounded-xl bg-[#005BAC]/10 hover:bg-[#005BAC]/20 text-[#005BAC] dark:bg-[#8CC63F]/10 dark:hover:bg-[#8CC63F]/20 dark:text-[#8CC63F] transition-colors"
@@ -600,6 +616,86 @@ export const ProfilePage: React.FC = () => {
                       className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold rounded-xl shadow-md transition-all active:scale-95"
                     >
                       Yes, Delete File
+                    </button>
+                  </div>
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>
+
+          {/* ── 👁️ FILE PREVIEW MODAL ── */}
+          <AnimatePresence>
+            {previewFile && (
+              <div
+                onClick={() => setPreviewFile(null)}
+                className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 cursor-pointer"
+              >
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col cursor-default"
+                >
+                  <div className="p-4 bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-[#005BAC] text-white flex items-center justify-center font-bold flex-shrink-0">
+                        <Eye className="w-4 h-4 text-[#8CC63F]" />
+                      </div>
+                      <div>
+                        <h3 className="font-extrabold text-sm text-slate-900 dark:text-white truncate max-w-xs sm:max-w-md">
+                          {previewFile.original_filename}
+                        </h3>
+                        <p className="text-[11px] text-slate-500 font-medium">
+                          {formatFileSize(previewFile.file_size_bytes)} • Format: {previewFile.file_type.toUpperCase()}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setPreviewFile(null)}
+                      className="p-1.5 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <div className="p-6 space-y-4 text-xs">
+                    <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2">
+                      <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 border-b border-slate-200 dark:border-slate-700 pb-2">
+                        <span>PERSONAL VAULT FILE METADATA</span>
+                        <span>{formatDate(previewFile.created_at)}</span>
+                      </div>
+                      <p className="text-xs font-bold text-slate-900 dark:text-white">Filename: {previewFile.original_filename}</p>
+                      <p className="text-[11px] text-slate-600 dark:text-slate-300">File Type: {previewFile.file_type.toUpperCase()}</p>
+                      <p className="text-[11px] text-slate-600 dark:text-slate-300">File Size: {formatFileSize(previewFile.file_size_bytes)}</p>
+                    </div>
+
+                    <div className="p-6 bg-slate-100 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 text-center space-y-3">
+                      <FileText className="w-12 h-12 text-[#005BAC] dark:text-[#8CC63F] mx-auto" />
+                      <p className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                        "{previewFile.original_filename}" is stored securely in your private vault.
+                      </p>
+                      <p className="text-[11px] text-slate-500">
+                        You can download the full original file anytime or attach it directly inside the EduPilot AI Chatbot.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                    <button
+                      type="button"
+                      onClick={() => setPreviewFile(null)}
+                      className="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold rounded-xl"
+                    >
+                      Close Preview
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDownload(previewFile)}
+                      className="px-5 py-2 bg-[#005BAC] hover:bg-[#0A6FD8] text-white text-xs font-extrabold rounded-xl shadow-md flex items-center gap-2"
+                    >
+                      <Download className="w-4 h-4 text-[#8CC63F]" />
+                      <span>Download File</span>
                     </button>
                   </div>
                 </motion.div>
