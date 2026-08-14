@@ -97,8 +97,7 @@ cp frontend/.env.example frontend/.env
 | `GROQ_API_KEY_1` | Primary Groq LLM key | [Groq Console](https://console.groq.com) |
 | `GROQ_API_KEY_2` | Backup Groq LLM key | Same console |
 | `GEMINI_API_KEY` | Primary Gemini Vision & LLM key | [Google AI Studio](https://aistudio.google.com) |
-| `GEMINI_API_KEY_1` | Backup Gemini failover key 1 | Same console |
-| `GEMINI_API_KEY_2` | Backup Gemini failover key 2 | Same console |
+| `GEMINI_API_KEY_1..10` | Backup Gemini failover keys (1, 2, 3, 4, 5...) for automatic round-robin failover | Same console |
 
 **Frontend** (`frontend/.env`):
 | Variable | Description | Example |
