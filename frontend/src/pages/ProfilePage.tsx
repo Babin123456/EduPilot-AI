@@ -56,13 +56,12 @@ function formatDate(iso: string | null): string {
 }
 
 export const ProfilePage: React.FC = () => {
-  const { user, updateUser, logout } = useAuth();
+  const { user, updateUser, performLogout } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    logout();
-    navigate('/login', { replace: true });
+    performLogout(navigate);
   };
   
   const [selectedAvatar, setSelectedAvatar] = useState<string>(user?.avatar_url || '/images/avatar.webp');

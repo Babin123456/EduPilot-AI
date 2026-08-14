@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { api } from '../api/client';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export interface ClassItem {
   id: string;
@@ -37,14 +38,15 @@ interface AuthContextType {
   token: string | null;
   activeClass: ClassItem | null;
   classChangeKey: number;
+  isLoggingOut: boolean;
   setActiveClass: (cls: ClassItem) => void;
   updateUser: (updatedData: Partial<UserProfile>) => void;
   login: (token: string, user: any) => void;
   logout: () => void;
+  performLogout: (navigate: (path: string, options?: any) => void) => void;
   isLoading: boolean;
   classesByYear: Record<string, ClassItem[]>;
 }
-
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -54,6 +56,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [activeClass, setActiveClassState] = useState<ClassItem | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [classChangeKey, setClassChangeKey] = useState(0);
+  const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
 
   useEffect(() => {
     if (token) {
@@ -91,14 +94,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(userData);
   };
 
-  const logout = () => {
+  const logout = useCallback(() => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('active_class_id');
     localStorage.removeItem('user');
     setToken(null);
     setUser(null);
     setActiveClassState(null);
-  };
+  }, []);
+
+  const performLogout = useCallback((navigate: (path: string, options?: any) => void) => {
+    setIsLoggingOut(true);
+    setTimeout(() => {
+      logout();
+      navigate('/login', { replace: true });
+      setTimeout(() => {
+        setIsLoggingOut(false);
+      }, 500);
+    }, 450);
+  }, [logout]);
 
   // Group classes by year for dropdown
   const classesByYear = React.useMemo(() => {
@@ -113,11 +127,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [user?.classes]);
 
   return (
-    <AuthContext.Provider value={{ user, token, activeClass, classChangeKey, setActiveClass, updateUser, login, logout, isLoading, classesByYear }}>
+    <AuthContext.Provider value={{ user, token, activeClass, classChangeKey, isLoggingOut, setActiveClass, updateUser, login, logout, performLogout, isLoading, classesByYear }}>
       {children}
+      {/* ── Sleek Fullscreen Blur Fade-Out / Fade-In Logout Overlay ── */}
+      <AnimatePresence>
+        {isLoggingOut && (
+          <motion.div
+            initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+            animate={{ opacity: 1, backdropFilter: 'blur(24px)' }}
+            exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+            className="fixed inset-0 z-[9999] bg-slate-950/80 backdrop-blur-2xl flex flex-col items-center justify-center pointer-events-auto"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ duration: 0.35, ease: 'easeOut' }}
+              className="flex flex-col items-center space-y-4 text-center"
+            >
+              <div className="w-16 h-16 rounded-2xl bg-white/10 dark:bg-slate-800/80 p-3 border border-white/20 shadow-2xl flex items-center justify-center backdrop-blur-xl">
+                <img src="/images/brand_logo.webp" alt="EduPilot Logo" className="w-full h-full object-contain animate-pulse" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-sm font-black text-white tracking-wide">Signing Out of EduPilot AI...</h3>
+                <p className="text-[11px] text-slate-300 font-medium">Securing session data and preparing login portal</p>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </AuthContext.Provider>
   );
-
 };
 
 export const useAuth = () => {

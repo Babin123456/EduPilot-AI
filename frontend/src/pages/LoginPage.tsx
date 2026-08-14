@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { api } from '../api/client';
+import { motion } from 'framer-motion';
 import { ShieldCheck, GraduationCap, ArrowRight, Lock, Mail, Sparkles, CheckCircle2, UserCheck, Sun, Moon, ArrowLeft } from 'lucide-react';
 
 const DEMO_FACULTY = [
@@ -100,7 +101,12 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#071426] flex flex-col justify-between p-4 sm:p-6 lg:p-8 transition-colors duration-200">
+    <motion.div
+      initial={{ opacity: 0, filter: 'blur(16px)', scale: 0.98 }}
+      animate={{ opacity: 1, filter: 'blur(0px)', scale: 1 }}
+      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+      className="min-h-screen bg-slate-50 dark:bg-[#071426] flex flex-col justify-between p-4 sm:p-6 lg:p-8 transition-colors duration-200"
+    >
       
       {/* Top Header Bar with Back to Home & Theme Toggle */}
       <div className="w-full max-w-5xl mx-auto flex items-center justify-between py-2">
@@ -273,6 +279,6 @@ export const LoginPage: React.FC = () => {
 
       </div>
 
-    </div>
+    </motion.div>
   );
 };

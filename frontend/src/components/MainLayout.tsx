@@ -29,15 +29,14 @@ import {
 
 
 export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, activeClass, setActiveClass, logout, classesByYear, classChangeKey } = useAuth();
+  const { user, activeClass, setActiveClass, performLogout, classesByYear, classChangeKey } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleLogout = () => {
-    logout();
-    navigate('/login', { replace: true });
+    performLogout(navigate);
   };
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [classDropdownOpen, setClassDropdownOpen] = useState(false);
