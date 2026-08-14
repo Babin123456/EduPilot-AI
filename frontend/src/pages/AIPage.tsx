@@ -62,8 +62,9 @@ export const AIPage: React.FC = () => {
     setTimeout(() => setCopiedCodeId(null), 2000);
   };
 
-  // RAG Document Library state
+  // RAG Document Library state & Teacher Profile Personal Vault state
   const [ragDocuments, setRagDocuments] = useState<RagDocument[]>([]);
+  const [personalFiles, setPersonalFiles] = useState<any[]>([]);
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const imageInputRef = React.useRef<HTMLInputElement>(null);
@@ -73,6 +74,7 @@ export const AIPage: React.FC = () => {
   useEffect(() => {
     fetchConversations();
     fetchRagDocuments();
+    fetchPersonalFiles();
   }, []);
 
   useEffect(() => {
@@ -91,6 +93,15 @@ export const AIPage: React.FC = () => {
       const res = await api.get('/ai/rag/documents');
       setRagDocuments(res.data || []);
     } catch (err) {}
+  };
+
+  const fetchPersonalFiles = async () => {
+    try {
+      const res = await api.get('/personal-files');
+      setPersonalFiles(res.data || []);
+    } catch (err) {
+      console.error('Failed to fetch personal files from teacher profile:', err);
+    }
   };
 
   // ── Mobile Responsive View State ──
@@ -218,6 +229,25 @@ export const AIPage: React.FC = () => {
 
     const inputTarget = e.target;
     setUploading(true);
+
+    // Instant local image preview using FileReader before upload completes
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const localDataUrl = ev.target?.result as string;
+        setAttachedFile({
+          filename: file.name,
+          file_type: 'image',
+          extracted_text: `Image File: ${file.name}`,
+          summary: `Attached image: ${file.name}`,
+          image_url: localDataUrl,
+          image_b64: localDataUrl.includes(',') ? localDataUrl.split(',')[1] : localDataUrl,
+          mime_type: file.type,
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+
     const formData = new FormData();
     formData.append('file', file);
 
@@ -236,7 +266,12 @@ export const AIPage: React.FC = () => {
           fileData.image_url = `${serverOrigin}${fileData.image_url}`;
         }
       }
-      setAttachedFile(fileData);
+      // Preserve local preview url if available
+      setAttachedFile((prev) => ({
+        ...fileData,
+        image_url: fileData.image_url || prev?.image_url || null,
+        image_b64: fileData.image_b64 || prev?.image_b64 || null,
+      }));
       setTimeout(fetchRagDocuments, 1000);
       return fileData;
     } catch (err) {
@@ -511,6 +546,76 @@ export const AIPage: React.FC = () => {
             </div>
           </div>
 
+          {/* Teacher Profile Personal Vault Section */}
+          <div className="space-y-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-extrabold uppercase tracking-wider text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+                <File className="w-3.5 h-3.5 text-[#005BAC] dark:text-[#8CC63F]" /> Teacher Profile Vault
+              </span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500">
+                {personalFiles.length} files
+              </span>
+            </div>
+
+            <div className="space-y-1 max-h-32 overflow-y-auto pr-1 custom-scrollbar">
+              {personalFiles.length === 0 ? (
+                <p className="py-2 text-[10px] text-slate-400 dark:text-slate-500 text-center leading-relaxed">
+                  No personal files uploaded in Profile.
+                </p>
+              ) : (
+                personalFiles.map((pfile) => {
+                  const baseURL = import.meta.env.VITE_API_URL || '';
+                  const serverOrigin = baseURL.startsWith('http')
+                    ? baseURL.replace(/\/api\/v1\/?$/, '')
+                    : window.location.origin;
+                  const fileViewUrl = `${serverOrigin}/api/v1/personal-files/view/${pfile.id}`;
+                  const isImg = ['png', 'jpg', 'jpeg', 'webp', 'gif'].includes((pfile.file_type || '').toLowerCase());
+
+                  return (
+                    <div
+                      key={pfile.id}
+                      className="group flex items-center justify-between px-2 py-1.5 rounded-lg bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-emerald-600 transition-all"
+                    >
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        {getFileIcon(pfile.file_type)}
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[11px] font-semibold text-slate-800 dark:text-slate-200 truncate" title={pfile.original_filename}>
+                            {pfile.original_filename}
+                          </p>
+                          <p className="text-[9px] text-slate-400">
+                            {formatFileSize(pfile.file_size_bytes)}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <button
+                          onClick={() => {
+                            setAttachedFile({
+                              filename: pfile.original_filename,
+                              file_type: pfile.file_type,
+                              image_url: isImg ? fileViewUrl : null,
+                              image_b64: null,
+                              mime_type: isImg ? `image/${pfile.file_type}` : null,
+                              extracted_text: pfile.extracted_text || `Teacher Profile Personal Vault File: ${pfile.original_filename}`,
+                              summary: `Attached from Teacher Profile Vault: ${pfile.original_filename}`,
+                            });
+                            setMobileTab('chat');
+                            toast.success('Attached to Prompt', `Attached "${pfile.original_filename}" from Teacher Profile Vault.`);
+                          }}
+                          className="px-1.5 py-0.5 bg-blue-50 dark:bg-blue-950 hover:bg-[#005BAC] text-[#005BAC] dark:text-blue-300 hover:text-white rounded text-[9px] font-bold border border-blue-200 dark:border-blue-800 transition-all flex items-center gap-0.5"
+                          title="Attach this file from Profile Vault to chat prompt"
+                        >
+                          <Paperclip className="w-2.5 h-2.5" /> Attach
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+
           {/* Recent Conversations Sidebar */}
           <div className="flex-1 flex flex-col min-h-0 space-y-1.5">
             <p className="px-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Recent Chats</p>
@@ -585,7 +690,19 @@ export const AIPage: React.FC = () => {
                     }`}
                   >
                     {msg.role === 'user' ? (
-                      <div className="whitespace-pre-wrap">{msg.content}</div>
+                      <div className="space-y-2">
+                        {msg.image_url && (
+                          <div className="overflow-hidden rounded-xl border border-white/30 shadow-sm max-w-xs">
+                            <img
+                              src={msg.image_url}
+                              alt="Uploaded attachment"
+                              className="w-full max-h-48 object-cover cursor-pointer hover:scale-105 transition-transform"
+                              onClick={() => window.open(msg.image_url, '_blank')}
+                            />
+                          </div>
+                        )}
+                        <div className="whitespace-pre-wrap">{msg.content}</div>
+                      </div>
                     ) : (
                       <ReactMarkdown
                         remarkPlugins={[remarkGfm]}
@@ -718,7 +835,14 @@ export const AIPage: React.FC = () => {
                   {(attachedFile.file_type === 'image' || attachedFile.image_url || attachedFile.image_b64) ? (
                     <div className="relative group/thumb cursor-pointer">
                       <img
-                        src={attachedFile.image_url || (attachedFile.image_b64 ? `data:${attachedFile.mime_type || 'image/png'};base64,${attachedFile.image_b64}` : '/images/avatar.webp')}
+                        src={
+                          attachedFile.image_url ||
+                          (attachedFile.image_b64
+                            ? (attachedFile.image_b64.startsWith('data:')
+                                ? attachedFile.image_b64
+                                : `data:${attachedFile.mime_type || 'image/png'};base64,${attachedFile.image_b64}`)
+                            : '/images/hero_illustration.webp')
+                        }
                         alt={attachedFile.filename}
                         className="w-12 h-12 object-cover rounded-xl border border-slate-300 dark:border-slate-600 shadow-md group-hover/thumb:scale-105 transition-transform"
                       />
