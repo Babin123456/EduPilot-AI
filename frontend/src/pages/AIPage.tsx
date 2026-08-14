@@ -93,11 +93,15 @@ export const AIPage: React.FC = () => {
     } catch (err) {}
   };
 
+  // ── Mobile Responsive View State ──
+  const [mobileTab, setMobileTab] = useState<'chat' | 'knowledge'>('chat');
+
   const handleNewChat = () => {
     setConversationId(null);
     setMessages([]);
     setAttachedFile(null);
     setInput('');
+    setMobileTab('chat');
     if (fileInputRef.current) fileInputRef.current.value = '';
     if (imageInputRef.current) imageInputRef.current.value = '';
   };
@@ -107,6 +111,7 @@ export const AIPage: React.FC = () => {
       const res = await api.get(`/ai/conversations/${id}`);
       setConversationId(res.data.id);
       setMessages(res.data.messages || []);
+      setMobileTab('chat');
     } catch (err) {}
   };
 
@@ -379,10 +384,38 @@ export const AIPage: React.FC = () => {
         </div>
       </div>
 
+      {/* ── Mobile Tab Segmented Switcher (Visible on small screens < lg) ── */}
+      <div className="flex lg:hidden bg-slate-100 dark:bg-slate-800/90 p-1 rounded-2xl text-xs font-extrabold flex-shrink-0 border border-slate-200 dark:border-slate-700 shadow-sm">
+        <button
+          type="button"
+          onClick={() => setMobileTab('chat')}
+          className={`flex-1 py-2 rounded-xl text-center transition-all flex items-center justify-center gap-2 ${
+            mobileTab === 'chat'
+              ? 'bg-white dark:bg-slate-900 text-[#005BAC] dark:text-[#8CC63F] shadow-md font-black'
+              : 'text-slate-500 dark:text-slate-400 font-bold'
+          }`}
+        >
+          <Bot className="w-3.5 h-3.5" />
+          <span>Chat Workspace</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setMobileTab('knowledge')}
+          className={`flex-1 py-2 rounded-xl text-center transition-all flex items-center justify-center gap-2 ${
+            mobileTab === 'knowledge'
+              ? 'bg-white dark:bg-slate-900 text-[#005BAC] dark:text-[#8CC63F] shadow-md font-black'
+              : 'text-slate-500 dark:text-slate-400 font-bold'
+          }`}
+        >
+          <Database className="w-3.5 h-3.5" />
+          <span>Library & History ({ragDocuments.length + conversations.length})</span>
+        </button>
+      </div>
+
       {/* Main Grid: Sidebar + Chat Area */}
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 min-h-0">
         {/* Left Sidebar: Knowledge Base & Conversations */}
-        <div className="lg:col-span-3 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 flex flex-col space-y-4 shadow-sm overflow-hidden min-h-0">
+        <div className={`lg:col-span-3 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 space-y-4 shadow-sm overflow-hidden min-h-0 ${mobileTab === 'knowledge' ? 'flex flex-col flex-1' : 'hidden lg:flex lg:flex-col'}`}>
           {/* Knowledge Base Section */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
@@ -514,7 +547,7 @@ export const AIPage: React.FC = () => {
         </div>
 
         {/* Right Area: Chat Workspace */}
-        <div className="lg:col-span-9 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col min-h-0 overflow-hidden">
+        <div className={`lg:col-span-9 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm min-h-0 overflow-hidden ${mobileTab === 'chat' ? 'flex flex-col flex-1' : 'hidden lg:flex lg:flex-col'}`}>
           {/* Chat Messages Log */}
           <div className="flex-1 p-4 lg:p-6 overflow-y-auto space-y-6">
             {messages.length === 0 ? (

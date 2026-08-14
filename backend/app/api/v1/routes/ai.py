@@ -165,31 +165,45 @@ def parse_uploaded_file(file_bytes: bytes, filename: str, content_type: str) -> 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 def _call_groq_llm(messages: list[dict], api_key: str, model: str) -> str | None:
-    """Call Groq API directly using httpx with 5.0s timeout."""
-    api_key = (api_key or "").strip()
-    if not api_key or "your_" in api_key or len(api_key) < 25:
+    """Call Groq API directly using httpx with timeout and key failover."""
+    keys_to_try = [
+        api_key,
+        os.environ.get("GROQ_API_KEY"),
+        os.environ.get("GROQ_API_KEY_1"),
+        os.environ.get("GROQ_API_KEY_2"),
+    ]
+    valid_keys = []
+    for k in keys_to_try:
+        k_clean = (k or "").strip()
+        if k_clean and "your_" not in k_clean and len(k_clean) >= 20 and k_clean not in valid_keys:
+            valid_keys.append(k_clean)
+
+    if not valid_keys:
         return None
-    try:
-        url = "https://api.groq.com/openai/v1/chat/completions"
-        headers = {
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-        }
-        payload = {
-            "model": model or "llama-3.3-70b-versatile",
-            "messages": messages,
-            "temperature": 0.7,
-            "max_tokens": 1024,
-        }
-        with httpx.Client(timeout=5.0) as client:
-            response = client.post(url, json=payload, headers=headers)
-            if response.status_code == 200:
-                data = response.json()
-                return data["choices"][0]["message"]["content"]
-            else:
-                print(f"[LLM Error] Groq API returned status {response.status_code}: {response.text}")
-    except Exception as exc:
-        print(f"[LLM Exception] Groq API call failed: {exc}")
+
+    model_name = model or "llama-3.3-70b-versatile"
+    for key in valid_keys:
+        try:
+            url = "https://api.groq.com/openai/v1/chat/completions"
+            headers = {
+                "Authorization": f"Bearer {key}",
+                "Content-Type": "application/json",
+            }
+            payload = {
+                "model": model_name,
+                "messages": messages,
+                "temperature": 0.7,
+                "max_tokens": 1024,
+            }
+            with httpx.Client(timeout=8.0) as client:
+                response = client.post(url, json=payload, headers=headers)
+                if response.status_code == 200:
+                    data = response.json()
+                    return data["choices"][0]["message"]["content"]
+                else:
+                    print(f"[LLM Error] Groq API returned status {response.status_code}: {response.text}")
+        except Exception as exc:
+            print(f"[LLM Exception] Groq API call failed: {exc}")
     return None
 
 
@@ -230,13 +244,12 @@ def _call_gemini_llm(prompt: str, api_key: str, model: str, image_b64: str | Non
         except Exception as compress_err:
             print(f"[Gemini] Image compression warning, using cleaned base64: {compress_err}")
 
-    # Build candidate (api_version, model_name) pairs to try for this key — gemini-2.5-flash is primary verified model
+    # Build candidate (api_version, model_name) pairs to try for this key
     candidate_endpoints = [
-        ("v1beta", "gemini-2.5-flash"),
-        ("v1beta", "gemini-2.5-flash-lite"),
-        ("v1beta", "gemini-2.5-pro"),
-        ("v1beta", "gemini-flash-latest"),
-        ("v1beta", "gemini-pro-latest"),
+        ("v1beta", "gemini-2.0-flash"),
+        ("v1beta", "gemini-1.5-flash"),
+        ("v1beta", "gemini-1.5-pro"),
+        ("v1beta", "gemini-2.0-flash-lite"),
     ]
     # Deduplicate preserving order
     unique_candidates = []
