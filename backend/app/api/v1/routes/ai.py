@@ -790,31 +790,28 @@ def chat(
     model_used = ""
     ai_response = None
 
-    # Helper for multi-key Gemini failover
+    # Helper for multi-key Gemini failover (supports up to 10+ Gemini keys)
     def _gemini_with_failover(prompt_text: str, b64_img: str | None = None, mime: str | None = None) -> str | None:
-        # Collect keys from both pydantic-settings and direct os.environ (Vercel injects into os.environ)
-        keys_to_try = [
-            ("settings.gemini_api_key", settings.gemini_api_key),
-            ("settings.gemini_api_key_1", settings.gemini_api_key_1),
-            ("settings.gemini_api_key_2", settings.gemini_api_key_2),
-            ("os.environ GEMINI_API_KEY", os.environ.get("GEMINI_API_KEY")),
-            ("os.environ GEMINI_API_KEY_1", os.environ.get("GEMINI_API_KEY_1")),
-            ("os.environ GEMINI_API_KEY_2", os.environ.get("GEMINI_API_KEY_2")),
-        ]
+        candidate_keys = []
+        # Scan settings attributes
+        for idx in range(1, 11):
+            attr_val = getattr(settings, f"gemini_api_key_{idx}", None) or (getattr(settings, "gemini_api_key", None) if idx == 1 else None)
+            if attr_val and isinstance(attr_val, str):
+                candidate_keys.append((f"settings.gemini_api_key_{idx}", attr_val))
 
-        # Debug: log which key sources have values
-        for source, val in keys_to_try:
-            v = (val or "").strip()
-            print(f"[Gemini Failover] {source}: len={len(v)}, valid={bool(v and 'your_' not in v and len(v) >= 15)}")
+        # Scan os.environ dynamically for any GEMINI_API_KEY*
+        for env_k, env_v in os.environ.items():
+            if env_k.startswith("GEMINI_API_KEY") and env_v:
+                candidate_keys.append((f"os.environ.{env_k}", env_v))
 
         # Filter non-empty unique keys
         valid_keys = []
-        for _source, k in keys_to_try:
+        for source, k in candidate_keys:
             k_clean = (k or "").strip()
             if k_clean and "your_" not in k_clean and len(k_clean) >= 15 and k_clean not in valid_keys:
                 valid_keys.append(k_clean)
 
-        print(f"[Gemini Failover] Total valid unique keys: {len(valid_keys)} | has_image={bool(b64_img)} | prompt_len={len(prompt_text)}")
+        print(f"[Gemini Failover] Discovered {len(valid_keys)} unique Gemini keys for multi-key failover | has_image={bool(b64_img)}")
 
         if not valid_keys:
             print("[Gemini Failover] NO VALID KEYS FOUND — falling back to offline response generator")
