@@ -132,33 +132,46 @@ def download_personal_file(
     teacher: dict = Depends(get_current_teacher),
     db: Database = Depends(get_db),
 ):
-    """Download a specific personal file."""
-    doc = db.teacher_personal_files.find_one({
-        "id": file_id,
-        "teacher_id": teacher["id"],
-    })
+    """Download a specific personal file safely."""
+    doc = db.teacher_personal_files.find_one({"id": file_id})
     if not doc:
         raise HTTPException(status_code=404, detail="File not found.")
 
+    if doc.get("teacher_id") != teacher["id"]:
+        raise HTTPException(status_code=403, detail="Not authorized to access this file.")
+
     filename = doc.get("original_filename", "downloaded_file")
+    # Sanitize header filename
+    safe_filename = filename.replace('"', '\\"').replace("\n", "").replace("\r", "")
 
     # 1. Serve from MongoDB Base64 if available
     if doc.get("file_b64"):
-        raw_bytes = base64.b64decode(doc["file_b64"])
-        return Response(
-            content=raw_bytes,
-            media_type="application/octet-stream",
-            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
-        )
+        try:
+            b64_str = doc["file_b64"]
+            missing_padding = len(b64_str) % 4
+            if missing_padding:
+                b64_str += "=" * (4 - missing_padding)
+            raw_bytes = base64.b64decode(b64_str)
+            return Response(
+                content=raw_bytes,
+                media_type="application/octet-stream",
+                headers={"Content-Disposition": f'attachment; filename="{safe_filename}"'},
+            )
+        except Exception as err:
+            print(f"[PersonalFiles] Base64 decode warning for {file_id}: {err}")
 
     # 2. Serve from local disk fallback
-    file_path = _personal_files_dir(teacher["id"]) / doc["stored_filename"]
-    if file_path.exists():
-        return FileResponse(
-            path=str(file_path),
-            filename=filename,
-            media_type="application/octet-stream",
-        )
+    try:
+        stored_name = doc.get("stored_filename", f"{file_id}.pdf")
+        file_path = _personal_files_dir(teacher["id"]) / stored_name
+        if file_path.exists():
+            return FileResponse(
+                path=str(file_path),
+                filename=safe_filename,
+                media_type="application/octet-stream",
+            )
+    except Exception as err:
+        print(f"[PersonalFiles] Local disk read warning for {file_id}: {err}")
 
     raise HTTPException(status_code=404, detail="File data is unavailable.")
 
