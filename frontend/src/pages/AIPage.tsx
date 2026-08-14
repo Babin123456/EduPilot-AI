@@ -215,9 +215,25 @@ export const AIPage: React.FC = () => {
       await api.delete(`/ai/rag/documents/${docId}`);
       toast.success('Document Removed', 'File removed from Knowledge Base.');
       fetchRagDocuments();
+      fetchPersonalFiles();
     } catch (err) {
       toast.error('Failed to delete document from Knowledge Base');
       fetchRagDocuments();
+      fetchPersonalFiles();
+    }
+  };
+
+  const deletePersonalFileInChat = async (fileId: string, filename: string) => {
+    try {
+      await api.delete(`/personal-files/${fileId}`);
+      toast.success('File Deleted', `"${filename}" removed from Vault and Chatbot Knowledge Base.`);
+      fetchPersonalFiles();
+      fetchRagDocuments();
+      if (attachedFile?.filename === filename) {
+        setAttachedFile(null);
+      }
+    } catch (err) {
+      toast.error('Delete Failed', 'Failed to remove file from vault.');
     }
   };
 
@@ -612,6 +628,13 @@ export const AIPage: React.FC = () => {
                           title="Attach this file from Profile Vault to chat prompt"
                         >
                           <Paperclip className="w-2.5 h-2.5" /> Attach
+                        </button>
+                        <button
+                          onClick={() => deletePersonalFileInChat(pfile.id, pfile.original_filename)}
+                          className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 rounded transition-colors"
+                          title="Delete file from Vault & Chatbot"
+                        >
+                          <Trash2 className="w-3 h-3" />
                         </button>
                       </div>
                     </div>

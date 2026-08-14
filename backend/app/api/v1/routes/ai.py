@@ -523,11 +523,25 @@ def delete_rag_doc(
     teacher: dict = Depends(get_current_teacher),
     db: Database = Depends(get_db),
 ):
-    """Delete a RAG document and all its embedding chunks."""
+    """Delete a RAG document and all its embedding chunks & matching profile vault files."""
+    doc = db.rag_documents.find_one({"id": document_id, "teacher_id": teacher["id"]})
+    filename = doc.get("filename") if doc else None
+
     success = delete_rag_document(document_id, teacher["id"], db)
     if not success:
         raise http_404("Document not found or you don't have permission to delete it.")
-    return {"success": True, "message": "Document and all chunks deleted successfully."}
+
+    # Remove matching profile personal file if present
+    if filename:
+        try:
+            db.teacher_personal_files.delete_many({
+                "teacher_id": teacher["id"],
+                "$or": [{"id": document_id}, {"original_filename": filename}]
+            })
+        except Exception:
+            pass
+
+    return {"success": True, "message": "Document deleted successfully from Chatbot Knowledge Base and Profile Vault."}
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

@@ -208,7 +208,7 @@ def delete_personal_file(
     teacher: dict = Depends(get_current_teacher),
     db: Database = Depends(get_db),
 ):
-    """Delete a personal file from storage and database."""
+    """Delete a personal file from storage, MongoDB, and Chatbot RAG Knowledge Base."""
     doc = db.teacher_personal_files.find_one({
         "id": file_id,
         "teacher_id": teacher["id"],
@@ -216,17 +216,41 @@ def delete_personal_file(
     if not doc:
         raise HTTPException(status_code=404, detail="File not found.")
 
-    # Remove from disk if exists
-    try:
-        file_path = _personal_files_dir(teacher["id"]) / doc["stored_filename"]
-        if file_path.exists():
-            os.unlink(file_path)
-    except Exception:
-        pass
+    original_filename = doc.get("original_filename")
 
-    # Remove from DB
-    db.teacher_personal_files.delete_one({"id": file_id})
-    return {"message": "File deleted successfully."}
+    # 1. Remove from disk if exists
+    try:
+        stored_name = doc.get("stored_filename", "")
+        if stored_name:
+            file_path = _personal_files_dir(teacher["id"]) / stored_name
+            if file_path.exists():
+                os.unlink(file_path)
+    except Exception as exc:
+        print(f"[PersonalFiles] Disk cleanup warning: {exc}")
+
+    # 2. Delete from teacher_personal_files
+    db.teacher_personal_files.delete_one({"id": file_id, "teacher_id": teacher["id"]})
+
+    # 3. Delete from rag_documents and rag_chunks so it is deleted from the Chatbot Knowledge Base
+    if original_filename:
+        try:
+            db.rag_documents.delete_many({
+                "teacher_id": teacher["id"],
+                "$or": [
+                    {"id": file_id},
+                    {"filename": original_filename},
+                    {"original_filename": original_filename}
+                ]
+            })
+            db.rag_chunks.delete_many({
+                "teacher_id": teacher["id"],
+                "filename": original_filename
+            })
+            print(f"[PersonalFiles] Cleaned '{original_filename}' from Chatbot RAG documents & chunks.")
+        except Exception as rag_err:
+            print(f"[PersonalFiles] RAG cleanup error: {rag_err}")
+
+    return {"message": "File deleted successfully from Teacher Profile Vault and Chatbot."}
 
 
 MIME_MAP = {
