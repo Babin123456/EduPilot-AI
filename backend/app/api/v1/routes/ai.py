@@ -140,7 +140,20 @@ def parse_uploaded_file(file_bytes: bytes, filename: str, content_type: str) -> 
                 img = Image.open(io.BytesIO(file_bytes))
                 b64_data = base64.b64encode(file_bytes).decode("utf-8")
                 mime_type = content_type or f"image/{ext.replace('.', '')}"
-                text_content = f"Image File: {filename} ({img.format}, {img.size[0]}x{img.size[1]} px). Base64 encoded for multimodal Gemini 1.5 Flash Vision inspection."
+                text_content = f"Image File: {filename} ({img.format}, {img.size[0]}x{img.size[1]} px)."
+
+                # Perform OCR text extraction on image
+                try:
+                    from rapidocr_onnxruntime import RapidOCR
+                    engine = RapidOCR()
+                    ocr_res, _ = engine(file_bytes)
+                    if ocr_res:
+                        lines = [line[1] for line in ocr_res if line and len(line) > 1 and line[1]]
+                        if lines:
+                            text_content += "\n\n[OCR Extracted Text & Diagram Content]:\n" + "\n".join(lines)
+                except Exception as ocr_err:
+                    print(f"[OCR] Note: {ocr_err}")
+
             except Exception:
                 text_content = f"Image File: {filename} ({len(file_bytes)} bytes) uploaded and received for visual inspection."
 
@@ -284,7 +297,7 @@ def _call_gemini_llm(prompt: str, api_key: str, model: str, image_b64: str | Non
         print(f"[Gemini] Calling {api_ver}/{target_model} | key=...{api_key[-6:]} | image_b64_len={b64_len} | prompt_len={len(prompt)}")
 
         try:
-            with httpx.Client(timeout=6.0) as client:
+            with httpx.Client(timeout=25.0) as client:
                 response = client.post(url, json=payload, headers=headers)
                 print(f"[Gemini] {api_ver}/{target_model} status={response.status_code}")
                 if response.status_code == 200:

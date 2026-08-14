@@ -106,6 +106,7 @@ export const AIPage: React.FC = () => {
 
   // ── Mobile Responsive View State ──
   const [mobileTab, setMobileTab] = useState<'chat' | 'knowledge'>('chat');
+  const [imageModalUrl, setImageModalUrl] = useState<string | null>(null);
 
   const handleNewChat = () => {
     setConversationId(null);
@@ -660,15 +661,58 @@ export const AIPage: React.FC = () => {
           {/* Chat Messages Log */}
           <div className="flex-1 p-4 lg:p-6 overflow-y-auto space-y-6">
             {messages.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-center space-y-4 max-w-md mx-auto my-auto py-12">
+              <div className="h-full flex flex-col items-center justify-center text-center space-y-6 max-w-xl mx-auto my-auto py-8">
                 <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-[#005BAC]/20 to-[#8CC63F]/20 text-[#005BAC] dark:text-[#8CC63F] flex items-center justify-center shadow-lg">
                   <Bot className="w-8 h-8" />
                 </div>
                 <div className="space-y-1">
                   <h3 className="text-base font-extrabold text-slate-900 dark:text-white">EduPilot AI Assistant</h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                    Ask questions about your classes, analyze uploaded PDF/DOCX documents, or generate teaching materials.
+                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed max-w-md mx-auto">
+                    Ask questions about your classes, analyze uploaded PDF/DOCX/image documents, or select a starter query below.
                   </p>
+                </div>
+
+                {/* 4 Default Starter Suggested Queries */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full pt-2">
+                  {[
+                    {
+                      icon: '📊',
+                      title: 'Student Risk Shortage',
+                      query: 'Which students in my active class have attendance below 75%?',
+                    },
+                    {
+                      icon: '📅',
+                      title: "Today's Schedule",
+                      query: 'What is my teaching schedule and upcoming classes for today?',
+                    },
+                    {
+                      icon: '📝',
+                      title: 'Quiz Generation',
+                      query: 'Generate a 5-question multiple choice quiz on Blockchain Technology with answers.',
+                    },
+                    {
+                      icon: '📄',
+                      title: 'Document Analysis',
+                      query: 'Analyze my uploaded course documents and summarize key teaching topics.',
+                    },
+                  ].map((q, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => handleSend(q.query)}
+                      className="p-3.5 bg-slate-50 dark:bg-slate-800/60 hover:bg-blue-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 hover:border-[#005BAC] dark:hover:border-[#8CC63F] rounded-2xl text-left transition-all duration-200 shadow-xs hover:shadow-md group flex flex-col justify-between space-y-1.5"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-base">{q.icon}</span>
+                        <span className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-[#005BAC] dark:group-hover:text-[#8CC63F]">
+                          {q.title}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 leading-snug">
+                        "{q.query}"
+                      </p>
+                    </button>
+                  ))}
                 </div>
               </div>
             ) : (
@@ -696,13 +740,19 @@ export const AIPage: React.FC = () => {
                     {msg.role === 'user' ? (
                       <div className="space-y-2">
                         {msg.image_url && (
-                          <div className="overflow-hidden rounded-xl border border-white/30 shadow-sm max-w-xs">
+                          <div
+                            onClick={() => setImageModalUrl(msg.image_url)}
+                            className="relative group/img cursor-pointer overflow-hidden rounded-xl border border-white/30 shadow-md max-w-xs"
+                            title="Click to view image"
+                          >
                             <img
                               src={msg.image_url}
                               alt="Uploaded attachment"
-                              className="w-full max-h-48 object-cover cursor-pointer hover:scale-105 transition-transform"
-                              onClick={() => window.open(msg.image_url, '_blank')}
+                              className="w-full max-h-48 object-cover group-hover/img:scale-105 transition-transform"
                             />
+                            <div className="absolute inset-0 bg-slate-950/50 opacity-0 group-hover/img:opacity-100 flex items-center justify-center text-white text-[11px] font-extrabold backdrop-blur-[2px] transition-opacity">
+                              <span>Click to view image ↗</span>
+                            </div>
                           </div>
                         )}
                         <div className="whitespace-pre-wrap">{msg.content}</div>
@@ -837,7 +887,14 @@ export const AIPage: React.FC = () => {
               >
                 <div className="flex items-center gap-3 text-xs font-bold text-slate-800 dark:text-slate-100">
                   {(attachedFile.file_type === 'image' || attachedFile.image_url || attachedFile.image_b64) ? (
-                    <div className="relative group/thumb cursor-pointer">
+                    <div
+                      onClick={() => {
+                        const src = attachedFile.image_url || (attachedFile.image_b64 ? (attachedFile.image_b64.startsWith('data:') ? attachedFile.image_b64 : `data:${attachedFile.mime_type || 'image/png'};base64,${attachedFile.image_b64}`) : null);
+                        if (src) setImageModalUrl(src);
+                      }}
+                      className="relative group/thumb cursor-pointer overflow-hidden rounded-xl border border-slate-300 dark:border-slate-600 shadow-md"
+                      title="Click to view image"
+                    >
                       <img
                         src={
                           attachedFile.image_url ||
@@ -848,8 +905,11 @@ export const AIPage: React.FC = () => {
                             : '/images/hero_illustration.webp')
                         }
                         alt={attachedFile.filename}
-                        className="w-12 h-12 object-cover rounded-xl border border-slate-300 dark:border-slate-600 shadow-md group-hover/thumb:scale-105 transition-transform"
+                        className="w-12 h-12 object-cover group-hover/thumb:scale-105 transition-transform"
                       />
+                      <div className="absolute inset-0 bg-slate-950/50 opacity-0 group-hover/thumb:opacity-100 flex items-center justify-center text-white text-[9px] font-extrabold text-center leading-tight p-0.5 transition-opacity">
+                        <span>Click to view image</span>
+                      </div>
                     </div>
                   ) : (
                     <div className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-center shadow-xs">
@@ -1044,6 +1104,57 @@ export const AIPage: React.FC = () => {
                     className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold rounded-xl shadow-md transition-all active:scale-95"
                   >
                     Yes, Delete Document
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
+        {/* ── 🖼️ FULL SCREEN IMAGE PREVIEW MODAL WINDOW ── */}
+        <AnimatePresence>
+          {imageModalUrl && (
+            <div
+              onClick={() => setImageModalUrl(null)}
+              className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 cursor-pointer"
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                onClick={(e) => e.stopPropagation()}
+                className="relative max-w-4xl max-h-[90vh] bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col cursor-default"
+              >
+                <div className="p-4 bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs font-extrabold text-slate-900 dark:text-white">
+                    <ImageIcon className="w-4 h-4 text-[#005BAC] dark:text-[#8CC63F]" />
+                    <span>Image Inspection View</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setImageModalUrl(null)}
+                    className="p-1.5 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <div className="p-4 flex items-center justify-center overflow-auto max-h-[75vh]">
+                  <img
+                    src={imageModalUrl}
+                    alt="Full preview"
+                    className="max-w-full max-h-[70vh] object-contain rounded-2xl border border-slate-200 dark:border-slate-800 shadow-lg"
+                  />
+                </div>
+
+                <div className="p-3 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs font-bold">
+                  <span className="text-slate-500">EduPilot AI Visual Inspection</span>
+                  <button
+                    type="button"
+                    onClick={() => window.open(imageModalUrl, '_blank')}
+                    className="px-4 py-1.5 bg-[#005BAC] text-white rounded-xl text-xs font-extrabold shadow-sm hover:bg-[#0A6FD8] transition-colors"
+                  >
+                    Open Original in New Tab ↗
                   </button>
                 </div>
               </motion.div>
