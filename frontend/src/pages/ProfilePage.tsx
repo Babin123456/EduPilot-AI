@@ -23,7 +23,6 @@ import {
   HardDrive,
   LogOut,
   Eye,
-  X
 } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 

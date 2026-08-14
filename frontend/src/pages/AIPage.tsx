@@ -8,7 +8,7 @@ import {
   Bot, Send, Sparkles, Paperclip, FileText, Image as ImageIcon,
   FileSpreadsheet, Presentation, File, X, Loader2,
   Copy, Check, RotateCw, PlusCircle, Trash2, MessageSquare, Download,
-  Upload, Database
+  Upload, Database, Users, Calendar, HelpCircle
 } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 
@@ -676,22 +676,22 @@ export const AIPage: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full pt-2">
                   {[
                     {
-                      icon: '📊',
+                      icon: <Users className="w-4 h-4 text-[#005BAC] dark:text-[#8CC63F]" />,
                       title: 'Student Risk Shortage',
                       query: 'Which students in my active class have attendance below 75%?',
                     },
                     {
-                      icon: '📅',
+                      icon: <Calendar className="w-4 h-4 text-[#005BAC] dark:text-[#8CC63F]" />,
                       title: "Today's Schedule",
                       query: 'What is my teaching schedule and upcoming classes for today?',
                     },
                     {
-                      icon: '📝',
+                      icon: <HelpCircle className="w-4 h-4 text-[#005BAC] dark:text-[#8CC63F]" />,
                       title: 'Quiz Generation',
                       query: 'Generate a 5-question multiple choice quiz on Blockchain Technology with answers.',
                     },
                     {
-                      icon: '📄',
+                      icon: <FileText className="w-4 h-4 text-[#005BAC] dark:text-[#8CC63F]" />,
                       title: 'Document Analysis',
                       query: 'Analyze my uploaded course documents and summarize key teaching topics.',
                     },
@@ -703,7 +703,7 @@ export const AIPage: React.FC = () => {
                       className="p-3.5 bg-slate-50 dark:bg-slate-800/60 hover:bg-blue-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 hover:border-[#005BAC] dark:hover:border-[#8CC63F] rounded-2xl text-left transition-all duration-200 shadow-xs hover:shadow-md group flex flex-col justify-between space-y-1.5"
                     >
                       <div className="flex items-center gap-2">
-                        <span className="text-base">{q.icon}</span>
+                        {q.icon}
                         <span className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-[#005BAC] dark:group-hover:text-[#8CC63F]">
                           {q.title}
                         </span>
@@ -1151,10 +1151,16 @@ export const AIPage: React.FC = () => {
                   <span className="text-slate-500">EduPilot AI Visual Inspection</span>
                   <button
                     type="button"
-                    onClick={() => window.open(imageModalUrl, '_blank')}
-                    className="px-4 py-1.5 bg-[#005BAC] text-white rounded-xl text-xs font-extrabold shadow-sm hover:bg-[#0A6FD8] transition-colors"
+                    onClick={() => {
+                      const a = document.createElement('a');
+                      a.href = imageModalUrl;
+                      a.download = `edupilot_image_${Date.now()}.png`;
+                      a.click();
+                    }}
+                    className="px-4 py-1.5 bg-[#005BAC] text-white rounded-xl text-xs font-extrabold shadow-sm hover:bg-[#0A6FD8] transition-colors flex items-center gap-1.5"
                   >
-                    Open Original in New Tab ↗
+                    <Download className="w-3.5 h-3.5 text-[#8CC63F]" />
+                    <span>Download Image</span>
                   </button>
                 </div>
               </motion.div>

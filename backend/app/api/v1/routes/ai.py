@@ -141,19 +141,6 @@ def parse_uploaded_file(file_bytes: bytes, filename: str, content_type: str) -> 
                 b64_data = base64.b64encode(file_bytes).decode("utf-8")
                 mime_type = content_type or f"image/{ext.replace('.', '')}"
                 text_content = f"Image File: {filename} ({img.format}, {img.size[0]}x{img.size[1]} px)."
-
-                # Perform OCR text extraction on image
-                try:
-                    from rapidocr_onnxruntime import RapidOCR
-                    engine = RapidOCR()
-                    ocr_res, _ = engine(file_bytes)
-                    if ocr_res:
-                        lines = [line[1] for line in ocr_res if line and len(line) > 1 and line[1]]
-                        if lines:
-                            text_content += "\n\n[OCR Extracted Text & Diagram Content]:\n" + "\n".join(lines)
-                except Exception as ocr_err:
-                    print(f"[OCR] Note: {ocr_err}")
-
             except Exception:
                 text_content = f"Image File: {filename} ({len(file_bytes)} bytes) uploaded and received for visual inspection."
 
@@ -835,10 +822,19 @@ def chat(
         print("[Gemini Failover] ALL keys exhausted — no response obtained")
         return None
 
+    # Auto-resolve image_b64 from MongoDB if attached from RAG or Personal Files
+    image_b64_payload = body.image_b64
+    image_mime_payload = body.mime_type
+    if not image_b64_payload and (is_image or (body.file_context and "Image File:" in body.file_context)):
+        doc = db.rag_documents.find_one({"teacher_id": teacher["id"], "file_type": "image"}, sort=[("created_at", -1)])
+        if doc and doc.get("image_b64"):
+            image_b64_payload = doc["image_b64"]
+            image_mime_payload = doc.get("mime_type") or "image/png"
+
     if has_attachment:
         # Attachment detected (Image or Document) -> Smart Route to Gemini Vision / Flash first with Multi-Key Failover
         model_used = "Gemini 1.5 Flash (Vision & Attachment Route)"
-        if body.image_b64:
+        if is_image or image_b64_payload:
             gemini_prompt = (
                 f"You are EduPilot AI, an expert visual & document AI assistant for Professor {teacher['full_name']}.\n"
                 f"The user has attached an image file for visual inspection.\n"
@@ -848,10 +844,10 @@ def chat(
             )
         else:
             gemini_prompt = f"{system_prompt}\n\nUser Question: {full_user_input}"
-        ai_response = _gemini_with_failover(gemini_prompt, body.image_b64, body.mime_type)
+        ai_response = _gemini_with_failover(gemini_prompt, image_b64_payload, image_mime_payload)
 
         # Fallback to Groq ONLY if it's a document (not a visual image requiring Gemini Vision)
-        if not ai_response and not body.image_b64:
+        if not ai_response and not (is_image or image_b64_payload):
             model_used = "Groq Llama-3.3-70B (Attachment Fallback)"
             ai_response = _call_groq_llm(llm_messages, settings.groq_api_key_1, settings.groq_model)
             if not ai_response:
