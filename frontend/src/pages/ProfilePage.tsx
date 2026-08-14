@@ -276,7 +276,7 @@ export const ProfilePage: React.FC = () => {
         
         <div className="flex items-center gap-4 relative z-10 flex-shrink-0 self-end sm:self-center">
           <div className="w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center flex-shrink-0">
-            <img src={user?.avatar_url || '/images/hero_illustration.webp'} alt="Teacher profile avatar" className="w-full h-full object-contain" />
+            <img src="/images/avatar.webp" alt="Teacher profile avatar" className="w-full h-full object-contain drop-shadow-md" />
           </div>
         </div>
       </div>
