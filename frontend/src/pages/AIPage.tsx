@@ -95,6 +95,8 @@ export const AIPage: React.FC = () => {
     setMessages([]);
     setAttachedFile(null);
     setInput('');
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (imageInputRef.current) imageInputRef.current.value = '';
   };
 
   const handleLoadConversation = async (id: string) => {
@@ -109,7 +111,7 @@ export const AIPage: React.FC = () => {
     e.stopPropagation();
     try {
       await api.delete(`/ai/conversations/${id}`);
-      if (conversationId === id) {
+      if (conversationId === id || !conversationId) {
         handleNewChat();
       }
       fetchConversations();
@@ -196,6 +198,7 @@ export const AIPage: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const inputTarget = e.target;
     setUploading(true);
     const formData = new FormData();
     formData.append('file', file);
@@ -223,7 +226,9 @@ export const AIPage: React.FC = () => {
     } finally {
       setUploading(false);
       uploadPromiseRef.current = null;
+      if (inputTarget) inputTarget.value = '';
       if (fileInputRef.current) fileInputRef.current.value = '';
+      if (imageInputRef.current) imageInputRef.current.value = '';
     }
   };
 
