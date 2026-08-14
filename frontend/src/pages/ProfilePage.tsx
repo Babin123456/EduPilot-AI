@@ -218,6 +218,37 @@ export const ProfilePage: React.FC = () => {
   };
 
   const [previewFile, setPreviewFile] = useState<PersonalFile | null>(null);
+  const [previewTextContent, setPreviewTextContent] = useState<string>('');
+  const [loadingPreviewText, setLoadingPreviewText] = useState(false);
+
+  const handlePreviewFile = async (file: PersonalFile) => {
+    setPreviewFile(file);
+    setPreviewTextContent('');
+
+    const baseURL = import.meta.env.VITE_API_URL || '';
+    const serverOrigin = baseURL.startsWith('http')
+      ? baseURL.replace(/\/api\/v1\/?$/, '')
+      : window.location.origin;
+    const viewUrl = `${serverOrigin}/api/v1/personal-files/view/${file.id}`;
+
+    // For PDF and Images, open inline in a new browser window/tab automatically
+    if (file.file_type === 'pdf' || ['png', 'jpg', 'jpeg', 'webp', 'gif'].includes(file.file_type.toLowerCase())) {
+      window.open(viewUrl, '_blank');
+    }
+
+    // Fetch extracted text content for DOC/DOCX/PDF/TXT inline viewing without downloading
+    if (['doc', 'docx', 'pdf', 'txt', 'csv'].includes(file.file_type.toLowerCase())) {
+      setLoadingPreviewText(true);
+      try {
+        const res = await api.get(`/personal-files/text-content/${file.id}`);
+        setPreviewTextContent(res.data.extracted_text || '');
+      } catch (err) {
+        console.error('Failed to load document text preview:', err);
+      } finally {
+        setLoadingPreviewText(false);
+      }
+    }
+  };
 
   const handleDownload = async (file: PersonalFile) => {
     try {
@@ -534,10 +565,10 @@ export const ProfilePage: React.FC = () => {
                          {/* Action Buttons */}
                          <div className="flex items-center gap-1.5 flex-shrink-0 opacity-60 group-hover:opacity-100 transition-opacity">
                             <button
-                              onClick={() => setPreviewFile(file)}
-                              className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors"
-                              title="Preview file"
-                            >
+                               onClick={() => handlePreviewFile(file)}
+                               className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors"
+                               title="Preview file in new window / document viewer"
+                             >
                               <Eye className="w-4 h-4 text-[#005BAC] dark:text-[#8CC63F]" />
                             </button>
                            <button
@@ -659,7 +690,7 @@ export const ProfilePage: React.FC = () => {
                     </button>
                   </div>
 
-                  <div className="p-6 space-y-4 text-xs">
+                  <div className="p-6 space-y-4 text-xs overflow-y-auto max-h-[60vh]">
                     <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2">
                       <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 border-b border-slate-200 dark:border-slate-700 pb-2">
                         <span>PERSONAL VAULT FILE METADATA</span>
@@ -670,14 +701,44 @@ export const ProfilePage: React.FC = () => {
                       <p className="text-[11px] text-slate-600 dark:text-slate-300">File Size: {formatFileSize(previewFile.file_size_bytes)}</p>
                     </div>
 
-                    <div className="p-6 bg-slate-100 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 text-center space-y-3">
-                      <FileText className="w-12 h-12 text-[#005BAC] dark:text-[#8CC63F] mx-auto" />
-                      <p className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                        "{previewFile.original_filename}" is stored securely in your private vault.
-                      </p>
-                      <p className="text-[11px] text-slate-500">
-                        You can download the full original file anytime or attach it directly inside the EduPilot AI Chatbot.
-                      </p>
+                    {/* Document Reader View (Inline DOCX / PDF / TXT Content Without Downloading) */}
+                    <div className="p-5 bg-slate-100 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
+                      <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+                        <span className="text-[10px] font-extrabold uppercase text-[#005BAC] dark:text-[#8CC63F]">Document Content Reader</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const baseURL = import.meta.env.VITE_API_URL || '';
+                            const serverOrigin = baseURL.startsWith('http')
+                              ? baseURL.replace(/\/api\/v1\/?$/, '')
+                              : window.location.origin;
+                            window.open(`${serverOrigin}/api/v1/personal-files/view/${previewFile.id}`, '_blank');
+                          }}
+                          className="text-[10px] font-bold text-[#005BAC] dark:text-[#8CC63F] hover:underline"
+                        >
+                          Open in New Window ↗
+                        </button>
+                      </div>
+
+                      {loadingPreviewText ? (
+                        <p className="text-center py-6 text-slate-400 font-semibold animate-pulse">
+                          Extracting document text content for preview...
+                        </p>
+                      ) : previewTextContent ? (
+                        <div className="max-h-64 overflow-y-auto pr-2 custom-scrollbar space-y-2 text-slate-800 dark:text-slate-200 font-sans text-xs leading-relaxed whitespace-pre-wrap">
+                          {previewTextContent}
+                        </div>
+                      ) : (
+                        <div className="text-center py-4 space-y-2">
+                          <FileText className="w-10 h-10 text-[#005BAC] dark:text-[#8CC63F] mx-auto" />
+                          <p className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                            "{previewFile.original_filename}" is ready for inline viewing.
+                          </p>
+                          <p className="text-[11px] text-slate-500">
+                            You can open it in a new window or download the original file anytime.
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -689,14 +750,29 @@ export const ProfilePage: React.FC = () => {
                     >
                       Close Preview
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDownload(previewFile)}
-                      className="px-5 py-2 bg-[#005BAC] hover:bg-[#0A6FD8] text-white text-xs font-extrabold rounded-xl shadow-md flex items-center gap-2"
-                    >
-                      <Download className="w-4 h-4 text-[#8CC63F]" />
-                      <span>Download File</span>
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const baseURL = import.meta.env.VITE_API_URL || '';
+                          const serverOrigin = baseURL.startsWith('http')
+                            ? baseURL.replace(/\/api\/v1\/?$/, '')
+                            : window.location.origin;
+                          window.open(`${serverOrigin}/api/v1/personal-files/view/${previewFile.id}`, '_blank');
+                        }}
+                        className="px-4 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-slate-900 dark:text-white text-xs font-bold rounded-xl transition-all"
+                      >
+                        Open in New Window ↗
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDownload(previewFile)}
+                        className="px-5 py-2 bg-[#005BAC] hover:bg-[#0A6FD8] text-white text-xs font-extrabold rounded-xl shadow-md flex items-center gap-2"
+                      >
+                        <Download className="w-4 h-4 text-[#8CC63F]" />
+                        <span>Download File</span>
+                      </button>
+                    </div>
                   </div>
                 </motion.div>
               </div>

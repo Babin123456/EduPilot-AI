@@ -68,6 +68,31 @@ async def upload_personal_file(
     # Base64 encode for database fallback (ensures availability in serverless environments)
     file_b64 = base64.b64encode(content).decode("utf-8")
 
+    # Extract text content for doc/pdf/txt viewing without downloading
+    extracted_text = ""
+    file_type_str = ext.lstrip(".").lower()
+    if file_type_str in ("docx", "doc"):
+        try:
+            import docx
+            doc_file = docx.Document(io.BytesIO(content))
+            paras = [p.text for p in doc_file.paragraphs if p.text.strip()]
+            extracted_text = "\n\n".join(paras).strip()
+        except Exception as e:
+            print(f"[PersonalFiles] DOCX text extraction error: {e}")
+    elif file_type_str == "pdf":
+        try:
+            import pdfplumber
+            with pdfplumber.open(io.BytesIO(content)) as pdf:
+                pages = [p.extract_text() or "" for p in pdf.pages[:15]]
+                extracted_text = "\n\n".join(pages).strip()
+        except Exception as e:
+            print(f"[PersonalFiles] PDF text extraction error: {e}")
+    elif file_type_str in ("txt", "csv"):
+        try:
+            extracted_text = content.decode("utf-8", errors="ignore").strip()
+        except Exception:
+            pass
+
     settings = get_settings()
     download_url = f"{settings.backend_url}/api/v1/personal-files/download/{file_id}"
 
@@ -77,10 +102,11 @@ async def upload_personal_file(
         "teacher_id": teacher["id"],
         "original_filename": file.filename,
         "stored_filename": safe_filename,
-        "file_type": ext.lstrip("."),
+        "file_type": file_type_str,
         "file_size_bytes": len(content),
         "download_url": download_url,
         "file_b64": file_b64,
+        "extracted_text": extracted_text,
         "created_at": datetime.now(timezone.utc),
     }
     db.teacher_personal_files.insert_one(doc)
@@ -201,3 +227,134 @@ def delete_personal_file(
     # Remove from DB
     db.teacher_personal_files.delete_one({"id": file_id})
     return {"message": "File deleted successfully."}
+
+
+MIME_MAP = {
+    "pdf": "application/pdf",
+    "png": "image/png",
+    "jpg": "image/jpeg",
+    "jpeg": "image/jpeg",
+    "webp": "image/webp",
+    "gif": "image/gif",
+    "txt": "text/plain; charset=utf-8",
+    "csv": "text/plain; charset=utf-8",
+    "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "doc": "application/msword",
+    "xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "xls": "application/vnd.ms-excel",
+    "pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "ppt": "application/vnd.ms-powerpoint",
+}
+
+
+@router.get("/view/{file_id}")
+def view_personal_file_inline(
+    file_id: str,
+    db: Database = Depends(get_db),
+):
+    """Serve personal file inline for native browser rendering in a new window/tab."""
+    doc = db.teacher_personal_files.find_one({"id": file_id})
+    if not doc:
+        raise HTTPException(status_code=404, detail="File not found.")
+
+    file_type = doc.get("file_type", "").lower()
+    mime_type = MIME_MAP.get(file_type, "application/pdf" if file_type == "pdf" else "application/octet-stream")
+    filename = doc.get("original_filename", "file")
+    safe_filename = filename.replace('"', '\\"').replace("\n", "").replace("\r", "")
+
+    # 1. Serve from Base64
+    if doc.get("file_b64"):
+        try:
+            b64_str = doc["file_b64"]
+            missing_padding = len(b64_str) % 4
+            if missing_padding:
+                b64_str += "=" * (4 - missing_padding)
+            raw_bytes = base64.b64decode(b64_str)
+            return Response(
+                content=raw_bytes,
+                media_type=mime_type,
+                headers={"Content-Disposition": f'inline; filename="{safe_filename}"'},
+            )
+        except Exception as err:
+            print(f"[PersonalFiles] Base64 inline decode warning: {err}")
+
+    # 2. Local disk fallback
+    try:
+        teacher_id = doc.get("teacher_id", "")
+        stored_name = doc.get("stored_filename", f"{file_id}.{file_type}")
+        file_path = _personal_files_dir(teacher_id) / stored_name
+        if file_path.exists():
+            return FileResponse(
+                path=str(file_path),
+                filename=safe_filename,
+                media_type=mime_type,
+                headers={"Content-Disposition": f'inline; filename="{safe_filename}"'},
+            )
+    except Exception as err:
+        print(f"[PersonalFiles] Disk inline read warning: {err}")
+
+    raise HTTPException(status_code=404, detail="File content is unavailable.")
+
+
+@router.get("/text-content/{file_id}")
+def get_personal_file_text_content(
+    file_id: str,
+    teacher: dict = Depends(get_current_teacher),
+    db: Database = Depends(get_db),
+):
+    """Retrieve extracted text content from document (DOC, DOCX, PDF, TXT) for inline viewing without downloading."""
+    doc = db.teacher_personal_files.find_one({"id": file_id})
+    if not doc:
+        raise HTTPException(status_code=404, detail="File not found.")
+
+    if doc.get("teacher_id") != teacher["id"]:
+        raise HTTPException(status_code=403, detail="Not authorized.")
+
+    extracted_text = doc.get("extracted_text", "")
+
+    # Extract text on-the-fly if missing
+    if not extracted_text:
+        raw_bytes = None
+        if doc.get("file_b64"):
+            try:
+                b64_str = doc["file_b64"]
+                missing_padding = len(b64_str) % 4
+                if missing_padding:
+                    b64_str += "=" * (4 - missing_padding)
+                raw_bytes = base64.b64decode(b64_str)
+            except Exception:
+                pass
+
+        file_type = doc.get("file_type", "").lower()
+        if raw_bytes:
+            if file_type in ("docx", "doc"):
+                try:
+                    import docx
+                    doc_file = docx.Document(io.BytesIO(raw_bytes))
+                    paras = [p.text for p in doc_file.paragraphs if p.text.strip()]
+                    extracted_text = "\n\n".join(paras).strip()
+                except Exception as e:
+                    print(f"DOCX extract error: {e}")
+            elif file_type == "pdf":
+                try:
+                    import pdfplumber
+                    with pdfplumber.open(io.BytesIO(raw_bytes)) as pdf:
+                        pages = [p.extract_text() or "" for p in pdf.pages[:15]]
+                        extracted_text = "\n\n".join(pages).strip()
+                except Exception as e:
+                    print(f"PDF extract error: {e}")
+            elif file_type in ("txt", "csv"):
+                try:
+                    extracted_text = raw_bytes.decode("utf-8", errors="ignore").strip()
+                except Exception:
+                    pass
+
+        if extracted_text:
+            db.teacher_personal_files.update_one({"id": file_id}, {"$set": {"extracted_text": extracted_text}})
+
+    return {
+        "id": doc["id"],
+        "original_filename": doc.get("original_filename", ""),
+        "file_type": doc.get("file_type", ""),
+        "extracted_text": extracted_text or f"Document Summary: {doc.get('original_filename')} is stored in your private vault.",
+    }
