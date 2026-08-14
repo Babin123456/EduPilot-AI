@@ -36,17 +36,28 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ onNavigate }) => {
 
   const handleNavClick = (id: string) => {
     setMobileMenuOpen(false);
-    if (id === 'top') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      onNavigate(id);
+    onNavigate(id);
+  };
+
+  const handleHeaderClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    // Don't scroll to top if user clicked explicit action buttons/links
+    if (
+      target.closest('button') ||
+      target.closest('a[href="/login"]') ||
+      target.closest('a[href="/docs"]') ||
+      target.closest('a[href="/faq"]')
+    ) {
+      return;
     }
+    handleNavClick('top');
   };
 
   return (
     <header
       id="landing-navbar"
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      onClick={handleHeaderClick}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 cursor-pointer ${
         scrolled
           ? 'bg-white/90 dark:bg-[#0F172A]/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 shadow-md py-3'
           : 'bg-transparent py-5'
@@ -54,7 +65,15 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ onNavigate }) => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         {/* Brand Logo */}
-        <Link to="/" className="flex items-center gap-3 group">
+        <Link
+          to="/"
+          onClick={(e) => {
+            e.preventDefault();
+            handleNavClick('top');
+          }}
+          className="flex items-center gap-3 group cursor-pointer"
+          title="Scroll back to top"
+        >
           <img
             src="/images/brand_logo.webp"
             alt="EduPilot AI Logo"

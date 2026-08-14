@@ -137,10 +137,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({ isAppLoaded = true }) 
 
 
   const handleNavigate = useCallback((sectionId: string) => {
+    if (sectionId === 'top') {
+      if (lenisRef.current) {
+        lenisRef.current.scrollTo(0, { duration: 1.2 });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      return;
+    }
     const elem = document.getElementById(sectionId);
     if (elem) {
       if (lenisRef.current) {
-        // Offset -70 ensures section header is perfectly visible below sticky navbar
         lenisRef.current.scrollTo(elem, { offset: -70, duration: 1.4 });
       } else {
         const top = elem.getBoundingClientRect().top + window.pageYOffset - 70;
