@@ -368,7 +368,9 @@ export const AssessmentsPage: React.FC = () => {
         </div>
       ) : assessments.length === 0 ? (
         <div className="bg-white dark:bg-slate-900 p-12 text-center rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-          <HelpCircle className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+          <div className="w-14 h-14 mx-auto rounded-2xl bg-blue-50 dark:bg-emerald-950/40 text-[#005BAC] dark:text-[#8CC63F] flex items-center justify-center mb-3 border border-blue-100 dark:border-emerald-900/50">
+            <HelpCircle className="w-7 h-7 text-[#005BAC] dark:text-[#8CC63F]" />
+          </div>
           <h3 className="font-bold text-slate-900 dark:text-white">No assessments yet</h3>
           <p className="text-xs text-slate-500 mt-1">Create assessments using EduPilot AI to get started.</p>
         </div>

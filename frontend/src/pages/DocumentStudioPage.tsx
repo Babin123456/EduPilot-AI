@@ -99,7 +99,9 @@ export const DocumentStudioPage: React.FC = () => {
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
           {documents.length === 0 ? (
             <div className="p-12 text-center">
-              <File className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+              <div className="w-14 h-14 mx-auto rounded-2xl bg-blue-50 dark:bg-emerald-950/40 text-[#005BAC] dark:text-[#8CC63F] flex items-center justify-center mb-3 border border-blue-100 dark:border-emerald-900/50">
+                <File className="w-7 h-7 text-[#005BAC] dark:text-[#8CC63F]" />
+              </div>
               <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300">Vault Empty for {activeClass?.course_code}</h3>
               <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Generate any Question Paper, Quiz, or Lecture Note in Assignment, Quiz, or Daily Notes section to auto-save them into this studio.</p>
             </div>

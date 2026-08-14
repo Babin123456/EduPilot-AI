@@ -375,8 +375,8 @@ export const AssignmentsPage: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {assignments.length === 0 ? (
           <div className="md:col-span-2 lg:col-span-3 rounded-3xl border border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-10 text-center shadow-sm">
-            <div className="w-14 h-14 mx-auto rounded-2xl bg-[#005BAC]/10 dark:bg-[#8CC63F]/15 text-[#005BAC] dark:text-[#8CC63F] flex items-center justify-center">
-              <ClipboardList className="w-7 h-7" />
+            <div className="w-14 h-14 mx-auto rounded-2xl bg-blue-50 dark:bg-emerald-950/40 text-[#005BAC] dark:text-[#8CC63F] flex items-center justify-center border border-blue-100 dark:border-emerald-900/50">
+              <ClipboardList className="w-7 h-7 text-[#005BAC] dark:text-[#8CC63F]" />
             </div>
             <h2 className="mt-4 text-base font-black text-slate-900 dark:text-white">No assignments yet</h2>
             <p className="mt-1 max-w-md mx-auto text-xs leading-relaxed text-slate-500">
